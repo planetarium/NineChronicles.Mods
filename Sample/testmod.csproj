@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>TestModPlugin</AssemblyName>
+    <LangVersion>9.0</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>C:\Users\{username}\AppData\Roaming\Nine Chronicles\player\main\NineChronicles_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>C:\Users\{username}\AppData\Roaming\Nine Chronicles\player\main\NineChronicles_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>C:\Users\{username}\AppData\Roaming\Nine Chronicles\player\main\NineChronicles_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="Lib9c">
+      <HintPath>C:\Users\{username}\AppData\Roaming\Nine Chronicles\player\main\NineChronicles_Data\Managed\Lib9c.dll</HintPath>
+    </Reference>
+    <Reference Include="Nekoyume">
+      <HintPath>C:\Users\{username}\AppData\Roaming\Nine Chronicles\player\main\NineChronicles_Data\Managed\Nekoyume.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>C:\Users\{username}\AppData\Roaming\Nine Chronicles\player\main\BepInEx\core\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>C:\Users\{username}\AppData\Roaming\Nine Chronicles\player\main\BepInEx\core\BepInEx.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
