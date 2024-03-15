@@ -62,6 +62,8 @@ Location e.g., `C:\Users{username}\Roaming\Nine Chronicles\player\main\BepInEx\c
 
 To implement an example plugin, add additional dependencies
 
+You can check example code here [https://github.com/planetarium/NineChronicles.Mods/tree/sample-dotnet-code/Sample]
+
 Location e.g., `C:\Users{username}\Roaming\Nine Chronicles\player\main\NineChronicles_Data\Managed\`
 - UnityEngine.InputLegacyModule.dll
 
