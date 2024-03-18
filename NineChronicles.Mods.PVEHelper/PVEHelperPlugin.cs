@@ -2,18 +2,20 @@
 using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Logging;
+using Cysharp.Threading.Tasks;
 using HarmonyLib;
+using Libplanet.Action.State;
+using Nekoyume.Game;
+using Nekoyume.State;
 using Nekoyume.UI;
+using NineChronicles.Mods.PVEHelper.BlockSimulation;
 using NineChronicles.Mods.PVEHelper.GUI;
+using NineChronicles.Mods.PVEHelper.Patches;
+using UniRx;
+using UnityEngine;
 
 namespace NineChronicles.Mods.PVEHelper
 {
-    using Libplanet.Action.State;
-    using Nekoyume.State;
-    using NineChronicles.Mods.PVEHelper.BlockSimulation;
-    using NineChronicles.Mods.PVEHelper.Patches;
-    using UniRx;
-
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     public class PVEHelperPlugin : BaseUnityPlugin
     {
@@ -24,7 +26,6 @@ namespace NineChronicles.Mods.PVEHelper
         internal static PVEHelperPlugin Instance { get; private set; }
 
         private Harmony _harmony;
-        private ManualLogSource _logger;
 
         private List<IDisposable> _disposables;
 
@@ -43,14 +44,16 @@ namespace NineChronicles.Mods.PVEHelper
 
             _harmony = new Harmony(PluginGUID);
             _harmony.PatchAll(typeof(PVEHelperPlugin));
-            _logger = BepInEx.Logging.Logger.CreateLogSource(PluginName);
+            _harmony.PatchAll(typeof(BattlePreparationWidgetPatch));
 
-            _disposables = new List<IDisposable>();
-            _disposables.Add(Widget.OnEnableStaticObservable.Subscribe(OnWidgetEnable));
-            _disposables.Add(Widget.OnDisableStaticObservable.Subscribe(OnWidgetDisable));
+            _disposables = new List<IDisposable>
+            {
+                Widget.OnEnableStaticObservable.Subscribe(OnWidgetEnable),
+                Widget.OnDisableStaticObservable.Subscribe(OnWidgetDisable)
+            };
             BattlePreparationWidgetPatch.OnShow += BattlePreparationWidgetPatch_OnShow;
 
-            _logger.LogInfo("Loaded");
+            Logger.LogInfo("Loaded");
         }
 
         private void OnGUI()
@@ -77,9 +80,12 @@ namespace NineChronicles.Mods.PVEHelper
 
             BattlePreparationWidgetPatch.OnShow -= BattlePreparationWidgetPatch_OnShow;
 
-            _logger.LogInfo("Unloaded");
-            _logger.Dispose();
-            _logger = null;
+            Logger.LogInfo("Unloaded");
+        }
+
+        public void Log(LogLevel logLevel, object data)
+        {
+            Logger.Log(logLevel, data);
         }
 
         private void OnWidgetEnable(Widget widget)
@@ -102,25 +108,28 @@ namespace NineChronicles.Mods.PVEHelper
             }
         }
 
-        private void BattlePreparationWidgetPatch_OnShow((int worldId, int stageId) tuple)
+        private async void BattlePreparationWidgetPatch_OnShow((int worldId, int stageId) tuple)
         {
+            Debug.Log("BattlePreparationWidgetPatch_OnShow");
+            var world = await GetOrCreateWorldAsync();
             var states = States.Instance;
             _winRateGUI = new WinRateGUI(
-                GetOrCreateWorld(),
+                world,
                 states.AgentState.address,
                 states.CurrentAvatarKey,
                 tuple.worldId,
                 tuple.stageId);
         }
 
-        private IWorld GetOrCreateWorld()
+        private async UniTask<IWorld> GetOrCreateWorldAsync()
         {
             if (_world is not null)
             {
                 return _world;
             }
 
-            _world = WorldFactory.CreateWorld();
+            var agent = Game.instance.Agent;
+            _world = await WorldFactory.CreateWorldAsync(agent);
             return _world;
         }
     }

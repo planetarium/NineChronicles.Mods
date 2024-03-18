@@ -1,6 +1,9 @@
 ﻿using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Libplanet.Action.State;
 using Libplanet.Crypto;
+using Nekoyume.Game;
+using Nekoyume.State;
 using UnityEngine;
 
 namespace NineChronicles.Mods.PVEHelper.GUI
@@ -23,6 +26,10 @@ namespace NineChronicles.Mods.PVEHelper.GUI
 
         public WinRateGUI(IWorld world, Address agentAddr, int avatarIndex, int worldId, int stageId)
         {
+            // 1136, 640
+            // Screen.width, Screen.height
+            // x rate, y rate
+            // rect size, font size, position
             _rect = new Rect(
                 Screen.width - AreaWidth - 5,
                 Screen.height - AreaHeight - 5,
@@ -63,10 +70,17 @@ namespace NineChronicles.Mods.PVEHelper.GUI
         {
             _isCalculating = true;
             _winRate = "Win Rate: Now calculating...";
-            //var results = await HackAndSlashCalculator.CalculateAsync(_world);
+            const int playCount = 700;
+            var winCount = await UniTask.Run(() => BlockSimulation.Actions.HackAndSlashSimulation.Simulate(
+                TableSheets.Instance,
+                States.Instance,
+                _avatarIndex,
+                _worldId,
+                _stageId,
+                playCount));
 
             await Task.Delay(1000);
-            var winRate = 1f;
+            var winRate = (float)winCount / playCount;
             _winRate = $"Win Rate: {winRate:P1}";
             _isCalculating = false;
         }

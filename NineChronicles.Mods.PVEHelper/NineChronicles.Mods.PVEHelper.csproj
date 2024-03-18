@@ -46,6 +46,9 @@
     <Reference Include="UniRx">
       <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\UniRx.dll</HintPath>
     </Reference>
+    <Reference Include="UniTask">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\UniTask.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
