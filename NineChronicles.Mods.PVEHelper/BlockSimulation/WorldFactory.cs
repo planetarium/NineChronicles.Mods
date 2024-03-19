@@ -1,19 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Bencodex.Types;
-using Cysharp.Threading.Tasks;
 using Libplanet.Action.State;
 using Libplanet.Crypto;
 using Libplanet.Types.Assets;
 using Nekoyume;
 using Nekoyume.Action;
-using Nekoyume.Blockchain;
+using Nekoyume.Game;
 using Nekoyume.Helper;
 using Nekoyume.Model.State;
 using Nekoyume.Module;
 using Nekoyume.State;
 using Nekoyume.TableData;
-using Debug = UnityEngine.Debug;
 
 namespace NineChronicles.Mods.PVEHelper.BlockSimulation
 {
@@ -21,25 +20,12 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation
     {
         public static IWorld CreateWorld() => new World(new MockWorldState());
 
-        public static async UniTask<IWorld> CreateWorldAsync(IAgent agent)
-        {
-            Debug.Log("CreateWorldAsync Start");
-            var addresses = new[]
-            {
-                Addresses.Admin,
-                Addresses.GoldCurrency,
-            };
-            var states = await agent.GetStateBulkAsync(ReservedAddresses.LegacyAccount, addresses);
-            var world = CreateWorld()
-                .WithAdmin(new AdminState((Dictionary)states[Addresses.Admin]))
-                .WithGoldCurrency(new GoldCurrencyState((Dictionary)states[Addresses.GoldCurrency]));
-            Debug.Log("CreateWorldAsync End");
-            return world;
-        }
-
-        public static IWorld CreateWorld2(States states)
+        public static IWorld CreateWorld(TableSheets tableSheets, States states)
         {
             return CreateWorld()
+                .WithGoldCurrency(new GoldCurrencyState(states.GoldBalanceState.Gold.Currency))
+                .WithGameConfig(states.GameConfigState)
+                .WithSheets(tableSheets)
                 .WithAgent(states.AgentState)
                 .WithAvatarState(states.CurrentAvatarState);
         }
@@ -67,6 +53,22 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation
         }
 
         public static IWorld WithGoldCurrency(this IWorld world) => world.WithGoldCurrency(null, 1_000_000_000L);
+
+        public static IWorld WithSheets(this IWorld world, TableSheets tableSheets)
+        {
+            var sheetProperties = tableSheets
+                .GetType()
+                .GetProperties()
+                .Where(p => p.PropertyType.IsAssignableFrom(typeof(ISheet)));
+            foreach (var sheetProperty in sheetProperties)
+            {
+                var address = Addresses.TableSheet.Derive(sheetProperty.Name);
+                var sheet = (ISheet)sheetProperty.GetValue(tableSheets);
+                var value = (IValue)sheet.GetType().GetMethod("Serialize").Invoke(sheet, null);
+                world = world.SetLegacyState(address, value);
+            }
+            return world;
+        }
 
         public static IWorld WithSheets(this IWorld world, Dictionary<string, string> sheets, Dictionary<string, string> sheetsOverride)
         {

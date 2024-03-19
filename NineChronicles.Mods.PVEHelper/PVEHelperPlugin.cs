@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Logging;
-using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Libplanet.Action.State;
-using Nekoyume.Game;
 using Nekoyume.State;
 using Nekoyume.UI;
-using NineChronicles.Mods.PVEHelper.BlockSimulation;
 using NineChronicles.Mods.PVEHelper.GUI;
 using NineChronicles.Mods.PVEHelper.Patches;
 using UniRx;
@@ -108,29 +105,14 @@ namespace NineChronicles.Mods.PVEHelper
             }
         }
 
-        private async void BattlePreparationWidgetPatch_OnShow((int worldId, int stageId) tuple)
+        private void BattlePreparationWidgetPatch_OnShow((int worldId, int stageId) tuple)
         {
             Debug.Log("BattlePreparationWidgetPatch_OnShow");
-            var world = await GetOrCreateWorldAsync();
             var states = States.Instance;
             _winRateGUI = new WinRateGUI(
-                world,
-                states.AgentState.address,
                 states.CurrentAvatarKey,
                 tuple.worldId,
                 tuple.stageId);
-        }
-
-        private async UniTask<IWorld> GetOrCreateWorldAsync()
-        {
-            if (_world is not null)
-            {
-                return _world;
-            }
-
-            var agent = Game.instance.Agent;
-            _world = await WorldFactory.CreateWorldAsync(agent);
-            return _world;
         }
     }
 }

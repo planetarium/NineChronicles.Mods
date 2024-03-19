@@ -1,7 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using BepInEx.Logging;
 using Cysharp.Threading.Tasks;
-using Libplanet.Action.State;
-using Libplanet.Crypto;
 using Nekoyume.Game;
 using Nekoyume.State;
 using UnityEngine;
@@ -18,26 +16,18 @@ namespace NineChronicles.Mods.PVEHelper.GUI
         private bool _isCalculating;
         private string _winRate;
 
-        private readonly IWorld _world;
-        private readonly Address _agentAddr;
         private readonly int _avatarIndex;
         private readonly int _worldId;
         private readonly int _stageId;
 
-        public WinRateGUI(IWorld world, Address agentAddr, int avatarIndex, int worldId, int stageId)
+        public WinRateGUI(int avatarIndex, int worldId, int stageId)
         {
-            // 1136, 640
-            // Screen.width, Screen.height
-            // x rate, y rate
-            // rect size, font size, position
             _rect = new Rect(
                 Screen.width - AreaWidth - 5,
                 Screen.height - AreaHeight - 5,
                 AreaWidth,
                 AreaHeight);
 
-            _world = world;
-            _agentAddr = agentAddr;
             _avatarIndex = avatarIndex;
             _worldId = worldId;
             _stageId = stageId;
@@ -78,9 +68,8 @@ namespace NineChronicles.Mods.PVEHelper.GUI
                 _worldId,
                 _stageId,
                 playCount));
-
-            await Task.Delay(1000);
             var winRate = (float)winCount / playCount;
+            PVEHelperPlugin.Instance.Log(LogLevel.Info, $"Play Count: {playCount}, Win Count: {winCount}, Win Rate: {winRate:P1}");
             _winRate = $"Win Rate: {winRate:P1}";
             _isCalculating = false;
         }
