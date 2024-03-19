@@ -1,0 +1,72 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <RootNamespace>NineChronicles.Mods.PVEHelper</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\NineChronicles_main\build\Windows\BepInEx\core\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="BalanceTool">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\BalanceTool.dll</HintPath>
+    </Reference>
+    <Reference Include="Bencodex">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\Bencodex.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>..\..\NineChronicles_main\build\Windows\BepInEx\core\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="Lib9c">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\Lib9c.dll</HintPath>
+    </Reference>
+    <Reference Include="Libplanet.Action">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\Libplanet.Action.dll</HintPath>
+    </Reference>
+    <Reference Include="Libplanet.Common">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\Libplanet.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Libplanet.Crypto">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\Libplanet.Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="Libplanet.Store">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\Libplanet.Store.dll</HintPath>
+    </Reference>
+    <Reference Include="Libplanet.Types">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\Libplanet.Types.dll</HintPath>
+    </Reference>
+    <Reference Include="Nekoyume">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\Nekoyume.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\System.Collections.Immutable.dll</HintPath>
+    </Reference>
+    <Reference Include="UniRx">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\UniRx.dll</HintPath>
+    </Reference>
+    <Reference Include="UniTask">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\UniTask.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\..\NineChronicles_main\build\Windows\NineChronicles_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
