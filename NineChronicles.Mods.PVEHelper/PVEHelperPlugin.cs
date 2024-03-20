@@ -4,12 +4,14 @@ using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using Libplanet.Action.State;
+using Nekoyume.Game;
 using Nekoyume.State;
 using Nekoyume.UI;
 using NineChronicles.Mods.PVEHelper.GUIs;
 using NineChronicles.Mods.PVEHelper.Patches;
 using UniRx;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace NineChronicles.Mods.PVEHelper
 {
@@ -25,6 +27,8 @@ namespace NineChronicles.Mods.PVEHelper
         private Harmony _harmony;
 
         private List<IDisposable> _disposables;
+
+        private EventSystem _eventSystem;
 
         private IWorld _world;
         private IGUI _winRateGUI;
@@ -43,6 +47,8 @@ namespace NineChronicles.Mods.PVEHelper
             _harmony.PatchAll(typeof(PVEHelperPlugin));
             _harmony.PatchAll(typeof(BattlePreparationWidgetPatch));
 
+            _eventSystem = FindObjectOfType<EventSystem>();
+
             _disposables = new List<IDisposable>
             {
                 Widget.OnEnableStaticObservable.Subscribe(OnWidgetEnable),
@@ -51,6 +57,27 @@ namespace NineChronicles.Mods.PVEHelper
             BattlePreparationWidgetPatch.OnShow += BattlePreparationWidgetPatch_OnShow;
 
             Logger.LogInfo("Loaded");
+        }
+
+        private void DisableEventSystem()
+        {
+            if (_eventSystem != null)
+            {
+                _eventSystem.enabled = false;
+            }
+        }
+
+        private void EnableEventSystem()
+        {
+            if (_eventSystem == null)
+            {
+                _eventSystem = FindObjectOfType<EventSystem>();
+            }
+
+            if (_eventSystem != null)
+            {
+                _eventSystem.enabled = true;
+            }
         }
 
         private void OnGUI()
@@ -79,7 +106,7 @@ namespace NineChronicles.Mods.PVEHelper
 
             Logger.LogInfo("Unloaded");
         }
-
+        
         public void Log(LogLevel logLevel, object data)
         {
             Logger.Log(logLevel, data);
