@@ -1,46 +1,5 @@
 $DOTENV_PATH = ".\.env.xml"
 
-function Get-Unity-Paths {
-    return @(Get-ChildItem -Path "$env:ProgramFiles\Unity" -Filter "Unity.exe" -Recurse)
-}
-
-function Select-Unity-Path() {
-    [OutputType([string])]
-    param (
-        [Parameter(Mandatory = $true)]
-        [System.IO.FileSystemInfo[]]
-        $paths
-    )
-    $caption = "Unity Editor versions found"
-    $i = 0
-    $list = ""
-    foreach ($path in $paths) {
-        $i++
-        $list = $list + "$i - $($path.FullName)" + [Environment]::NewLine
-    }
-
-    $message = @"
-Choose a version
-$list
-"@
-
-    $i = 0
-    $options = @()
-    foreach ($path in $paths) {
-        $i++
-        $options = $options + [System.Management.Automation.Host.ChoiceDescription]::new("&$i", "$path")
-    }
-    $options = $options + [System.Management.Automation.Host.ChoiceDescription]::new("&Quit", "Terminate")
-    $choice = $Host.UI.PromptForChoice($caption, $message, $options, $options.Count - 1)
-    if ($choice -eq $options.Count - 1)
-    {
-        Write-Host "Terminating..."
-        exit
-    }
-    Write-Host "$($paths[$choice].FullName) selected"
-    return "$($paths[$choice].DirectoryName)"
-}
-
 function Get-NineChroniclesDir {
     $defaultNineChroniclesDir = "C:\Users\$env:USERNAME\AppData\Roaming\Nine Chronicles\player\main"
     $caption = "Confirm Nine Chronicles Directory"
@@ -83,20 +42,11 @@ function Write-Env ($content) {
     Set-Content $DOTENV_PATH $content
 }
 
-$unity_paths = Get-Unity-Paths
-if ($unity_paths.Count -eq 0) {
-    Write-Host "No Unity Editor was found"
-    exit
-}
-$unity_dir = Select-Unity-Path($unity_paths)
-$unity_engine_dir = Join-Path -Path $unity_dir -ChildPath "Data\Managed\UnityEngine"
 $nine_chronicles_dir = Get-NineChroniclesDir
 
 $dotenv_content = @"
 <Project>
 	<PropertyGroup>
-		<UNITY_DIR>$unity_dir</UNITY_DIR>
-		<UNITY_ENGINE_DIR>$unity_engine_dir</UNITY_ENGINE_DIR>
 		<NINECHRONICLES_DIR>$nine_chronicles_dir</NINECHRONICLES_DIR>
 	</PropertyGroup>
 </Project>

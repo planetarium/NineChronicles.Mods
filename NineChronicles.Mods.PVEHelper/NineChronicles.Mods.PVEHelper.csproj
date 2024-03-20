@@ -10,31 +10,31 @@
 
   <ItemGroup>
     <Reference Include="UnityEngine">
-      <HintPath>$(UNITY_ENGINE_DIR)\UnityEngine.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(UNITY_ENGINE_DIR)\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.EventSystems">
       <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.EventSystems.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(UNITY_ENGINE_DIR)\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.CoreModule">
-      <HintPath>$(UNITY_ENGINE_DIR)\UnityEditor.CoreModule.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEditor.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(UNITY_ENGINE_DIR)\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>$(UNITY_ENGINE_DIR)\UnityEngine.UI.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>$(UNITY_ENGINE_DIR)\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.UIModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 
