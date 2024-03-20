@@ -4,14 +4,14 @@ using Nekoyume.Game;
 using Nekoyume.State;
 using UnityEngine;
 
-namespace NineChronicles.Mods.PVEHelper.GUI
+namespace NineChronicles.Mods.PVEHelper.GUIs
 {
     public class WinRateGUI : IGUI
     {
         private const float AreaWidth = 430;
         private const float AreaHeight = 35;
 
-        private readonly Rect _rect;
+        private Rect _rect;
 
         private bool _isCalculating;
         private string _winRate;
@@ -23,8 +23,8 @@ namespace NineChronicles.Mods.PVEHelper.GUI
         public WinRateGUI(int avatarIndex, int worldId, int stageId)
         {
             _rect = new Rect(
-                Screen.width - AreaWidth - 5,
-                Screen.height - AreaHeight - 5,
+                GUIToolbox.ScreenWidthReference - AreaWidth - 5,
+                GUIToolbox.ScreenHeightReference - AreaHeight - 5,
                 AreaWidth,
                 AreaHeight);
 
@@ -37,11 +37,12 @@ namespace NineChronicles.Mods.PVEHelper.GUI
 
         public void OnGUI()
         {
+            GUI.matrix = GUIToolbox.GetGUIMatrix();
             GUILayout.BeginArea(_rect);
             GUILayout.BeginHorizontal();
             if (_isCalculating)
             {
-                UnityEngine.GUI.enabled = false;
+                GUI.enabled = false;
             }
 
             if (GUILayout.Button("Calculate", GUILayout.Width(100), GUILayout.Height(AreaHeight)))
@@ -49,7 +50,7 @@ namespace NineChronicles.Mods.PVEHelper.GUI
                 UpdateWinRate();
             }
 
-            UnityEngine.GUI.enabled = true;
+            GUI.enabled = true;
 
             GUILayout.Label(_winRate, GUILayout.Height(AreaHeight));
             GUILayout.EndHorizontal();

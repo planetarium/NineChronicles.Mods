@@ -1,4 +1,4 @@
-﻿namespace NineChronicles.Mods.PVEHelper.GUI
+﻿namespace NineChronicles.Mods.PVEHelper.GUIs
 {
     public interface IGUI
     {

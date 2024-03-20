@@ -6,7 +6,7 @@ using HarmonyLib;
 using Libplanet.Action.State;
 using Nekoyume.State;
 using Nekoyume.UI;
-using NineChronicles.Mods.PVEHelper.GUI;
+using NineChronicles.Mods.PVEHelper.GUIs;
 using NineChronicles.Mods.PVEHelper.Patches;
 using UniRx;
 using UnityEngine;
