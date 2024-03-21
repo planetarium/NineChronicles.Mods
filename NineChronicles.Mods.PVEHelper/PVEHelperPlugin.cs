@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using Libplanet.Action.State;
-using Nekoyume.Game;
 using Nekoyume.State;
 using Nekoyume.UI;
 using NineChronicles.Mods.PVEHelper.GUIs;
 using NineChronicles.Mods.PVEHelper.Patches;
 using UniRx;
-using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace NineChronicles.Mods.PVEHelper
@@ -30,8 +27,12 @@ namespace NineChronicles.Mods.PVEHelper
 
         private EventSystem _eventSystem;
 
-        private IWorld _world;
         private IGUI _winRateGUI;
+        private InventoryGUI _inventoryGUI = new InventoryGUI(
+            positionX: 100,
+            positionY: 100,
+            slotCountPerPage: 15,
+            slotCountPerRow: 5);
 
         private void Awake()
         {
@@ -55,6 +56,10 @@ namespace NineChronicles.Mods.PVEHelper
                 Widget.OnDisableStaticObservable.Subscribe(OnWidgetDisable)
             };
             BattlePreparationWidgetPatch.OnShow += BattlePreparationWidgetPatch_OnShow;
+            _inventoryGUI.OnSlotSelected += tuple =>
+            {
+                Log(LogLevel.Info, $"Selected: {tuple.item}, {tuple.count}");
+            };
 
             Logger.LogInfo("Loaded");
         }
@@ -82,6 +87,7 @@ namespace NineChronicles.Mods.PVEHelper
 
         private void OnGUI()
         {
+            _inventoryGUI?.OnGUI();
             _winRateGUI?.OnGUI();
         }
 
@@ -106,7 +112,7 @@ namespace NineChronicles.Mods.PVEHelper
 
             Logger.LogInfo("Unloaded");
         }
-        
+
         public void Log(LogLevel logLevel, object data)
         {
             Logger.Log(logLevel, data);
@@ -116,6 +122,18 @@ namespace NineChronicles.Mods.PVEHelper
         {
             switch (widget)
             {
+                case Menu:
+                    _inventoryGUI.Clear();
+                    var inventory = States.Instance.CurrentAvatarState?.inventory;
+                    if (inventory is not null)
+                    {
+                        foreach (var inventoryItem in inventory.Items)
+                        {
+                            _inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
+                        }
+                    }
+
+                    break;
                 case BattlePreparation:
                     // do nothing: show BattlePreparationWidgetPatch_OnShow((int, int))
                     break;
@@ -134,7 +152,7 @@ namespace NineChronicles.Mods.PVEHelper
 
         private void BattlePreparationWidgetPatch_OnShow((int worldId, int stageId) tuple)
         {
-            Debug.Log("BattlePreparationWidgetPatch_OnShow");
+            Log(LogLevel.Info, "BattlePreparationWidgetPatch_OnShow");
             var states = States.Instance;
             _winRateGUI = new WinRateGUI(
                 states.CurrentAvatarKey,
