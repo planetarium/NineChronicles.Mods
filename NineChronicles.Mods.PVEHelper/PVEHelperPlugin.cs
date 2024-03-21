@@ -10,9 +10,7 @@ using NineChronicles.Mods.PVEHelper.GUIs;
 using NineChronicles.Mods.PVEHelper.Manager;
 using NineChronicles.Mods.PVEHelper.Models;
 using NineChronicles.Mods.PVEHelper.Patches;
-using NineChronicles.Mods.PVEHelper.Models;
-using System.Collections.Immutable;
-using NineChronicles.Mods.PVEHelper.Utils;
+using NineChronicles.Mods.PVEHelper.Manager;
 using UniRx;
 using UnityEngine.EventSystems;
 
@@ -96,7 +94,10 @@ namespace NineChronicles.Mods.PVEHelper
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                _enhancementGUI = new EnhancementGUI();
+                _enhancementGUI = new EnhancementGUI(cacheManager);
+                
+                var equipments = cacheManager.LoadEquipmentCaches();
+                _enhancementGUI.SelectedEquipment = equipments[0];
                 DisableEventSystem();
             }
 
