@@ -10,6 +10,9 @@ using NineChronicles.Mods.PVEHelper.GUIs;
 using NineChronicles.Mods.PVEHelper.Manager;
 using NineChronicles.Mods.PVEHelper.Models;
 using NineChronicles.Mods.PVEHelper.Patches;
+using NineChronicles.Mods.PVEHelper.Models;
+using System.Collections.Immutable;
+using NineChronicles.Mods.PVEHelper.Utils;
 using UniRx;
 using UnityEngine.EventSystems;
 
@@ -89,6 +92,21 @@ namespace NineChronicles.Mods.PVEHelper
             modInventoryManager.UpdateItem(testItem.Id, testItem);
         }
 
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                _enhancementGUI = new EnhancementGUI();
+                DisableEventSystem();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                _enhancementGUI = null;
+                EnableEventSystem();
+            }
+        }
+
         private void DisableEventSystem()
         {
             if (_eventSystem != null)
@@ -114,6 +132,7 @@ namespace NineChronicles.Mods.PVEHelper
         {
             _inventoryGUI?.OnGUI();
             _winRateGUI?.OnGUI();
+            _enhancementGUI?.OnGUI();
         }
 
         private void OnDestroy()
@@ -168,6 +187,7 @@ namespace NineChronicles.Mods.PVEHelper
             {
                 case BattlePreparation:
                     _winRateGUI = null;
+                    _enhancementGUI = null;
                     break;
             }
         }
