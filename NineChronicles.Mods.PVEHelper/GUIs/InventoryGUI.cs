@@ -13,18 +13,18 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
     public class InventoryGUI : IGUI
     {
         // TabGUI
-        private const int _tabWidth = 50;
-        private const int _tabHeight = 30;
+        private const int _tabWidth = 100;
+        private const int _tabHeight = 40;
         private const int _tabCount = 2; // temporary.
 
         private static readonly Rect _tabRectPrefab = new Rect(0, 0, _tabWidth, _tabHeight);
         // ~TabGUI
 
         // SlotGUI
-        private const int _itemIconWidth = 50;
-        private const int _itemIconHeight = 50;
+        private const int _itemIconWidth = 100;
+        private const int _itemIconHeight = 100;
         private const int _itemNameHeight = 20;
-        private const int _itemCountWidth = 40;
+        private const int _itemCountWidth = 50;
         private const int _itemCountHeight = 20;
         private const int _slotWidth = _itemIconWidth;
         private const int _slotHeight = _itemIconHeight + _itemNameHeight;
@@ -39,8 +39,8 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         // ~SlotGUI
 
         // TageNumberGUI
-        private const int _pageNumberWidth = 30;
-        private const int _pageNumberHeight = 30;
+        private const int _pageNumberWidth = 100;
+        private const int _pageNumberHeight = 40;
         private const int _pageNumberCount = 5; // temporary.
 
         private static readonly Rect _pageNumberRectPrefab = new Rect(0, 0, _pageNumberWidth, _pageNumberHeight);
@@ -195,7 +195,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 return;
             }
 
-            if (GUI.Button(iconRect, item.GetIcon().texture))
+            if (GUI.Button(iconRect, item.GetIcon()))
             {
                 OnSlotSelected?.Invoke((item, count));
                 PVEHelperPlugin.Instance.Log(LogLevel.Info, $"Slot {index} selected.");
@@ -211,6 +211,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
         private void DrawPageNumbers()
         {
+            // FIXME: index 4 페이지 누르면 에러.
             var middleIndex = _pageNumberCount / 2;
             var startIndex = _viewModel.CurrentPageIndex > middleIndex
                 ? _viewModel.CurrentPageIndex - middleIndex
