@@ -15,14 +15,8 @@
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.EventSystems">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.EventSystems.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEditor.CoreModule">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEditor.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
