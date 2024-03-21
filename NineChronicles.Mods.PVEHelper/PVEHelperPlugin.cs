@@ -44,6 +44,7 @@ namespace NineChronicles.Mods.PVEHelper
         public static void Log(object data) => Log(LogLevel.Info, data);
         private EnhancementGUI _enhancementGUI;
         private IGUI _overlayGUI;
+        private StageSimulateGUI _stageSimulateGUI;
 
         private void Awake()
         {
@@ -68,8 +69,9 @@ namespace NineChronicles.Mods.PVEHelper
             };
             BattlePreparationWidgetPatch.OnShow += BattlePreparationWidgetPatch_OnShow;
 
-            _overlayGUI = new OverlayGUI();
-            
+            _stageSimulateGUI = new StageSimulateGUI(1);
+            _overlayGUI = new OverlayGUI(() => _stageSimulateGUI.Show());
+
             Logger.LogInfo("Loaded");
         }
 
@@ -132,6 +134,7 @@ namespace NineChronicles.Mods.PVEHelper
             _winRateGUI?.OnGUI();
             _enhancementGUI?.OnGUI();
             _overlayGUI?.OnGUI();
+            _stageSimulateGUI?.OnGUI();
         }
 
         private void OnDestroy()

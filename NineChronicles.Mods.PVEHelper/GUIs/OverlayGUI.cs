@@ -1,11 +1,15 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace NineChronicles.Mods.PVEHelper.GUIs
 {
     public class OverlayGUI : IGUI
     {
-        public OverlayGUI()
+        private readonly Action _onClick;
+
+        public OverlayGUI(Action onClick)
         {
+            _onClick = onClick;
         }
 
         public void OnGUI()
@@ -20,6 +24,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 PVEHelperPlugin.Instance.Log(
                     BepInEx.Logging.LogLevel.Info,
                     $"{nameof(OverlayGUI)}.{nameof(OnGUI)}");
+                _onClick();
             }
 
             GUILayout.EndHorizontal();
