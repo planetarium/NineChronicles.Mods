@@ -47,6 +47,7 @@ namespace NineChronicles.Mods.PVEHelper
         }
 
         public static void Log(object data) => Log(LogLevel.Info, data);
+        private EnhancementGUI _enhancementGUI;
 
         private void Awake()
         {
