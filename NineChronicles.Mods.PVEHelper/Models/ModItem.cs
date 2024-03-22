@@ -12,9 +12,11 @@ namespace NineChronicles.Mods.PVEHelper.Models
 
         public int Level {get; set;}
 
-        public int SubRecipeId {get; set;}
+        public bool ExistsItem {get; set;} = false;
 
-        public ImmutableList<int> OptionIdList {get; set;}
+        public int? SubRecipeId {get; set;}
+
+        public ImmutableList<int>? OptionIdList {get; set;}
 
         public void Enhancement()
         {
@@ -23,7 +25,7 @@ namespace NineChronicles.Mods.PVEHelper.Models
         
         public void Downgrade()
         {
-            if (Level <= 1)
+            if (Level <= 0)
             {
                 throw new InvalidOperationException("Level cannot be downgraded further.");
             }

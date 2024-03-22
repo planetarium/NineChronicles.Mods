@@ -3,9 +3,6 @@ using Nekoyume.Model.Item;
 using UnityEngine;
 using NineChronicles.Mods.PVEHelper.Manager;
 using NineChronicles.Mods.PVEHelper.Models;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace NineChronicles.Mods.PVEHelper.GUIs
 {
@@ -15,13 +12,31 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
         private readonly Rect _upgradeLayoutRect;
 
-        private CacheManager _cacheManager;
+        private ModInventoryManager _modInventoryManager;
 
-        public EquipmentCache SelectedEquipment {get; set;}
+        private InventoryGUI _inventoryGUI;
 
-        public EnhancementGUI(CacheManager cacheManager)
+        public ModItem SelectedEquipment {get; set;}
+
+        public EnhancementGUI(ModInventoryManager modInventoryManager, InventoryGUI inventoryGUI)
         {
-            _cacheManager = cacheManager;
+            _modInventoryManager = modInventoryManager;
+            _inventoryGUI = inventoryGUI;
+
+            _inventoryGUI.OnSlotSelected += tuple =>
+            {
+                var modItem = new ModItem();
+                
+                if (tuple.item is Equipment equipment)
+                {
+                    modItem.Id = equipment.ItemId;
+                    modItem.EquipmentId = equipment.Id;
+                    modItem.Level = equipment.level;
+                    modItem.ExistsItem = true;
+                }
+
+                SelectedEquipment = modItem;
+            };
 
             _overlayRect = new Rect(
                 100,
@@ -55,8 +70,12 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                                 if (SelectedEquipment != null)
                                 {
                                     SelectedEquipment.Enhancement();
-                                    _cacheManager.UpdateEquipmentCache(SelectedEquipment.Id, SelectedEquipment);
-                                    PVEHelperPlugin.Instance.Log(LogLevel.Info, "Upgrade button clicked");
+                                    if (_modInventoryManager.GetItem(SelectedEquipment.Id) == null)
+                                    {
+                                        _modInventoryManager.AddItem(SelectedEquipment);
+                                    }
+                                    _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
+                                    PVEHelperPlugin.Log(LogLevel.Info, "Upgrade button clicked");
                                 }
                             }
 
@@ -65,8 +84,13 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                                 if (SelectedEquipment != null)
                                 {
                                     SelectedEquipment.Downgrade();
-                                    _cacheManager.UpdateEquipmentCache(SelectedEquipment.Id, SelectedEquipment);
-                                    PVEHelperPlugin.Instance.Log(LogLevel.Info, "Downgrade button clicked");
+                                    
+                                    if (_modInventoryManager.GetItem(SelectedEquipment.Id) == null)
+                                    {
+                                        _modInventoryManager.AddItem(SelectedEquipment);
+                                    }
+                                    _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
+                                    PVEHelperPlugin.Log(LogLevel.Info, "Downgrade button clicked");
                                 }
                             }
                         }
