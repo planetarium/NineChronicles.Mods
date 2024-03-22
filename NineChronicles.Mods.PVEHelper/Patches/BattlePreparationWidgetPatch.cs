@@ -13,9 +13,7 @@ namespace NineChronicles.Mods.PVEHelper.Patches
         [HarmonyPatch("Show")]
         public static void ShowPostfix(ref int ____worldId, ref int ____stageId)
         {
-            PVEHelperPlugin.Instance.Log(
-                BepInEx.Logging.LogLevel.Info,
-                $"BattlePreparationWidgetPatch.ShowPostfix({____worldId}, {____stageId})");
+            PVEHelperPlugin.Log($"BattlePreparationWidgetPatch.ShowPostfix({____worldId}, {____stageId})");
             OnShow?.Invoke((____worldId, ____stageId));
         }
     }

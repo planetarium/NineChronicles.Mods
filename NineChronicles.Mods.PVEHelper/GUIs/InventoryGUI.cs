@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BepInEx.Logging;
 using Nekoyume.Model.Item;
 using NineChronicles.Mods.PVEHelper.Extensions;
 using NineChronicles.Mods.PVEHelper.ViewModels;
@@ -175,7 +174,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             if (GUI.Button(rect, tabName))
             {
                 _viewModel.SelectTab(index);
-                PVEHelperPlugin.Instance.Log(LogLevel.Info, $"{tabName} Tab({index}) selected.");
+                PVEHelperPlugin.Log($"{tabName} Tab({index}) selected.");
             }
 
             GUI.backgroundColor = Color.white;
@@ -215,13 +214,13 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 {
                     _viewModel.UnselectSlot();
                     OnSlotUnselected?.Invoke();
-                    PVEHelperPlugin.Instance.Log(LogLevel.Info, $"Slot({index}) unselected.");
+                    PVEHelperPlugin.Log($"Slot({index}) unselected.");
                 }
                 else
                 {
                     _viewModel.SelectSlot(index);
                     OnSlotSelected?.Invoke((item, count));
-                    PVEHelperPlugin.Instance.Log(LogLevel.Info, $"Slot({index}) selected.");
+                    PVEHelperPlugin.Log($"Slot({index}) selected.");
                 }
             }
 
@@ -267,7 +266,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             if (GUI.Button(rect, $"{dataIndex + 1}"))
             {
                 _viewModel.SelectPage(dataIndex);
-                PVEHelperPlugin.Instance.Log(LogLevel.Info, $"Page #{dataIndex + 1}({dataIndex}) selected.");
+                PVEHelperPlugin.Log($"Page #{dataIndex + 1}({dataIndex}) selected.");
             }
 
             GUI.backgroundColor = Color.white;

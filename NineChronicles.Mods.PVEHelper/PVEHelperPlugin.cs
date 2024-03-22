@@ -33,6 +33,14 @@ namespace NineChronicles.Mods.PVEHelper
             positionY: 100,
             slotCountPerPage: 15,
             slotCountPerRow: 5);
+        private ItemCreationGUI _itemCreationGUI;
+
+        public static void Log(LogLevel logLevel, object data)
+        {
+            Instance?.Logger.Log(logLevel, data);
+        }
+
+        public static void Log(object data) => Log(LogLevel.Info, data);
 
         private void Awake()
         {
@@ -58,7 +66,7 @@ namespace NineChronicles.Mods.PVEHelper
             BattlePreparationWidgetPatch.OnShow += BattlePreparationWidgetPatch_OnShow;
             _inventoryGUI.OnSlotSelected += tuple =>
             {
-                Log(LogLevel.Info, $"Selected: {tuple.item}, {tuple.count}");
+                Log($"Selected: {tuple.item}, {tuple.count}");
             };
 
             Logger.LogInfo("Loaded");
@@ -113,11 +121,6 @@ namespace NineChronicles.Mods.PVEHelper
             Logger.LogInfo("Unloaded");
         }
 
-        public void Log(LogLevel logLevel, object data)
-        {
-            Logger.Log(logLevel, data);
-        }
-
         private void OnWidgetEnable(Widget widget)
         {
             switch (widget)
@@ -152,7 +155,7 @@ namespace NineChronicles.Mods.PVEHelper
 
         private void BattlePreparationWidgetPatch_OnShow((int worldId, int stageId) tuple)
         {
-            Log(LogLevel.Info, "BattlePreparationWidgetPatch_OnShow");
+            Log("BattlePreparationWidgetPatch_OnShow");
             var states = States.Instance;
             _winRateGUI = new WinRateGUI(
                 states.CurrentAvatarKey,

@@ -1,5 +1,4 @@
-﻿using BepInEx.Logging;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using Nekoyume.Game;
 using Nekoyume.State;
 using UnityEngine;
@@ -70,7 +69,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 _stageId,
                 playCount));
             var winRate = (float)winCount / playCount;
-            PVEHelperPlugin.Instance.Log(LogLevel.Info, $"Play Count: {playCount}, Win Count: {winCount}, Win Rate: {winRate:P1}");
+            PVEHelperPlugin.Log($"Play Count: {playCount}, Win Count: {winCount}, Win Rate: {winRate:P1}");
             _winRate = $"Win Rate: {winRate:P1}";
             _isCalculating = false;
         }
