@@ -34,6 +34,7 @@ namespace NineChronicles.Mods.PVEHelper
         private EventSystem _eventSystem;
 
         private InventoryGUI _inventoryGUI;
+        private ItemCreationGUI _itemCreationGUI;
 
         public static void Log(LogLevel logLevel, object data)
         {
@@ -194,7 +195,7 @@ namespace NineChronicles.Mods.PVEHelper
                 case Menu:
                     break;
                 case BattlePreparation:
-                    // do nothing: show BattlePreparationWidgetPatch_OnShow((int, int))
+                    // do nothing: show BattlePreparationWidgetPatch_OnShow((worldId, stageId))
                     break;
             }
         }
