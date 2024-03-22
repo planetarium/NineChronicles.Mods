@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using Nekoyume.State;
 using Nekoyume.UI;
 using NineChronicles.Mods.PVEHelper.GUIs;
+using NineChronicles.Mods.PVEHelper.Manager;
+using NineChronicles.Mods.PVEHelper.Models;
 using NineChronicles.Mods.PVEHelper.Patches;
 using UniRx;
 using UnityEngine.EventSystems;
@@ -22,6 +25,8 @@ namespace NineChronicles.Mods.PVEHelper
         internal static PVEHelperPlugin Instance { get; private set; }
 
         private Harmony _harmony;
+
+        private ModInventoryManager modInventoryManager = new ModInventoryManager("../../mod_inventory.csv");
 
         private List<IDisposable> _disposables;
 
@@ -62,6 +67,18 @@ namespace NineChronicles.Mods.PVEHelper
             };
 
             Logger.LogInfo("Loaded");
+
+            var testItem = new ModItem()
+            {
+                Id = Guid.NewGuid(),
+                EquipmentId = 1,
+                SubRecipeId = 1,
+                Level = 1,
+                OptionIdList = new List<int>{1,2,3}.ToImmutableList()
+            };
+            modInventoryManager.AddItem(testItem);
+            testItem.Enhancement();
+            modInventoryManager.UpdateItem(testItem.Id, testItem);
         }
 
         private void DisableEventSystem()
@@ -109,6 +126,8 @@ namespace NineChronicles.Mods.PVEHelper
             }
 
             BattlePreparationWidgetPatch.OnShow -= BattlePreparationWidgetPatch_OnShow;
+
+            modInventoryManager.SaveItemsToCsv();
 
             Logger.LogInfo("Unloaded");
         }
