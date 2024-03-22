@@ -5,7 +5,6 @@ using Nekoyume.Model.Item;
 using NineChronicles.Mods.PVEHelper.Extensions;
 using NineChronicles.Mods.PVEHelper.ViewModels;
 using UnityEngine;
-using static NineChronicles.Mods.PVEHelper.ViewModels.InventoryViewModel;
 
 namespace NineChronicles.Mods.PVEHelper.GUIs
 {
@@ -192,7 +191,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             GUI.EndGroup();
         }
 
-        private void DrawSlot(int index, Slot slot)
+        private void DrawSlot(int index, InventoryViewModel.Slot slot)
         {
             var (iconRect, nameRect, countRect) = _slotRectPool[index];
             var item = slot.item;
