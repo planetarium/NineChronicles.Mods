@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using Nekoyume.Game;
 using Nekoyume.State;
 using Nekoyume.UI;
 using NineChronicles.Mods.PVEHelper.GUIs;
 using NineChronicles.Mods.PVEHelper.Manager;
-using NineChronicles.Mods.PVEHelper.Models;
 using NineChronicles.Mods.PVEHelper.Patches;
 using UniRx;
 using UnityEngine;
@@ -33,8 +32,13 @@ namespace NineChronicles.Mods.PVEHelper
 
         private EventSystem _eventSystem;
 
+        // NOTE: Please add your GUIs here as alphabetical order.
+        private EnhancementGUI _enhancementGUI;
+        private EquipGUI _equipGUI;
         private InventoryGUI _inventoryGUI;
         private ItemCreationGUI _itemCreationGUI;
+        private IGUI _overlayGUI;
+        private StageSimulateGUI _stageSimulateGUI;
 
         public static void Log(LogLevel logLevel, object data)
         {
@@ -42,10 +46,6 @@ namespace NineChronicles.Mods.PVEHelper
         }
 
         public static void Log(object data) => Log(LogLevel.Info, data);
-        private EnhancementGUI _enhancementGUI;
-        private EquipGUI _equipGUI;
-        private IGUI _overlayGUI;
-        private StageSimulateGUI _stageSimulateGUI;
 
         private void Awake()
         {
@@ -74,8 +74,28 @@ namespace NineChronicles.Mods.PVEHelper
 
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Log("Escape key pressed.");
+                _enhancementGUI = null;
+                _equipGUI = null;
+                _inventoryGUI = null;
+                _itemCreationGUI = null;
+                _overlayGUI = null;
+                _stageSimulateGUI = null;
+                EnableEventSystem();
+            }
+
+            //if (_enhancementGUI is not null ||
+            //    _itemCreationGUI is not null ||
+            //    _stageSimulateGUI is not null)
+            //{
+            //    return;
+            //}
+
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                Log("space key pressed.");
                 _inventoryGUI = new InventoryGUI(
                     positionX: 600,
                     positionY: 100,
@@ -98,6 +118,7 @@ namespace NineChronicles.Mods.PVEHelper
 
             if (Input.GetKeyDown(KeyCode.C))
             {
+                Log("c key pressed.");
                 _inventoryGUI = new InventoryGUI(
                     positionX: 600,
                     positionY: 100,
@@ -119,20 +140,25 @@ namespace NineChronicles.Mods.PVEHelper
 
             if (Input.GetKeyDown(KeyCode.X))
             {
+                Log("x key pressed.");
                 _stageSimulateGUI = new StageSimulateGUI(1);
                 _overlayGUI = new OverlayGUI(() => _stageSimulateGUI.Show());
 
                 DisableEventSystem();
             }
 
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                _enhancementGUI = null;
-                _inventoryGUI = null;
-                _overlayGUI = null;
-                _stageSimulateGUI = null;
-                _equipGUI = null;
-                EnableEventSystem();
+                Log("1 key pressed.");
+                var tableSheets = TableSheets.Instance;
+                _itemCreationGUI = new ItemCreationGUI(modInventoryManager);
+                _itemCreationGUI.SetItemRecipes(
+                    tableSheets.EquipmentItemSheet,
+                    tableSheets.EquipmentItemRecipeSheet,
+                    tableSheets.EquipmentItemSubRecipeSheetV2,
+                    tableSheets.EquipmentItemOptionSheet);
+
+                DisableEventSystem();
             }
         }
 
@@ -159,34 +185,35 @@ namespace NineChronicles.Mods.PVEHelper
 
         private void OnGUI()
         {
-            _inventoryGUI?.OnGUI();
             _enhancementGUI?.OnGUI();
+            _equipGUI?.OnGUI();
+            _inventoryGUI?.OnGUI();
+            _itemCreationGUI?.OnGUI();
             _overlayGUI?.OnGUI();
             _stageSimulateGUI?.OnGUI();
-            _equipGUI?.OnGUI();
         }
 
-        private void OnDestroy()
-        {
-            if (Instance != this)
-            {
-                return;
-            }
+        //private void OnDestroy()
+        //{
+        //    if (Instance != this)
+        //    {
+        //        return;
+        //    }
 
-            Instance = null;
+        //    Instance = null;
 
-            _harmony.UnpatchSelf();
-            _harmony = null;
+        //    _harmony.UnpatchSelf();
+        //    _harmony = null;
 
-            foreach (var disposable in _disposables)
-            {
-                disposable.Dispose();
-            }
+        //    foreach (var disposable in _disposables)
+        //    {
+        //        disposable.Dispose();
+        //    }
 
-            modInventoryManager.SaveItemsToCsv();
+        //    modInventoryManager.SaveItemsToCsv();
 
-            Logger.LogInfo("Unloaded");
-        }
+        //    Logger.LogInfo("Unloaded");
+        //}
 
         private void OnWidgetEnable(Widget widget)
         {

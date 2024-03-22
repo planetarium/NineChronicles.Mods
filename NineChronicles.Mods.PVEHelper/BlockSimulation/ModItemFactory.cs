@@ -1,17 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Libplanet.Action;
+using Libplanet.Crypto;
 using Nekoyume.Action;
-using Nekoyume.Model.State;
-using Nekoyume.Module;
-using Nekoyume.TableData;
 using Nekoyume.Extensions;
 using Nekoyume.Model.Item;
 using Nekoyume.Model.Skill;
 using Nekoyume.Model.Stat;
+using Nekoyume.Model.State;
+using Nekoyume.Module;
+using Nekoyume.TableData;
 using NineChronicles.Mods.PVEHelper.Models;
-using Libplanet.Action;
-using Libplanet.Crypto;
 
 
 namespace NineChronicles.Mods.PVEHelper.BlockSimulation
@@ -24,7 +24,7 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation
             ModItem modItem)
         {
             var equipmentItemSheet = sheets.GetSheet<EquipmentItemSheet>();
-            var enhancementCostSheetV2 = sheets.GetSheet<EnhancementCostSheetV2>();
+            var enhancementCostSheetV3 = sheets.GetSheet<EnhancementCostSheetV3>();
             var recipeSheet = sheets.GetSheet<EquipmentItemRecipeSheet>();
             var subRecipeSheetV2 = sheets.GetSheet<EquipmentItemSubRecipeSheetV2>();
             var optionSheet = sheets.GetSheet<EquipmentItemOptionSheet>();
@@ -66,10 +66,12 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation
                 if (option.StatType == StatType.NONE)
                 {
                     var skillRow = skillSheet[option.SkillId];
-                    var skill = SkillFactory.GetV1(
+                    var skill = SkillFactory.Get(
                         skillRow,
                         option.SkillDamageMax,
-                        option.SkillChanceMax);
+                        option.SkillChanceMax,
+                        option.StatDamageRatioMax,
+                        option.ReferencedStatType);
                     equipment.Skills.Add(skill);
 
                     continue;
@@ -79,15 +81,12 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation
             }
 
             if (modItem.Level > 0 &&
-                ItemEnhancement11.TryGetRow(
+                ItemEnhancement.TryGetRow(
                     equipment,
-                    enhancementCostSheetV2,
+                    enhancementCostSheetV3,
                     out var enhancementCostRow))
             {
-                for (var j = 0; j < modItem.Level; j++)
-                {
-                    equipment.LevelUp(random, enhancementCostRow, true);
-                }
+                equipment.SetLevel(random, modItem.Level, enhancementCostSheetV3);
             }
 
             return equipment;

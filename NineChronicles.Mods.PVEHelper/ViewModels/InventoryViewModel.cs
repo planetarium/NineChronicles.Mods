@@ -100,34 +100,6 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
         public int TabCount => _tabs.Count;
         public int PageCount => _tabs[CurrentTabIndex].pages.Count;
         public IEnumerable<Slot> CurrentPageSlots => _tabs[CurrentTabIndex].pages[CurrentPageIndex].slots;
-        //public IEnumerable<Slot> CurrentPageSlots
-        //{
-        //    get
-        //    {
-        //        if (_tabs.Count <= CurrentTabIndex)
-        //        {
-        //            PVEHelperPlugin.Instance.Log(
-        //                BepInEx.Logging.LogLevel.Info,
-        //                $"CurrentTabIndex({CurrentTabIndex}) is out of range.");
-        //            return Enumerable.Empty<Slot>();
-        //        }
-
-        //        var tab = _tabs[CurrentTabIndex];
-        //        if (tab.pages.Count <= CurrentPageIndex)
-        //        {
-        //            PVEHelperPlugin.Instance.Log(
-        //                BepInEx.Logging.LogLevel.Info,
-        //                $"CurrentPageIndex({CurrentPageIndex}) is out of range.");
-        //            return Enumerable.Empty<Slot>();
-        //        }
-
-        //        return tab.pages[CurrentPageIndex].slots;
-        //    }
-        //}
-
-        public event System.Action OnTabSelected;
-        public event System.Action OnPageSelected;
-        public event System.Action OnSlotSelected;
 
         public InventoryViewModel(int itemCountPerEachPage)
         {
@@ -148,29 +120,23 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
         public void SelectTab(int index)
         {
             CurrentTabIndex = index;
-            OnTabSelected?.Invoke();
-
             SelectPage(0);
         }
 
         public void SelectPage(int index)
         {
             CurrentPageIndex = index;
-            OnPageSelected?.Invoke();
-
             SelectSlot(-1);
         }
 
         public void SelectSlot(int index)
         {
             SelectedSlotIndex = index;
-            OnSlotSelected?.Invoke();
         }
 
-        public void UnselectSlot()
+        public void DeselectSlot()
         {
             SelectedSlotIndex = -1;
-            OnSlotSelected?.Invoke();
         }
 
         public void Clear()

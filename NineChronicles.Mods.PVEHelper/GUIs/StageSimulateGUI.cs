@@ -2,10 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Bencodex.Types;
-using BepInEx.Logging;
 using Cysharp.Threading.Tasks;
 using Nekoyume;
-using Nekoyume.Blockchain;
 using Nekoyume.Game;
 using Nekoyume.State;
 using Nekoyume.TableData;
@@ -52,7 +50,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             this.enabled = true;
         }
-        
+
         public void Close()
         {
             this.enabled = false;
@@ -127,13 +125,11 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
             if (GUILayout.Button("X", style))
             {
-                PVEHelperPlugin.Log(
-                    LogLevel.Info,
-                    "Close simulation mode");
+                PVEHelperPlugin.Log("Close simulation mode");
                 Close();
             }
         }
-        
+
         private void ControllablePicker(string[] list, Action<string[], int> onChanged, int index = 0)
         {
             var buttonStyle = new GUIStyle
@@ -164,7 +160,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                     }
                 }
             }
-            
+
             var labelStyle = new GUIStyle
             {
                 margin =
@@ -265,7 +261,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             if (GUILayout.Button("Simulate", style))
             {
                 Simulate();
-                PVEHelperPlugin.Log(LogLevel.Info, selectedStageId);
+                PVEHelperPlugin.Log(selectedStageId);
             }
         }
 
@@ -339,13 +335,13 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 selectedStageId,
                 playCount));
 
-                
+
             _wave0ClearCount = clearWaveInfo.TryGetValue(0, out var w0) ? w0 : 0;
             _wave1ClearCount = clearWaveInfo.TryGetValue(1, out var w1) ? w1 : 0;
             _wave2ClearCount = clearWaveInfo.TryGetValue(2, out var w2) ? w2 : 0;
             _wave3ClearCount = clearWaveInfo.TryGetValue(3, out var w3) ? w3 : 0;
 
-            PVEHelperPlugin.Log(LogLevel.Info, $"[StageGUI] Simulate 100: w0 ({_wave0ClearCount}) w1({_wave1ClearCount}) w2({_wave2ClearCount}) w3({_wave3ClearCount})");
+            PVEHelperPlugin.Log($"[StageGUI] Simulate 100: w0 ({_wave0ClearCount}) w1({_wave1ClearCount}) w2({_wave2ClearCount}) w3({_wave3ClearCount})");
             _isCalculating = false;
         }
 
@@ -367,7 +363,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
             var worldSheet = new WorldSheet();
             worldSheet.Set((Text)sheets[Addresses.GetSheetAddress<WorldSheet>()]);
-            
+
             var stageSheet = new StageSheet();
             stageSheet.Set((Text)sheets[Addresses.GetSheetAddress<StageSheet>()]);
 

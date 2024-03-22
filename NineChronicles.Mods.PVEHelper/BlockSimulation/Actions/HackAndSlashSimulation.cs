@@ -26,8 +26,9 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
             randomSeed ??= new RandomImpl(DateTime.Now.Millisecond).Next();
             var signerAddress = states.AgentState.address;
             var avatarState = (AvatarState)states.CurrentAvatarState.Clone();
+            // avatarState.inventory;
             var itemSlotState = states.CurrentItemSlotStates[BattleType.Adventure];
-            avatarState.EquipEquipments(itemSlotState.Equipments);
+            avatarState.EquipEquipments(itemSlotState.Equipments); //mod items... 
 
             var skillState = States.Instance.CrystalRandomSkillState;
             var key = string.Format("HackAndSlash.SelectedBonusSkillId.{0}", avatarState.address);
@@ -61,6 +62,7 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
                 StageBuffId = skillId == 0 ? null : skillId,
                 AvatarAddress = avatarState.address,
             };
+
             var eval = new ActionEvaluation<HackAndSlash>
             {
                 PreviousState = default,

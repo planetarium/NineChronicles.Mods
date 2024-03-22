@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Nekoyume.Model.Item;
 using NineChronicles.Mods.PVEHelper.Extensions;
 using NineChronicles.Mods.PVEHelper.ViewModels;
 using UnityEngine;
+using static NineChronicles.Mods.PVEHelper.ViewModels.ItemRecipesViewModel;
 
 namespace NineChronicles.Mods.PVEHelper.GUIs
 {
-    public class InventoryGUI : IGUI
+    public class ItemRecipesGUI : IGUI
     {
         // TabGUI
         private const int _tabWidth = 100;
         private const int _tabHeight = 40;
-        private const int _tabCount = 2; // temporary.
+        private const int _tabCount = 5;
 
         private static readonly Rect _tabRectPrefab = new Rect(0, 0, _tabWidth, _tabHeight);
         // ~TabGUI
@@ -39,7 +39,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         // TageNumberGUI
         private const int _pageNumberWidth = 100;
         private const int _pageNumberHeight = 40;
-        private const int _pageNumberCount = 5; // temporary.
+        private const int _pageNumberCount = 5;
 
         private static readonly Rect _pageNumberRectPrefab = new Rect(0, 0, _pageNumberWidth, _pageNumberHeight);
         // ~TageNumberGUI
@@ -48,10 +48,10 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private readonly int _slotCountPerRow;
 
         // view model
-        private readonly InventoryViewModel _viewModel;
+        private readonly ItemRecipesViewModel _viewModel;
 
         // groups
-        private readonly Rect _inventoryGroupRect;
+        private readonly Rect _rootGroupRect;
         private readonly Rect _tabGroupRect;
         private readonly Rect _slotGroupRect;
         private readonly Rect _pageNumberGroupRect;
@@ -62,10 +62,10 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             new List<(Rect, Rect, Rect)>();
         private readonly List<Rect> _pageNumerRectPool = new List<Rect>();
 
-        public event Action<(IItem item, int count)> OnSlotSelected;
+        public event Action<ItemRecipe> OnSlotSelected;
         public event Action OnSlotDeselected;
 
-        public InventoryGUI(
+        public ItemRecipesGUI(
             int positionX,
             int positionY,
             int slotCountPerPage,
@@ -73,18 +73,18 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             _slotCountPerPage = slotCountPerPage;
             _slotCountPerRow = slotCountPerRow;
-            _viewModel = new InventoryViewModel(slotCountPerPage);
+            _viewModel = new ItemRecipesViewModel(slotCountPerPage);
 
-            var inventoryWith = _slotWidth * slotCountPerRow;
+            var width = _slotWidth * slotCountPerRow;
             var slotRowCount = slotCountPerPage / slotCountPerRow;
-            var inventoryHeight =
+            var height =
                 _tabHeight +
                 _slotHeight * slotRowCount +
                 _pageNumberHeight;
-            _inventoryGroupRect = new Rect(positionX, positionY, inventoryWith, inventoryHeight);
-            _tabGroupRect = new Rect(0, 0, inventoryWith, _tabHeight);
-            _slotGroupRect = new Rect(0, _tabHeight, inventoryWith, _slotHeight * slotRowCount);
-            _pageNumberGroupRect = new Rect(0, _tabHeight + _slotHeight * slotRowCount, inventoryWith, _pageNumberHeight);
+            _rootGroupRect = new Rect(positionX, positionY, width, height);
+            _tabGroupRect = new Rect(0, 0, width, _tabHeight);
+            _slotGroupRect = new Rect(0, _tabHeight, width, _slotHeight * slotRowCount);
+            _pageNumberGroupRect = new Rect(0, _tabHeight + _slotHeight * slotRowCount, width, _pageNumberHeight);
 
             for (int i = 0; i < _tabCount; i++)
             {
@@ -128,19 +128,11 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             }
         }
 
-        // ------ ------
-        // | T1 | | T2 |
-        // ----------------------------------
-        // | I1 | | I2 | | I3 | | I4 | | I5 |
-        // ----------------------------------
-        // | I5 | | I6 | | I7 | | I8 | | I9 |
-        // ----------------------------------
-        // | P1 | | P2 | | P3 | | P4 | | P5 |
-        // ----------------------------------
         public void OnGUI()
         {
             GUI.matrix = GUIToolbox.GetGUIMatrix();
-            GUI.BeginGroup(_inventoryGroupRect);
+            GUI.BeginGroup(_rootGroupRect);
+            GUI.Box(_rootGroupRect, string.Empty);
             DrawTabs();
             DrawSlots();
             DrawPageNumbers();
@@ -163,8 +155,11 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             var rect = _tabRectPool[index];
             var tabName = index switch
             {
-                0 => "Equipment",
-                1 => "The Other",
+                0 => "Weapon",
+                1 => "Armor",
+                2 => "Belt",
+                3 => "Necklace",
+                4 => "Ring",
                 _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
             };
             var isSelected = _viewModel.CurrentTabIndex == index;
@@ -191,13 +186,11 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             GUI.EndGroup();
         }
 
-        private void DrawSlot(int index, InventoryViewModel.Slot slot)
+        private void DrawSlot(int index, Slot slot)
         {
             var (iconRect, nameRect, countRect) = _slotRectPool[index];
-            var item = slot.item;
-            var count = slot.count;
-
-            if (item is null)
+            var itemRecipe = slot.itemRecipe;
+            if (itemRecipe is null)
             {
                 GUI.enabled = false;
                 GUI.Button(iconRect, "Empty");
@@ -206,8 +199,12 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             }
 
             var isSelected = _viewModel.SelectedSlotIndex == index;
+            var equipmentRow = itemRecipe.equipmentRow;
             GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
-            if (GUI.Button(iconRect, item.GetIcon()))
+            var buttonContent = new GUIContent(
+                $"{equipmentRow.ElementalType}({equipmentRow.Grade})",
+                equipmentRow.GetIcon());
+            if (GUI.Button(iconRect, buttonContent))
             {
                 if (isSelected)
                 {
@@ -218,19 +215,14 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 else
                 {
                     _viewModel.SelectSlot(index);
-                    OnSlotSelected?.Invoke((item, count));
+                    OnSlotSelected?.Invoke(itemRecipe);
                     PVEHelperPlugin.Log($"Slot({index}) selected.");
                 }
             }
 
             GUI.backgroundColor = Color.white;
             GUI.skin.label.fontStyle = isSelected ? FontStyle.Bold : FontStyle.Normal;
-            GUI.Label(nameRect, item.GetName());
-
-            if (count > 1)
-            {
-                GUI.Label(countRect, count.ToString());
-            }
+            GUI.Label(nameRect, equipmentRow.GetName());
         }
 
         private void DrawPageNumbers()
@@ -276,14 +268,26 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             _viewModel.Clear();
         }
 
-        public void AddItem(IItem item, int count)
+        public void AddItem(ItemRecipesViewModel.ItemRecipe itemRecipe)
         {
-            _viewModel.AddItem(item, count);
+            _viewModel.AddItem(itemRecipe);
         }
 
-        public void RemoveItem(IItem item, int count)
+        public void RemoveItem(ItemRecipesViewModel.ItemRecipe itemRecipe)
         {
-            _viewModel.RemoveItem(item, count);
+            _viewModel.RemoveItem(itemRecipe);
+        }
+
+        public bool TryGetSelectedSlot(out Slot slot)
+        {
+            if (_viewModel.SelectedSlotIndex == -1)
+            {
+                slot = null;
+                return false;
+            }
+
+            slot = _viewModel.CurrentPageSlots.ElementAt(_viewModel.SelectedSlotIndex);
+            return true;
         }
     }
 }
