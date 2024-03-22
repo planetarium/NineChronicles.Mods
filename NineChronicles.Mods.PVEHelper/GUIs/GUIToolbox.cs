@@ -39,8 +39,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 Quaternion.identity,
                 scale);
 
-            PVEHelperPlugin.Instance?.Log(
-                BepInEx.Logging.LogLevel.Info,
+            PVEHelperPlugin.Log(
                 $"Screen size changed: {_screenWidthCache}x{_screenHeightCache}" +
                 $"\nScale: {scale}" +
                 $"\nMatrix: {GUI.matrix}");
