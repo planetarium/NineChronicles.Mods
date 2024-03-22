@@ -11,6 +11,7 @@ using NineChronicles.Mods.PVEHelper.Manager;
 using NineChronicles.Mods.PVEHelper.Models;
 using NineChronicles.Mods.PVEHelper.Patches;
 using UniRx;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace NineChronicles.Mods.PVEHelper
@@ -33,12 +34,7 @@ namespace NineChronicles.Mods.PVEHelper
         private EventSystem _eventSystem;
 
         private IGUI _winRateGUI;
-        private InventoryGUI _inventoryGUI = new InventoryGUI(
-            positionX: 100,
-            positionY: 100,
-            slotCountPerPage: 15,
-            slotCountPerRow: 5);
-        private ItemCreationGUI _itemCreationGUI;
+        private InventoryGUI _inventoryGUI;
 
         public static void Log(LogLevel logLevel, object data)
         {
@@ -46,6 +42,7 @@ namespace NineChronicles.Mods.PVEHelper
         }
 
         public static void Log(object data) => Log(LogLevel.Info, data);
+        private EnhancementGUI _enhancementGUI;
 
         private void Awake()
         {
@@ -69,24 +66,40 @@ namespace NineChronicles.Mods.PVEHelper
                 Widget.OnDisableStaticObservable.Subscribe(OnWidgetDisable)
             };
             BattlePreparationWidgetPatch.OnShow += BattlePreparationWidgetPatch_OnShow;
-            _inventoryGUI.OnSlotSelected += tuple =>
-            {
-                Log($"Selected: {tuple.item}, {tuple.count}");
-            };
 
             Logger.LogInfo("Loaded");
+        }
 
-            var testItem = new ModItem()
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                Id = Guid.NewGuid(),
-                EquipmentId = 1,
-                SubRecipeId = 1,
-                Level = 1,
-                OptionIdList = new List<int>{1,2,3}.ToImmutableList()
-            };
-            modInventoryManager.AddItem(testItem);
-            testItem.Enhancement();
-            modInventoryManager.UpdateItem(testItem.Id, testItem);
+                _inventoryGUI = new InventoryGUI(
+                    positionX: 600,
+                    positionY: 100,
+                    slotCountPerPage: 15,
+                    slotCountPerRow: 5);
+                _inventoryGUI.Clear();
+
+                var inventory = States.Instance.CurrentAvatarState?.inventory;
+                if (inventory is not null)
+                {
+                    foreach (var inventoryItem in inventory.Items)
+                    {
+                        _inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
+                    }
+                }
+                _enhancementGUI = new EnhancementGUI(modInventoryManager, _inventoryGUI);
+
+                DisableEventSystem();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                _enhancementGUI = null;
+                _inventoryGUI = null;
+                EnableEventSystem();
+            }
         }
 
         private void DisableEventSystem()
@@ -114,6 +127,7 @@ namespace NineChronicles.Mods.PVEHelper
         {
             _inventoryGUI?.OnGUI();
             _winRateGUI?.OnGUI();
+            _enhancementGUI?.OnGUI();
         }
 
         private void OnDestroy()
@@ -145,16 +159,6 @@ namespace NineChronicles.Mods.PVEHelper
             switch (widget)
             {
                 case Menu:
-                    _inventoryGUI.Clear();
-                    var inventory = States.Instance.CurrentAvatarState?.inventory;
-                    if (inventory is not null)
-                    {
-                        foreach (var inventoryItem in inventory.Items)
-                        {
-                            _inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
-                        }
-                    }
-
                     break;
                 case BattlePreparation:
                     // do nothing: show BattlePreparationWidgetPatch_OnShow((int, int))
@@ -168,6 +172,7 @@ namespace NineChronicles.Mods.PVEHelper
             {
                 case BattlePreparation:
                     _winRateGUI = null;
+                    _enhancementGUI = null;
                     break;
             }
         }
