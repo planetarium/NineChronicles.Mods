@@ -167,6 +167,12 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
             OnSlotSelected?.Invoke();
         }
 
+        public void UnselectSlot()
+        {
+            SelectedSlotIndex = -1;
+            OnSlotSelected?.Invoke();
+        }
+
         public void Clear()
         {
             foreach (var tab in _tabs)

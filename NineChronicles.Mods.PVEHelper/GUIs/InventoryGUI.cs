@@ -65,6 +65,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private readonly List<Rect> _pageNumerRectPool = new List<Rect>();
 
         public event Action<(IItem item, int count)> OnSlotSelected;
+        public event Action OnSlotUnselected;
 
         public InventoryGUI(
             int positionX,
@@ -162,11 +163,22 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private void DrawTab(int index)
         {
             var rect = _tabRectPool[index];
-            if (GUI.Button(rect, $"T{index}"))
+            var tabName = index switch
+            {
+                0 => "Equipment",
+                1 => "The Other",
+                _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
+            };
+            var isSelected = _viewModel.CurrentTabIndex == index;
+            GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
+            GUI.skin.button.fontStyle = isSelected ? FontStyle.Bold : FontStyle.Normal;
+            if (GUI.Button(rect, tabName))
             {
                 _viewModel.SelectTab(index);
-                PVEHelperPlugin.Instance.Log(LogLevel.Info, $"Tab {index} selected.");
+                PVEHelperPlugin.Instance.Log(LogLevel.Info, $"{tabName} Tab({index}) selected.");
             }
+
+            GUI.backgroundColor = Color.white;
         }
 
         private void DrawSlots()
@@ -195,12 +207,26 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 return;
             }
 
+            var isSelected = _viewModel.SelectedSlotIndex == index;
+            GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
             if (GUI.Button(iconRect, item.GetIcon()))
             {
-                OnSlotSelected?.Invoke((item, count));
-                PVEHelperPlugin.Instance.Log(LogLevel.Info, $"Slot {index} selected.");
+                if (isSelected)
+                {
+                    _viewModel.UnselectSlot();
+                    OnSlotUnselected?.Invoke();
+                    PVEHelperPlugin.Instance.Log(LogLevel.Info, $"Slot({index}) unselected.");
+                }
+                else
+                {
+                    _viewModel.SelectSlot(index);
+                    OnSlotSelected?.Invoke((item, count));
+                    PVEHelperPlugin.Instance.Log(LogLevel.Info, $"Slot({index}) selected.");
+                }
             }
 
+            GUI.backgroundColor = Color.white;
+            GUI.skin.label.fontStyle = isSelected ? FontStyle.Bold : FontStyle.Normal;
             GUI.Label(nameRect, item.GetName());
 
             if (count > 1)
@@ -211,7 +237,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
         private void DrawPageNumbers()
         {
-            // FIXME: index 4 페이지 누르면 에러.
+            // FIXME: CurrentPageIndex 4 페이지 누르면 에러.
             var middleIndex = _pageNumberCount / 2;
             var startIndex = _viewModel.CurrentPageIndex > middleIndex
                 ? _viewModel.CurrentPageIndex - middleIndex
@@ -220,26 +246,31 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             GUI.BeginGroup(_pageNumberGroupRect);
             for (int i = 0; i < _pageNumberCount; i++)
             {
-                var pageIndex = startIndex + i;
-                if (_viewModel.IsEmptyPage(pageIndex))
+                var dataIndex = startIndex + i;
+                if (_viewModel.IsEmptyPage(dataIndex))
                 {
                     continue;
                 }
 
-                DrawPageNumber(pageIndex);
+                DrawPageNumber(i, dataIndex);
             }
 
             GUI.EndGroup();
         }
 
-        private void DrawPageNumber(int index)
+        private void DrawPageNumber(int viewIndex, int dataIndex)
         {
-            var rect = _pageNumerRectPool[index];
-            if (GUI.Button(rect, $"P{index}"))
+            var rect = _pageNumerRectPool[viewIndex];
+            var isSelected = _viewModel.CurrentPageIndex == dataIndex;
+            GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
+            GUI.skin.button.fontStyle = isSelected ? FontStyle.Bold : FontStyle.Normal;
+            if (GUI.Button(rect, $"{dataIndex + 1}"))
             {
-                _viewModel.SelectPage(index);
-                PVEHelperPlugin.Instance.Log(LogLevel.Info, $"Page {index} selected.");
+                _viewModel.SelectPage(dataIndex);
+                PVEHelperPlugin.Instance.Log(LogLevel.Info, $"Page #{dataIndex + 1}({dataIndex}) selected.");
             }
+
+            GUI.backgroundColor = Color.white;
         }
 
         public void Clear()
