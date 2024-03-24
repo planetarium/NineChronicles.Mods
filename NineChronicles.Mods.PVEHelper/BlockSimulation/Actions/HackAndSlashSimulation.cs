@@ -15,7 +15,7 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
 {
     public static class HackAndSlashSimulation
     {
-        public static bool Simulate(
+        public static int Simulate(
             TableSheets tableSheets,
             States states,
             int worldId,
@@ -87,10 +87,10 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
                 tableSheets,
                 out var simulator,
                 out _);
-            return simulator.Log.IsClear;
+            return simulator.Log.waveCount;
         }
 
-        public static int Simulate(
+        public static Dictionary<int, int> Simulate(
             TableSheets tableSheets,
             States states,
             int worldId,
@@ -99,16 +99,23 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
             long blockIndex = 0,
             int? randomSeed = null)
         {
-            var winCount = 0;
+            var result = new Dictionary<int, int>();
+
             for (var i = 0; i < playCount; i++)
             {
-                if (Simulate(tableSheets, states, worldId, stageId, blockIndex, randomSeed))
+                var clearWave = Simulate(tableSheets, states, worldId, stageId, blockIndex, randomSeed);
+
+                if (result.TryGetValue(clearWave, out var count))
                 {
-                    winCount++;
+                    result[clearWave] = count + 1;
+                }
+                else
+                {
+                    result[clearWave] = 1;
                 }
             }
 
-            return winCount;
+            return result;
         }
     }
 }

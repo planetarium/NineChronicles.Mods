@@ -29,6 +29,11 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
         private readonly int _avatarIndex;
 
+        private int _wave1ClearCount = 0;
+        private int _wave2ClearCount = 0;
+        private int _wave3ClearCount = 0;
+
+
         public StageSimulateGUI(int avatarIndex)
         {
             var width = 1000;
@@ -121,7 +126,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
             if (GUILayout.Button("X", style))
             {
-                PVEHelperPlugin.Instance.Log(
+                PVEHelperPlugin.Log(
                     LogLevel.Info,
                     "Close simulation mode");
                 Close();
@@ -256,7 +261,11 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                     right = 2,
                 },
             };
-            GUILayout.Button("Simulate", style);
+            if (GUILayout.Button("Simulate", style))
+            {
+                Simulate();
+                PVEHelperPlugin.Log(LogLevel.Info, selectedStageId);
+            }
         }
 
         private void SimulationResultTextArea()
@@ -290,9 +299,10 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                     right = 2,
                 },
             };
-            const float winRate = 100.0f;
-            const float missRate = 100.0f;
-            GUILayout.TextArea($"Win Rate: {winRate}%\nMiss Rate: {missRate}%", style);
+
+            GUILayout.TextArea($"1 Wave Clear: {_wave1ClearCount}", style);
+            GUILayout.TextArea($"2 Wave Clear: {_wave2ClearCount}", style);
+            GUILayout.TextArea($"3 Wave Clear: {_wave3ClearCount}", style);
         }
 
         private Texture2D CreateColorTexture(Rect rect, Color color)
@@ -308,6 +318,29 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             texture.SetPixels(buf);
             texture.Apply();
             return texture;
+        }
+
+        private async Task Simulate()
+        {
+            _isCalculating = true;
+            _wave1ClearCount = 0;
+            _wave2ClearCount = 0;
+            _wave3ClearCount = 0;
+
+            const int playCount = 100;
+
+            var clearWaveInfo = await UniTask.Run(() => BlockSimulation.Actions.HackAndSlashSimulation.Simulate(
+                TableSheets.Instance,
+                States.Instance,
+                _avatarIndex,
+                selectedStageId / 50,
+                selectedStageId,
+                playCount));
+                
+            _wave1ClearCount = clearWaveInfo.TryGetValue(1, out var w1) ? w1 : 0;
+            _wave2ClearCount = clearWaveInfo.TryGetValue(2, out var w2) ? w2 : 0;
+            _wave3ClearCount = clearWaveInfo.TryGetValue(3, out var w3) ? w3 : 0;
+            _isCalculating = false;
         }
 
         private async Task UpdateStateData()

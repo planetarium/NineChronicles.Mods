@@ -21,7 +21,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
             if (GUILayout.Button("Labs", GUILayout.Width(50), GUILayout.Height(50)))
             {
-                PVEHelperPlugin.Instance.Log(
+                PVEHelperPlugin.Log(
                     BepInEx.Logging.LogLevel.Info,
                     $"{nameof(OverlayGUI)}.{nameof(OnGUI)}");
                 _onClick();

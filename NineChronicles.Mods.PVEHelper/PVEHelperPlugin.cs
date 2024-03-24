@@ -33,7 +33,6 @@ namespace NineChronicles.Mods.PVEHelper
 
         private EventSystem _eventSystem;
 
-        private IGUI _winRateGUI;
         private InventoryGUI _inventoryGUI;
 
         public static void Log(LogLevel logLevel, object data)
@@ -67,10 +66,6 @@ namespace NineChronicles.Mods.PVEHelper
                 Widget.OnEnableStaticObservable.Subscribe(OnWidgetEnable),
                 Widget.OnDisableStaticObservable.Subscribe(OnWidgetDisable)
             };
-            BattlePreparationWidgetPatch.OnShow += BattlePreparationWidgetPatch_OnShow;
-
-            _stageSimulateGUI = new StageSimulateGUI(1);
-            _overlayGUI = new OverlayGUI(() => _stageSimulateGUI.Show());
 
             Logger.LogInfo("Loaded");
         }
@@ -99,10 +94,20 @@ namespace NineChronicles.Mods.PVEHelper
                 DisableEventSystem();
             }
 
+            if (Input.GetKeyDown(KeyCode.X))
+            {
+                _stageSimulateGUI = new StageSimulateGUI(1);
+                _overlayGUI = new OverlayGUI(() => _stageSimulateGUI.Show());
+
+                DisableEventSystem();
+            }
+
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 _enhancementGUI = null;
                 _inventoryGUI = null;
+                _overlayGUI = null;
+                _stageSimulateGUI = null;
                 EnableEventSystem();
             }
         }
@@ -131,7 +136,6 @@ namespace NineChronicles.Mods.PVEHelper
         private void OnGUI()
         {
             _inventoryGUI?.OnGUI();
-            _winRateGUI?.OnGUI();
             _enhancementGUI?.OnGUI();
             _overlayGUI?.OnGUI();
             _stageSimulateGUI?.OnGUI();
@@ -153,8 +157,6 @@ namespace NineChronicles.Mods.PVEHelper
             {
                 disposable.Dispose();
             }
-
-            BattlePreparationWidgetPatch.OnShow -= BattlePreparationWidgetPatch_OnShow;
 
             modInventoryManager.SaveItemsToCsv();
 
@@ -178,20 +180,9 @@ namespace NineChronicles.Mods.PVEHelper
             switch (widget)
             {
                 case BattlePreparation:
-                    _winRateGUI = null;
                     _enhancementGUI = null;
                     break;
             }
-        }
-
-        private void BattlePreparationWidgetPatch_OnShow((int worldId, int stageId) tuple)
-        {
-            Log("BattlePreparationWidgetPatch_OnShow");
-            var states = States.Instance;
-            _winRateGUI = new WinRateGUI(
-                states.CurrentAvatarKey,
-                tuple.worldId,
-                tuple.stageId);
         }
     }
 }
