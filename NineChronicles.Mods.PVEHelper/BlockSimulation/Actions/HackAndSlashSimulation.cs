@@ -87,7 +87,7 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
                 tableSheets,
                 out var simulator,
                 out _);
-            return simulator.Log.waveCount;
+            return simulator.Log.clearedWaveNumber;
         }
 
         public static Dictionary<int, int> Simulate(
