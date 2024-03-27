@@ -28,7 +28,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
                 if (tuple.item is Equipment equipment)
                 {
-                    modItem.Id = equipment.ItemId;
+                    modItem.Id = equipment.NonFungibleId;
                     modItem.EquipmentId = equipment.Id;
                     modItem.Level = equipment.level;
                     modItem.ExistsItem = true;
