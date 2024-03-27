@@ -1,8 +1,7 @@
-using BepInEx.Logging;
 using Nekoyume.Model.Item;
-using UnityEngine;
 using NineChronicles.Mods.PVEHelper.Manager;
 using NineChronicles.Mods.PVEHelper.Models;
+using UnityEngine;
 
 namespace NineChronicles.Mods.PVEHelper.GUIs
 {
@@ -16,7 +15,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
         private InventoryGUI _inventoryGUI;
 
-        public ModItem SelectedEquipment {get; set;}
+        public ModItem SelectedEquipment { get; set; }
 
         public EnhancementGUI(ModInventoryManager modInventoryManager, InventoryGUI inventoryGUI)
         {
@@ -26,7 +25,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             _inventoryGUI.OnSlotSelected += tuple =>
             {
                 var modItem = new ModItem();
-                
+
                 if (tuple.item is Equipment equipment)
                 {
                     modItem.Id = equipment.ItemId;
@@ -75,7 +74,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                                         _modInventoryManager.AddItem(SelectedEquipment);
                                     }
                                     _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
-                                    PVEHelperPlugin.Log(LogLevel.Info, "Upgrade button clicked");
+                                    PVEHelperPlugin.Log("Upgrade button clicked");
                                 }
                             }
 
@@ -84,13 +83,13 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                                 if (SelectedEquipment != null)
                                 {
                                     SelectedEquipment.Downgrade();
-                                    
+
                                     if (_modInventoryManager.GetItem(SelectedEquipment.Id) == null)
                                     {
                                         _modInventoryManager.AddItem(SelectedEquipment);
                                     }
                                     _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
-                                    PVEHelperPlugin.Log(LogLevel.Info, "Downgrade button clicked");
+                                    PVEHelperPlugin.Log("Downgrade button clicked");
                                 }
                             }
                         }

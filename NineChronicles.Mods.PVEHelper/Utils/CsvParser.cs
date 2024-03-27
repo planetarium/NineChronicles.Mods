@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Immutable;
-using BepInEx.Logging;
 using System.IO;
 
 namespace NineChronicles.Mods.PVEHelper.Utils
@@ -12,9 +11,9 @@ namespace NineChronicles.Mods.PVEHelper.Utils
             ImmutableList<T> items = ImmutableList<T>.Empty;
 
             using (var reader = new StreamReader(filePath))
-            {   
+            {
                 string headerLine = reader.ReadLine();
-                
+
                 while (!reader.EndOfStream)
                 {
                     var line = reader.ReadLine();
