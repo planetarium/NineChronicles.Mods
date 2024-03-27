@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections.Immutable;
 using NineChronicles.Mods.PVEHelper.Models;
 using NineChronicles.Mods.PVEHelper.Utils;
+using Nekoyume.Model.Item;
 
 namespace NineChronicles.Mods.PVEHelper.Manager
 {
@@ -11,6 +12,13 @@ namespace NineChronicles.Mods.PVEHelper.Manager
     {
         private ImmutableList<ModItem> items;
         private string filePath;
+
+        public Equipment? SelectedAura { get; set; }
+        public Equipment? SelectedWeapon { get; set; }
+        public Equipment? SelectedArmor { get; set; }
+        public Equipment? SelectedBelt { get; set; }
+        public Equipment? SelectedRing1 { get; set; }
+        public Equipment? SelectedRing2 { get; set; }
 
         public ModInventoryManager(string filePath)
         {

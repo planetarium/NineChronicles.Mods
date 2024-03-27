@@ -42,6 +42,7 @@ namespace NineChronicles.Mods.PVEHelper
 
         public static void Log(object data) => Log(LogLevel.Info, data);
         private EnhancementGUI _enhancementGUI;
+        private EquipGUI _equipGUI;
         private IGUI _overlayGUI;
         private StageSimulateGUI _stageSimulateGUI;
 
@@ -94,6 +95,27 @@ namespace NineChronicles.Mods.PVEHelper
                 DisableEventSystem();
             }
 
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                _inventoryGUI = new InventoryGUI(
+                    positionX: 600,
+                    positionY: 100,
+                    slotCountPerPage: 15,
+                    slotCountPerRow: 5);
+                _inventoryGUI.Clear();
+
+                var inventory = States.Instance.CurrentAvatarState?.inventory;
+                if (inventory is not null)
+                {
+                    foreach (var inventoryItem in inventory.Items)
+                    {
+                        _inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
+                    }
+                }
+                _equipGUI = new EquipGUI(modInventoryManager, _inventoryGUI);
+                DisableEventSystem();
+            }
+
             if (Input.GetKeyDown(KeyCode.X))
             {
                 _stageSimulateGUI = new StageSimulateGUI(1);
@@ -108,6 +130,7 @@ namespace NineChronicles.Mods.PVEHelper
                 _inventoryGUI = null;
                 _overlayGUI = null;
                 _stageSimulateGUI = null;
+                _equipGUI = null;
                 EnableEventSystem();
             }
         }
@@ -139,6 +162,7 @@ namespace NineChronicles.Mods.PVEHelper
             _enhancementGUI?.OnGUI();
             _overlayGUI?.OnGUI();
             _stageSimulateGUI?.OnGUI();
+            _equipGUI?.OnGUI();
         }
 
         private void OnDestroy()

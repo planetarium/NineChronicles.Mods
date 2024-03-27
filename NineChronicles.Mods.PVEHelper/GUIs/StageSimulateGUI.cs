@@ -29,6 +29,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
         private readonly int _avatarIndex;
 
+        private int _wave0ClearCount = 0;
         private int _wave1ClearCount = 0;
         private int _wave2ClearCount = 0;
         private int _wave3ClearCount = 0;
@@ -279,8 +280,8 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 },
                 padding =
                 {
-                    top = 10,
-                    bottom = 10,
+                    top = 1,
+                    bottom = 1,
                     left = 10,
                     right = 10,
                 },
@@ -300,6 +301,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 },
             };
 
+            GUILayout.TextArea($"0 Wave Clear: {_wave0ClearCount}", style);
             GUILayout.TextArea($"1 Wave Clear: {_wave1ClearCount}", style);
             GUILayout.TextArea($"2 Wave Clear: {_wave2ClearCount}", style);
             GUILayout.TextArea($"3 Wave Clear: {_wave3ClearCount}", style);
@@ -323,23 +325,27 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private async Task Simulate()
         {
             _isCalculating = true;
-            _wave1ClearCount = 0;
-            _wave2ClearCount = 0;
-            _wave3ClearCount = 0;
+            _wave0ClearCount = -1;
+            _wave1ClearCount = -1;
+            _wave2ClearCount = -1;
+            _wave3ClearCount = -1;
 
-            const int playCount = 100;
+            const int playCount = 300;
 
             var clearWaveInfo = await UniTask.Run(() => BlockSimulation.Actions.HackAndSlashSimulation.Simulate(
                 TableSheets.Instance,
                 States.Instance,
-                _avatarIndex,
                 selectedStageId / 50,
                 selectedStageId,
                 playCount));
+
                 
+            _wave0ClearCount = clearWaveInfo.TryGetValue(0, out var w0) ? w0 : 0;
             _wave1ClearCount = clearWaveInfo.TryGetValue(1, out var w1) ? w1 : 0;
             _wave2ClearCount = clearWaveInfo.TryGetValue(2, out var w2) ? w2 : 0;
             _wave3ClearCount = clearWaveInfo.TryGetValue(3, out var w3) ? w3 : 0;
+
+            PVEHelperPlugin.Log(LogLevel.Info, $"[StageGUI] Simulate 100: w0 ({_wave0ClearCount}) w1({_wave1ClearCount}) w2({_wave2ClearCount}) w3({_wave3ClearCount})");
             _isCalculating = false;
         }
 
