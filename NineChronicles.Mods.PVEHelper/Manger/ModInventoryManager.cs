@@ -5,6 +5,8 @@ using System.Linq;
 using Nekoyume.Model.Item;
 using NineChronicles.Mods.PVEHelper.Models;
 using NineChronicles.Mods.PVEHelper.Utils;
+using Nekoyume.Model.Item;
+using System.Collections.Generic;
 
 namespace NineChronicles.Mods.PVEHelper.Manager
 {
@@ -25,6 +27,11 @@ namespace NineChronicles.Mods.PVEHelper.Manager
             this.filePath = filePath;
             items = ImmutableList<ModItem>.Empty;
             LoadItemsFromCsv();
+        }
+
+        public List<Equipment> GetEquipments()
+        {
+            return new List<Equipment>() { SelectedAura, SelectedWeapon, SelectedArmor, SelectedBelt, SelectedRing1, SelectedRing2 }.FindAll(e => e != null);
         }
 
         private void LoadItemsFromCsv()

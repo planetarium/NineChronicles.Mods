@@ -281,6 +281,11 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             _viewModel.AddItem(item, count);
         }
 
+        public void AddItem(INonFungibleItem item)
+        {
+            _viewModel.AddItem(item, 1);
+        }
+
         public void RemoveItem(IItem item, int count)
         {
             _viewModel.RemoveItem(item, count);

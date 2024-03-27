@@ -7,6 +7,7 @@ using Nekoyume;
 using Nekoyume.Game;
 using Nekoyume.State;
 using Nekoyume.TableData;
+using NineChronicles.Mods.PVEHelper.Manager;
 using UnityEngine;
 
 namespace NineChronicles.Mods.PVEHelper.GUIs
@@ -30,11 +31,14 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private int _wave0ClearCount = 0;
         private int _wave1ClearCount = 0;
         private int _wave2ClearCount = 0;
-        private int _wave3ClearCount = 0;
+        private int _wave3ClearCount = 0;        
+        
+        private ModInventoryManager _modInventoryManager;
 
-
-        public StageSimulateGUI(int avatarIndex)
+        public StageSimulateGUI(ModInventoryManager modInventoryManager, int avatarIndex)
         {
+            _modInventoryManager = modInventoryManager;
+
             var width = 1000;
             var height = 500;
             _rect = new Rect(
@@ -329,6 +333,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             const int playCount = 300;
 
             var clearWaveInfo = await UniTask.Run(() => BlockSimulation.Actions.HackAndSlashSimulation.Simulate(
+                _modInventoryManager.GetEquipments(),
                 TableSheets.Instance,
                 States.Instance,
                 selectedStageId / 50,

@@ -8,6 +8,7 @@ using Nekoyume.Game;
 using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Skill;
 using Nekoyume.Model.State;
+using Nekoyume.Model.Item;
 using Nekoyume.State;
 using UnityEngine;
 
@@ -16,6 +17,7 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
     public static class HackAndSlashSimulation
     {
         public static int Simulate(
+            List<Equipment> equipments,
             TableSheets tableSheets,
             States states,
             int worldId,
@@ -28,7 +30,12 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
             var avatarState = (AvatarState)states.CurrentAvatarState.Clone();
             // avatarState.inventory;
             var itemSlotState = states.CurrentItemSlotStates[BattleType.Adventure];
-            avatarState.EquipEquipments(itemSlotState.Equipments); //mod items... 
+
+            foreach(var equipment in equipments)
+            {
+                avatarState.inventory.AddItem(equipment);
+            }
+            avatarState.EquipEquipments(equipments.Select(e => e.NonFungibleId).ToList());
 
             var skillState = States.Instance.CrystalRandomSkillState;
             var key = string.Format("HackAndSlash.SelectedBonusSkillId.{0}", avatarState.address);
@@ -93,6 +100,7 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
         }
 
         public static Dictionary<int, int> Simulate(
+            List<Equipment> equipments,
             TableSheets tableSheets,
             States states,
             int worldId,
@@ -105,7 +113,7 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
 
             for (var i = 0; i < playCount; i++)
             {
-                var clearWave = Simulate(tableSheets, states, worldId, stageId, blockIndex, randomSeed);
+                var clearWave = Simulate(equipments, tableSheets, states, worldId, stageId, blockIndex, randomSeed);
 
                 if (result.TryGetValue(clearWave, out var count))
                 {

@@ -8,10 +8,14 @@ using Nekoyume.State;
 using Nekoyume.UI;
 using NineChronicles.Mods.PVEHelper.GUIs;
 using NineChronicles.Mods.PVEHelper.Manager;
+using NineChronicles.Mods.PVEHelper.BlockSimulation;
 using NineChronicles.Mods.PVEHelper.Patches;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Nekoyume.Game;
+using System.Linq;
+using Nekoyume.Model.Item;
 
 namespace NineChronicles.Mods.PVEHelper
 {
@@ -129,10 +133,32 @@ namespace NineChronicles.Mods.PVEHelper
                 var inventory = States.Instance.CurrentAvatarState?.inventory;
                 if (inventory is not null)
                 {
-                    foreach (var inventoryItem in inventory.Items)
+                    foreach (var modItem in modInventoryManager.GetAllItems())
                     {
-                        _inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
+                        Equipment createdEquipment;
+                        if (modItem.ExistsItem)
+                        {
+                            if (inventory.TryGetNonFungibleItem<Equipment>(modItem.Id, out var existsItem))
+                            {
+                                createdEquipment = ModItemFactory.ModifyLevel(TableSheets.Instance, existsItem, modItem);
+                                _inventoryGUI.AddItem(existsItem);
+                            }
+                            else
+                            {
+                                Log(LogLevel.Info, $"Error {modItem.Id}");
+                                throw new Exception();
+                            }
+                        }
+                        else
+                        {
+                            createdEquipment = ModItemFactory.CreateEquipmentWithModItem(TableSheets.Instance, modItem);
+                        }
+                        _inventoryGUI.AddItem(createdEquipment);
                     }
+                    // foreach (var inventoryItem in inventory.Items)
+                    // {
+                    //     _inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
+                    // }
                 }
                 _equipGUI = new EquipGUI(modInventoryManager, _inventoryGUI);
                 DisableEventSystem();
@@ -140,8 +166,7 @@ namespace NineChronicles.Mods.PVEHelper
 
             if (Input.GetKeyDown(KeyCode.X))
             {
-                Log("x key pressed.");
-                _stageSimulateGUI = new StageSimulateGUI(1);
+                _stageSimulateGUI = new StageSimulateGUI(modInventoryManager, 1);
                 _overlayGUI = new OverlayGUI(() => _stageSimulateGUI.Show());
 
                 DisableEventSystem();
