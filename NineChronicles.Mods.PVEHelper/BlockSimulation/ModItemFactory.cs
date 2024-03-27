@@ -47,7 +47,7 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation
 
             var recipe = recipeSheet.OrderedList!
                 .First(e => e.ResultEquipmentId == modItem.EquipmentId);
-            var subRecipe = subRecipeSheetV2[modItem.SubRecipeId.Value];
+            var subRecipeRow = subRecipeSheetV2[modItem.SubRecipeId.Value];
             var additionalOptionStats = equipment.StatsMap.GetAdditionalStats(false).ToArray();
             foreach (var statMapEx in additionalOptionStats)
             {
@@ -57,27 +57,29 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation
             equipment.Skills.Clear();
             equipment.BuffSkills.Clear();
 
-            var options = subRecipe.Options
-                .Select(e => optionSheet[e.Id])
-                .Where(o => modItem.OptionIdList.Contains(o.Id))
+            var options = modItem.OptionIdList
+                .Where(e => optionSheet.ContainsKey(e))
+                .Select(e => (
+                    optionSheet[e],
+                    modItem.RatioOfOptionValueRangeList[modItem.OptionIdList.IndexOf(e)]))
                 .ToArray();
-            foreach (var option in options)
+            foreach (var (optionRow, ratio) in options)
             {
-                if (option.StatType == StatType.NONE)
+                if (optionRow.StatType == StatType.NONE)
                 {
-                    var skillRow = skillSheet[option.SkillId];
+                    var skillRow = skillSheet[optionRow.SkillId];
                     var skill = SkillFactory.Get(
                         skillRow,
-                        option.SkillDamageMax,
-                        option.SkillChanceMax,
-                        option.StatDamageRatioMax,
-                        option.ReferencedStatType);
+                        (int)(optionRow.SkillDamageMax * ratio),
+                        (int)(optionRow.SkillChanceMax * ratio),
+                        (int)(optionRow.StatDamageRatioMax * ratio),
+                        optionRow.ReferencedStatType);
                     equipment.Skills.Add(skill);
 
                     continue;
                 }
 
-                equipment.StatsMap.AddStatAdditionalValue(option.StatType, option.StatMax);
+                equipment.StatsMap.AddStatAdditionalValue(optionRow.StatType, optionRow.StatMax);
             }
 
             if (modItem.Level > 0 &&

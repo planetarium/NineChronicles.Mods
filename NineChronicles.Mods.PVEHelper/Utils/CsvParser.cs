@@ -49,10 +49,13 @@ namespace NineChronicles.Mods.PVEHelper.Utils
                         string[] stringValues = fields[i].Split(';');
 
                         object list;
-
                         if (fieldType == typeof(ImmutableList<int>))
                         {
                             list = ImmutableList<int>.Empty;
+                        }
+                        else if (fieldType == typeof(ImmutableList<float>))
+                        {
+                            list = ImmutableList<float>.Empty;
                         }
                         else if (fieldType == typeof(ImmutableList<string>))
                         {
