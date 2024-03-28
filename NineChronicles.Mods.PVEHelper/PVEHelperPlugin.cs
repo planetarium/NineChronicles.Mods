@@ -190,9 +190,9 @@ namespace NineChronicles.Mods.PVEHelper
 
         private void DisableEventSystem()
         {
-            _mainCamera = Camera.main;
-            if (_mainCamera)
+            if (_mainCamera is null)
             {
+                _mainCamera = Camera.main;
                 _mainCameraBackgroundColor = _mainCamera.backgroundColor;
                 _mainCameraCullingMask = _mainCamera.cullingMask;
                 _mainCamera.backgroundColor = Color.white;
