@@ -251,16 +251,16 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             using (var verticalScope = new GUILayout.VerticalScope())
             {
                 GUI.enabled = !_isCalculating;
-                if (GUILayout.Button("+", GUILayout.Width(20), GUILayout.Height(20)))
+                if (GUILayout.Button("+", GUILayout.Width(30), GUILayout.Height(20)))
                 {
                     playCount += 100;
                 }
 
                 GUI.enabled = true;
-                GUILayout.Label(playCount + "", GUILayout.Width(20));
+                GUILayout.Label(playCount + "", GUILayout.Width(30));
                 
                 GUI.enabled = !_isCalculating;
-                if (GUILayout.Button("-", GUILayout.Width(20), GUILayout.Height(20)))
+                if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.Height(20)))
                 {
                     if (playCount >= 0)
                     {
