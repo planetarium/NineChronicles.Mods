@@ -172,6 +172,7 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
             {
                 new Tab(0, itemCountPerEachPage),
                 new Tab(1, itemCountPerEachPage),
+                new Tab(2, itemCountPerEachPage),
             };
         }
 
@@ -235,8 +236,10 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
         {
             var tabIndex = item switch
             {
-                Equipment => 0,
-                _ => 1, // TODO: Add more tabs
+                Equipment equipment => equipment.ItemSubType != ItemSubType.Aura
+                    ? 0
+                    : 1,
+                _ => 2, // TODO: Add more tabs
             };
             return _tabs[tabIndex];
         }
