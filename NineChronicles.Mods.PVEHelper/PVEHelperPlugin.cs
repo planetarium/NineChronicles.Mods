@@ -101,88 +101,14 @@ namespace NineChronicles.Mods.PVEHelper
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 Log("space key pressed.");
-                _inventoryGUI = new InventoryGUI(
-                    positionX: 600,
-                    positionY: 100,
-                    slotCountPerPage: 15,
-                    slotCountPerRow: 5);
-                _inventoryGUI.Clear();
 
-                var inventory = States.Instance.CurrentAvatarState?.inventory;
-                if (inventory is not null)
+                _overlayGUI = new TabGUI(new List<(string Name, Func<IGUI> UI)>
                 {
-                    foreach (var inventoryItem in inventory.Items)
-                    {
-                        _inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
-                    }
-                }
-                _enhancementGUI = new EnhancementGUI(modInventoryManager, _inventoryGUI);
-
-                DisableEventSystem();
-            }
-
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                Log("c key pressed.");
-                _inventoryGUI = new InventoryGUI(
-                    positionX: 600,
-                    positionY: 100,
-                    slotCountPerPage: 15,
-                    slotCountPerRow: 5);
-                _inventoryGUI.Clear();
-
-                var inventory = States.Instance.CurrentAvatarState?.inventory;
-                if (inventory is not null)
-                {
-                    foreach (var modItem in modInventoryManager.GetAllItems())
-                    {
-                        Equipment createdEquipment;
-                        if (modItem.ExistsItem)
-                        {
-                            if (inventory.TryGetNonFungibleItem<Equipment>(modItem.Id, out var existsItem))
-                            {
-                                createdEquipment = ModItemFactory.ModifyLevel(TableSheets.Instance, existsItem, modItem);
-                                _inventoryGUI.AddItem(existsItem);
-                            }
-                            else
-                            {
-                                Log(LogLevel.Info, $"Error {modItem.Id}");
-                                throw new Exception();
-                            }
-                        }
-                        else
-                        {
-                            createdEquipment = ModItemFactory.CreateEquipmentWithModItem(TableSheets.Instance, modItem);
-                        }
-                        _inventoryGUI.AddItem(createdEquipment);
-                    }
-                    // foreach (var inventoryItem in inventory.Items)
-                    // {
-                    //     _inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
-                    // }
-                }
-                _equipGUI = new EquipGUI(modInventoryManager, _inventoryGUI);
-                DisableEventSystem();
-            }
-
-            if (Input.GetKeyDown(KeyCode.X))
-            {
-                _stageSimulateGUI = new StageSimulateGUI(modInventoryManager, 1);
-                _overlayGUI = new OverlayGUI(() => _stageSimulateGUI.Show());
-
-                DisableEventSystem();
-            }
-
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                Log("1 key pressed.");
-                var tableSheets = TableSheets.Instance;
-                _itemCreationGUI = new ItemCreationGUI(modInventoryManager);
-                _itemCreationGUI.SetItemRecipes(
-                    tableSheets.EquipmentItemSheet,
-                    tableSheets.EquipmentItemRecipeSheet,
-                    tableSheets.EquipmentItemSubRecipeSheetV2,
-                    tableSheets.EquipmentItemOptionSheet);
+                    ("Simulate", () => new StageSimulateGUI(modInventoryManager, 1)),
+                    ("Create", CreateItemCreationGUI),
+                    ("Enhancement", CreateEnhancementGUI),
+                    ("Equipment", CreateEquipGUI),
+                });
 
                 DisableEventSystem();
             }
@@ -223,6 +149,81 @@ namespace NineChronicles.Mods.PVEHelper
             {
                 _eventSystem.enabled = true;
             }
+        }
+
+        private IGUI CreateItemCreationGUI()
+        {
+            var tableSheets = TableSheets.Instance;
+            var ui = new ItemCreationGUI(modInventoryManager);
+            ui.SetItemRecipes(
+                tableSheets.EquipmentItemSheet,
+                tableSheets.EquipmentItemRecipeSheet,
+                tableSheets.EquipmentItemSubRecipeSheetV2,
+                tableSheets.EquipmentItemOptionSheet);
+
+            return ui;
+        }
+
+        private IGUI CreateEnhancementGUI()
+        {
+            var inventoryGUI = new InventoryGUI(
+                positionX: 600,
+                positionY: 100,
+                slotCountPerPage: 15,
+                slotCountPerRow: 5);
+            inventoryGUI.Clear();
+
+            var inventory = States.Instance.CurrentAvatarState?.inventory;
+            if (inventory is not null)
+            {
+                foreach (var inventoryItem in inventory.Items)
+                {
+                    inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
+                }
+            }
+            return new EnhancementGUI(modInventoryManager, inventoryGUI);
+        }
+
+        private IGUI CreateEquipGUI()
+        {
+            var inventoryGUI = new InventoryGUI(
+                positionX: 600,
+                positionY: 100,
+                slotCountPerPage: 15,
+                slotCountPerRow: 5);
+            inventoryGUI.Clear();
+
+            var inventory = States.Instance.CurrentAvatarState?.inventory;
+            if (inventory is not null)
+            {
+                foreach (var modItem in modInventoryManager.GetAllItems())
+                {
+                    Equipment createdEquipment;
+                    if (modItem.ExistsItem)
+                    {
+                        if (inventory.TryGetNonFungibleItem<Equipment>(modItem.Id, out var existsItem))
+                        {
+                            createdEquipment = ModItemFactory.ModifyLevel(TableSheets.Instance, existsItem, modItem);
+                            inventoryGUI.AddItem(existsItem);
+                        }
+                        else
+                        {
+                            Log(LogLevel.Info, $"Error {modItem.Id}");
+                            throw new Exception();
+                        }
+                    }
+                    else
+                    {
+                        createdEquipment = ModItemFactory.CreateEquipmentWithModItem(TableSheets.Instance, modItem);
+                    }
+                    inventoryGUI.AddItem(createdEquipment);
+                }
+                foreach (var inventoryItem in inventory.Items)
+                {
+                    inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
+                }
+            }
+            return new EquipGUI(modInventoryManager, inventoryGUI);
         }
 
         private void OnGUI()

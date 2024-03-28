@@ -19,8 +19,6 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private bool _isCalculating;
         private string _simulationInformationText;
 
-        private bool enabled;
-
         private int selectedStageId = 0;
 
         private (WorldSheet WorldSheet, StageSheet StageSheet, int clearedStageId)? StateData { get; set; } = null;
@@ -50,62 +48,49 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             _avatarIndex = avatarIndex;
         }
 
-        public void Show()
-        {
-            this.enabled = true;
-        }
-
-        public void Close()
-        {
-            this.enabled = false;
-        }
-
         public void OnGUI()
         {
-            if (this.enabled)
+            UpdateStateData();
+
+            if (!(StateData is { } stateData))
             {
-                UpdateStateData();
+                return;
+            }
 
-                if (!(StateData is { } stateData))
+            if (selectedStageId == 0)
+            {
+                selectedStageId = stateData.clearedStageId;
+            }
+
+            var style = new GUIStyle
+            {
+                normal =
                 {
-                    return;
+                    background = CreateColorTexture(_rect, Color.black)
                 }
+            };
 
-                if (selectedStageId == 0)
-                {
-                    selectedStageId = stateData.clearedStageId;
-                }
+            GUILayout.BeginArea(_rect, style);
+            GUILayout.BeginVertical();
+            {
+                CloseButton();
 
-                var style = new GUIStyle
+                var marginStyle = new GUIStyle
                 {
-                    normal =
+                    margin =
                     {
-                        background = CreateColorTexture(_rect, Color.black)
-                    }
+                        top = 25,
+                        bottom = 25,
+                    },
                 };
 
-                GUILayout.BeginArea(_rect, style);
-                GUILayout.BeginVertical();
-                {
-                    CloseButton();
-
-                    var marginStyle = new GUIStyle
-                    {
-                        margin =
-                        {
-                            top = 25,
-                            bottom = 25,
-                        },
-                    };
-
-                    GUILayout.BeginHorizontal(marginStyle);
-                    GUILayout.Box("", GUILayout.Width(700));
-                    DrawSimulationSection(stateData.StageSheet);
-                    GUILayout.EndHorizontal();
-                }
-                GUILayout.EndVertical();
-                GUILayout.EndArea();
+                GUILayout.BeginHorizontal(marginStyle);
+                GUILayout.Box("", GUILayout.Width(700));
+                DrawSimulationSection(stateData.StageSheet);
+                GUILayout.EndHorizontal();
             }
+            GUILayout.EndVertical();
+            GUILayout.EndArea();
         }
 
         private void CloseButton()
@@ -127,11 +112,10 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 fontSize = 20
             };
 
-            if (GUILayout.Button("X", style))
-            {
-                PVEHelperPlugin.Log("Close simulation mode");
-                Close();
-            }
+            // if (GUILayout.Button("X", style))
+            // {
+            //     PVEHelperPlugin.Log("Close simulation mode");
+            // }
         }
 
         private void ControllablePicker(string[] list, Action<string[], int> onChanged, int index = 0)
