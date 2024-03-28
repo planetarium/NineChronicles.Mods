@@ -35,9 +35,17 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
 
             foreach(var equipment in equipments)
             {
-                avatarState.inventory.AddItem(equipment);
+                if (!avatarState.inventory.HasNonFungibleItem(equipment.NonFungibleId))
+                {
+                    avatarState.inventory.AddItem(equipment);
+                }
             }
+
             avatarState.EquipEquipments(equipments.Select(e => e.NonFungibleId).ToList());
+            var equippedCount = avatarState.inventory.Equipments.Count(equip => equip.equipped);
+            PVEHelperPlugin.Log($"equippedCount: {equippedCount} / equipments.Count: {equipments.Count}");
+            var equippedIds = avatarState.inventory.Equipments.Where(equip => equip.equipped).Select(equip => equip.ItemId.ToString()).ToList();
+            PVEHelperPlugin.Log(string.Join("\n", equippedIds));
 
             var skillState = States.Instance.CrystalRandomSkillState;
             var key = string.Format("HackAndSlash.SelectedBonusSkillId.{0}", avatarState.address);
@@ -71,6 +79,8 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
                 StageBuffId = skillId == 0 ? null : skillId,
                 AvatarAddress = avatarState.address,
             };
+
+            PVEHelperPlugin.Log(action.PlainValue.Inspect());
 
             var eval = new ActionEvaluation<HackAndSlash>
             {
