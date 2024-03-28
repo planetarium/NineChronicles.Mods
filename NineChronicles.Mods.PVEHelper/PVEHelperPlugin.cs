@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using BepInEx;
 using BepInEx.Logging;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Nekoyume;
+using Nekoyume.Battle;
 using Nekoyume.Game;
 using Nekoyume.Model.Item;
+using Nekoyume.Model.EnumType;
 using Nekoyume.State;
 using Nekoyume.UI;
 using NineChronicles.Mods.PVEHelper.BlockSimulation;
@@ -44,7 +47,7 @@ namespace NineChronicles.Mods.PVEHelper
 
         // NOTE: Please add your GUIs here as alphabetical order.
         private EnhancementGUI _enhancementGUI;
-        private EquipGUI _equipGUI;
+        // private EquipGUI _equipGUI;
         private InventoryGUI _inventoryGUI;
         private ItemCreationGUI _itemCreationGUI;
         private IGUI _overlayGUI;
@@ -99,7 +102,7 @@ namespace NineChronicles.Mods.PVEHelper
         private void DisableModeGUI()
         {
             _enhancementGUI = null;
-            _equipGUI = null;
+            // _equipGUI = null;
             _inventoryGUI = null;
             _itemCreationGUI = null;
             _overlayGUI = null;
@@ -125,13 +128,52 @@ namespace NineChronicles.Mods.PVEHelper
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 Log("space key pressed.");
+                
+                // var itemSlotState = States.Instance.CurrentItemSlotStates[BattleType.Adventure];
+
+                // foreach (var equipmentId in itemSlotState.Equipments)
+                // {
+                //     var inventory = States.Instance.CurrentAvatarState?.inventory;
+
+                //     if (inventory.TryGetNonFungibleItem<Equipment>(equipmentId, out var equipment))
+                //     {
+                //         switch (equipment.ItemSubType)
+                //         {
+                //             case ItemSubType.Weapon:
+                //                 modInventoryManager.SelectedWeapon = equipment;
+                //                 break;
+                //             case ItemSubType.Armor:
+                //                 modInventoryManager.SelectedArmor = equipment;
+                //                 break;
+                //             case ItemSubType.Belt:
+                //                 modInventoryManager.SelectedBelt = equipment;
+                //                 break;
+                //             case ItemSubType.Necklace:
+                //                 modInventoryManager.SelectedNecklace = equipment;
+                //                 break;
+                //             case ItemSubType.Ring:
+                //                 if (modInventoryManager.SelectedRing1 == null)
+                //                 {
+                //                     modInventoryManager.SelectedRing1 = equipment;
+                //                 }
+                //                 else
+                //                 {
+                //                     modInventoryManager.SelectedRing2 = equipment;
+                //                 }
+                //                 break;
+                //             case ItemSubType.Aura:
+                //                 modInventoryManager.SelectedAura = equipment;
+                //                 break;
+                //         }
+                //     }
+                // }
 
                 _overlayGUI = new TabGUI(new List<(string Name, Func<IGUI> UI)>
                 {
-                    ("Simulate", () => new StageSimulateGUI(modInventoryManager)),
+                    // ("Simulate", CreateSimulateGUI),
                     ("Create", CreateItemCreationGUI),
                     ("Enhancement", CreateEnhancementGUI),
-                    ("Equipment", CreateEquipGUI),
+                    ("Simulate", CreateStageSimulateGUI),
                 }, DisableModeGUI);
 
                 TrackOnce();
@@ -146,7 +188,7 @@ namespace NineChronicles.Mods.PVEHelper
                 _mainCamera = Camera.main;
                 _mainCameraBackgroundColor = _mainCamera.backgroundColor;
                 _mainCameraCullingMask = _mainCamera.cullingMask;
-                _mainCamera.backgroundColor = Color.white;
+                _mainCamera.backgroundColor = Color.gray;
                 _mainCamera.cullingMask = 0;
             }
 
@@ -176,8 +218,16 @@ namespace NineChronicles.Mods.PVEHelper
             }
         }
 
+        // private IGUI CreateSimulateGUI()
+        // {
+        //     RemoveInventory();
+        //     return new StageSimulateGUI(modInventoryManager);
+        // }
+
         private IGUI CreateItemCreationGUI()
         {
+            RemoveInventory();
+
             var tableSheets = TableSheets.Instance;
             var ui = new ItemCreationGUI(modInventoryManager);
             ui.SetItemRecipes(
@@ -191,70 +241,81 @@ namespace NineChronicles.Mods.PVEHelper
 
         private IGUI CreateEnhancementGUI()
         {
+            CreateInventoryGUI();
+            return new EnhancementGUI(modInventoryManager, _inventoryGUI);
+        }
+
+        private IGUI CreateStageSimulateGUI()
+        {
+            CreateInventoryGUI();
+            return new StageSimulateGUI(modInventoryManager, _inventoryGUI);
+        }
+
+        private void CreateInventoryGUI()
+        {
             var inventoryGUI = new InventoryGUI(
-                positionX: 600,
+                positionX: 100,
                 positionY: 100,
                 slotCountPerPage: 15,
                 slotCountPerRow: 5);
             inventoryGUI.Clear();
 
             var inventory = States.Instance.CurrentAvatarState?.inventory;
+            List<Equipment> equipments = new List<Equipment>();
             if (inventory is not null)
             {
                 foreach (var inventoryItem in inventory.Items)
                 {
-                    inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
+                    if (inventoryItem.item is Equipment inventoryEquipment)
+                    {
+                        equipments.Add(inventoryEquipment);
+                    }
+                    else
+                    {
+                        inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
+                    }
                 }
-            }
-            return new EnhancementGUI(modInventoryManager, inventoryGUI);
-        }
-
-        private IGUI CreateEquipGUI()
-        {
-            var inventoryGUI = new InventoryGUI(
-                positionX: 600,
-                positionY: 100,
-                slotCountPerPage: 15,
-                slotCountPerRow: 5);
-            inventoryGUI.Clear();
-
-            var inventory = States.Instance.CurrentAvatarState?.inventory;
-            if (inventory is not null)
-            {
                 foreach (var modItem in modInventoryManager.GetAllItems())
                 {
-                    Equipment createdEquipment;
                     if (modItem.ExistsItem)
                     {
                         if (inventory.TryGetNonFungibleItem<Equipment>(modItem.Id, out var existsItem))
                         {
-                            createdEquipment = ModItemFactory.ModifyLevel(TableSheets.Instance, existsItem, modItem);
-                            inventoryGUI.AddItem(existsItem);
+                            equipments.Remove(existsItem);
+                            var createdEquipment = ModItemFactory.ModifyLevel(TableSheets.Instance, existsItem, modItem);
+                            equipments.Add(createdEquipment);
                         }
                         else
                         {
                             Log(LogLevel.Info, $"Error {modItem.Id}");
-                            throw new Exception();
                         }
                     }
                     else
                     {
-                        createdEquipment = ModItemFactory.CreateEquipmentWithModItem(TableSheets.Instance, modItem);
+                        var createdEquipment = ModItemFactory.CreateEquipmentWithModItem(TableSheets.Instance, modItem);
+                        equipments.Add(createdEquipment);
                     }
-                    inventoryGUI.AddItem(createdEquipment);
-                }
-                foreach (var inventoryItem in inventory.Items)
-                {
-                    inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
                 }
             }
-            return new EquipGUI(modInventoryManager, inventoryGUI);
+            equipments.Sort((e1, e2) => CPHelper.GetCP(e2).CompareTo(CPHelper.GetCP(e1)));
+
+            foreach (var equipment in equipments)
+            {
+                inventoryGUI.AddItem(equipment);
+            }
+
+            _inventoryGUI = inventoryGUI;
+        }
+
+        private void RemoveInventory()
+        {
+            _inventoryGUI = null;
         }
 
         private void OnGUI()
         {
             _enhancementGUI?.OnGUI();
-            _equipGUI?.OnGUI();
+            // _equipGUI?.OnGUI();
             _inventoryGUI?.OnGUI();
             _itemCreationGUI?.OnGUI();
             _overlayGUI?.OnGUI();
