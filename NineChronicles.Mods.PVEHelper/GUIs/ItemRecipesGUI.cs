@@ -57,6 +57,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private readonly Rect _pageNumberGroupRect;
 
         // pools
+        private readonly Rect _rootBoxRect;
         private readonly List<Rect> _tabRectPool = new List<Rect>();
         private readonly List<(Rect iconRect, Rect textRect, Rect countRect)> _slotRectPool =
             new List<(Rect, Rect, Rect)>();
@@ -82,9 +83,11 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 _slotHeight * slotRowCount +
                 _pageNumberHeight;
             _rootGroupRect = new Rect(positionX, positionY, width, height);
-            _tabGroupRect = new Rect(0, 0, width, _tabHeight);
-            _slotGroupRect = new Rect(0, _tabHeight, width, _slotHeight * slotRowCount);
-            _pageNumberGroupRect = new Rect(0, _tabHeight + _slotHeight * slotRowCount, width, _pageNumberHeight);
+            _tabGroupRect = new Rect(0f, 0f, width, _tabHeight);
+            _slotGroupRect = new Rect(0f, _tabHeight, width, _slotHeight * slotRowCount);
+            _pageNumberGroupRect = new Rect(0f, _tabHeight + _slotHeight * slotRowCount, width, _pageNumberHeight);
+
+            _rootBoxRect = new Rect(0f, 0f, width, height);
 
             for (int i = 0; i < _tabCount; i++)
             {
@@ -132,7 +135,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             GUI.matrix = GUIToolbox.GetGUIMatrix();
             GUI.BeginGroup(_rootGroupRect);
-            GUI.Box(_rootGroupRect, string.Empty);
+            GUI.Box(_rootBoxRect, string.Empty);
             DrawTabs();
             DrawSlots();
             DrawPageNumbers();
