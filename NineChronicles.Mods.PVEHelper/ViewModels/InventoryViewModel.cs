@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Nekoyume;
+using Nekoyume.Helper;
 using Nekoyume.Model.Item;
+using NineChronicles.Mods.PVEHelper.Extensions;
+using UnityEngine;
 
 namespace NineChronicles.Mods.PVEHelper.ViewModels
 {
@@ -61,10 +65,13 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
             public IItem item;
             public int count;
 
+            public string slotText;
+            public string tooltip;
+            public GUIContent slotGUIContent;
+
             public Slot(IItem item, int count)
             {
-                this.item = item;
-                this.count = count;
+                Set(item, count);
             }
 
             public void Clear() => Set(null, 0);
@@ -73,6 +80,7 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
             {
                 this.item = item;
                 this.count = count;
+                UpdateSlotTextAndTooltip();
             }
 
             public void AddCount(int count)
@@ -83,6 +91,59 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
             public void RemoveCount(int count)
             {
                 this.count -= count;
+            }
+
+            private void UpdateSlotTextAndTooltip()
+            {
+                if (item is null)
+                {
+                    slotText = string.Empty;
+                    tooltip = string.Empty;
+                    slotGUIContent = GUIContent.none;
+                    return;
+                }
+
+                if (item is Equipment equipment)
+                {
+                    slotText = $"Grade {equipment.Grade}" +
+                        $"\n{equipment.ElementalType}" +
+                        $"\n{equipment.GetName()}";
+                    tooltip = $"+{equipment.level} {equipment.GetName()}" +
+                        $"\n{equipment.GetGradeText()} | {equipment.ElementalType.GetLocalizedString()} | {equipment.GetSubTypeText()}" +
+                        $"\n{equipment.GetCPText()}";
+
+                    var optionInfo = new ItemOptionInfo(equipment);
+                    var (mainStatType, _, mainStatTotalValue) = optionInfo.MainStat;
+                    tooltip += $"\n$ {mainStatType} {mainStatTotalValue}";
+                    foreach (var (type, value, count) in optionInfo.StatOptions)
+                    {
+                        tooltip += $"\n{string.Concat(Enumerable.Range(0, count).Select(_ => "#"))} {type} +{value}";
+                    }
+
+                    foreach (var (skillRow, power, chance, statPowerRatio, refStatType) in optionInfo.SkillOptions)
+                    {
+                        tooltip += $"\n@ {skillRow.GetLocalizedName()}" +
+                            $"\nPower: {power}" +
+                            $"\nChance: {chance}";
+                        if (refStatType != Nekoyume.Model.Stat.StatType.NONE)
+                        {
+                            tooltip += $"\nStatPowerRatio: {statPowerRatio}" +
+                                $"\nRefStatType: {refStatType}";
+                        }
+                    }
+                }
+                else
+                {
+                    slotText = $"Not Implemented: {item.GetType().Name}" +
+                        $"\n{item.GetName()}";
+                }
+
+                if (count > 1)
+                {
+                    slotText += $"\nx{count}";
+                }
+
+                slotGUIContent = new GUIContent(slotText, tooltip);
             }
         }
 
@@ -97,6 +158,9 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
         /// 0~: Selected slot index
         /// </summary>
         public int SelectedSlotIndex { get; private set; } = -1;
+        public Slot SelectedSlot => SelectedSlotIndex < 0
+            ? null
+            : _tabs[CurrentTabIndex].pages[CurrentPageIndex].slots[SelectedSlotIndex];
         public int TabCount => _tabs.Count;
         public int PageCount => _tabs[CurrentTabIndex].pages.Count;
         public IEnumerable<Slot> CurrentPageSlots => _tabs[CurrentTabIndex].pages[CurrentPageIndex].slots;

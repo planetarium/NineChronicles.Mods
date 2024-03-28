@@ -44,5 +44,30 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 $"\nScale: {scale}" +
                 $"\nMatrix: {GUI.matrix}");
         }
+
+        public static Rect MoveInsideScreen(Rect rect, int marginX = 0, int marginY = 0)
+        {
+            if (rect.x + rect.width + marginX > ScreenWidthReference)
+            {
+                rect.x = ScreenWidthReference - rect.width - marginX;
+            }
+
+            if (rect.y + rect.height + marginY > ScreenHeightReference)
+            {
+                rect.y = ScreenHeightReference - rect.height - marginY;
+            }
+
+            if (rect.x - marginX < 0f)
+            {
+                rect.x = marginX;
+            }
+
+            if (rect.y - marginY < 0f)
+            {
+                rect.y = marginY;
+            }
+
+            return rect;
+        }
     }
 }
