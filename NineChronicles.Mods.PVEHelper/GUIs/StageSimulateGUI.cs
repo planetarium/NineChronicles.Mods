@@ -1,51 +1,144 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Bencodex.Types;
+using BepInEx.Logging;
 using Cysharp.Threading.Tasks;
+using NineChronicles.Mods.PVEHelper.Manager;
+using NineChronicles.Mods.PVEHelper.Extensions;
 using Nekoyume;
 using Nekoyume.Game;
 using Nekoyume.State;
 using Nekoyume.TableData;
-using NineChronicles.Mods.PVEHelper.Manager;
+using Nekoyume.Model.Item;
 using UnityEngine;
 
 namespace NineChronicles.Mods.PVEHelper.GUIs
 {
     public class StageSimulateGUI : IGUI
     {
-        private readonly Rect _rect;
-
         private bool _isCalculating;
-        private string _simulationInformationText;
-
         private int selectedStageId = 0;
-
         private (WorldSheet WorldSheet, StageSheet StageSheet, int clearedStageId)? StateData { get; set; } = null;
         private DateTimeOffset? LastSheetsUpdated { get; set; } = null;
+        private readonly Rect _selectLayoutRect;
+        private readonly Rect _simulateLayoutRect;
+
+        private ModInventoryManager _modInventoryManager;
+
+        private InventoryGUI _inventoryGUI;
+
+        public Equipment? SelectedAura { get; set; }
+        public Equipment? SelectedWeapon { get; set; }
+        public Equipment? SelectedArmor { get; set; }
+        public Equipment? SelectedBelt { get; set; }
+        public Equipment? SelectedNecklace { get; set; }
+        public Equipment? SelectedRing1 { get; set; }
+        public Equipment? SelectedRing2 { get; set; }
+
+        public GUIContent SelectedAuraContent = new GUIContent("Aura");
+        public GUIContent SelectedWeaponContent = new GUIContent("Weapon");
+        public GUIContent SelectedArmorContent = new GUIContent("Armor");
+        public GUIContent SelectedBeltContent = new GUIContent("Belt");
+        public GUIContent SelectedNecklaceContent = new GUIContent("Necklace");
+        public GUIContent SelectedRing1Content = new GUIContent("Ring1");
+        public GUIContent SelectedRing2Content = new GUIContent("Ring2");
 
         private int _wave0ClearCount = 0;
         private int _wave1ClearCount = 0;
         private int _wave2ClearCount = 0;
-        private int _wave3ClearCount = 0;        
-        
-        private ModInventoryManager _modInventoryManager;
+        private int _wave3ClearCount = 0;
+        private int playCount = 100;
 
-        public StageSimulateGUI(ModInventoryManager modInventoryManager)
+        public StageSimulateGUI(ModInventoryManager modInventoryManager, InventoryGUI inventoryGUI)
         {
             _modInventoryManager = modInventoryManager;
+            _inventoryGUI = inventoryGUI;
 
-            var width = 1000;
-            var height = 500;
-            _rect = new Rect(
-                (GUIToolbox.ScreenWidthReference - width) / 2,
-                (GUIToolbox.ScreenHeightReference - height) / 2,
-                width,
-                height);
+            SelectedAura = modInventoryManager.SelectedAura;
+            SelectedWeapon = modInventoryManager.SelectedWeapon;
+            SelectedArmor = modInventoryManager.SelectedArmor;
+            SelectedBelt = modInventoryManager.SelectedBelt;
+            SelectedNecklace = modInventoryManager.SelectedNecklace;
+            SelectedRing1 = modInventoryManager.SelectedRing1;
+            SelectedRing2 = modInventoryManager.SelectedRing2;
+
+            _inventoryGUI.OnSlotSelected += tuple =>
+            {
+                if (tuple.item is Equipment equipment)
+                {
+                    var slotText = $"Grade {equipment.Grade}" +
+                        $"\n{equipment.ElementalType}" +
+                        $"\n{equipment.GetName()}\n" +
+                        $"+{equipment.level}";
+
+                    switch (equipment.ItemSubType)
+                    {
+                        case ItemSubType.Weapon:
+                            SelectedWeapon = equipment;
+                            _modInventoryManager.SelectedWeapon = equipment;
+                            SelectedWeaponContent = new GUIContent(slotText);
+                            PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected weapon {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                            break;
+                        case ItemSubType.Armor:
+                            SelectedArmor = equipment;
+                            _modInventoryManager.SelectedArmor = equipment;
+                            SelectedArmorContent = new GUIContent(slotText);
+                            PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected armor {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                            break;
+                        case ItemSubType.Belt:
+                            SelectedBelt = equipment;
+                            _modInventoryManager.SelectedBelt = equipment;
+                            SelectedBeltContent = new GUIContent(slotText);
+                            PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected belt {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                            break;
+                        case ItemSubType.Necklace:
+                            SelectedNecklace = equipment;
+                            _modInventoryManager.SelectedNecklace = equipment;
+                            SelectedNecklaceContent = new GUIContent(slotText);
+                            PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected necklace {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                            break;
+                        case ItemSubType.Ring:
+                            if (SelectedRing1 == null)
+                            {
+                                SelectedRing1 = equipment;
+                                _modInventoryManager.SelectedRing1 = equipment;
+                                SelectedRing1Content = new GUIContent(slotText);
+                                PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected ring1 {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                            }
+                            else
+                            {
+                                SelectedRing2 = equipment;
+                                _modInventoryManager.SelectedRing2 = equipment;
+                                SelectedRing2Content = new GUIContent(slotText);
+                                PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected ring2 {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                            }
+                            break;
+                        case ItemSubType.Aura:
+                            SelectedAura = equipment;
+                            _modInventoryManager.SelectedAura = equipment;
+                            SelectedAuraContent = new GUIContent(slotText);
+                            PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected aura {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                            break;
+                    }
+                }
+            };
+
+            _selectLayoutRect = new Rect(
+                GUIToolbox.ScreenWidthReference - 400,
+                GUIToolbox.ScreenHeightReference / 2 - 160,
+                400,
+                800);
+            _simulateLayoutRect = new Rect(
+                GUIToolbox.ScreenWidthReference - 350,
+                GUIToolbox.ScreenHeightReference - 160,
+                200,
+                400);
         }
-
         public void OnGUI()
         {
+            GUI.matrix = GUIToolbox.GetGUIMatrix();
+
             UpdateStateData();
 
             if (!(StateData is { } stateData))
@@ -55,88 +148,117 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
             if (selectedStageId == 0)
             {
-                selectedStageId = stateData.clearedStageId;
+                selectedStageId = stateData.clearedStageId + 1;
             }
 
-            var style = new GUIStyle
+            using (var areaScope = new GUILayout.AreaScope(_selectLayoutRect))
             {
-                normal =
+                using (var verticalScope = new GUILayout.VerticalScope())
                 {
-                    background = CreateColorTexture(_rect, Color.black)
-                }
-            };
-
-            GUILayout.BeginArea(_rect, style);
-            GUILayout.BeginVertical();
-            {
-                CloseButton();
-
-                var marginStyle = new GUIStyle
-                {
-                    margin =
+                    using (var horizontalScope = new GUILayout.HorizontalScope())
                     {
-                        top = 25,
-                        bottom = 25,
-                    },
-                };
-
-                GUILayout.BeginHorizontal(marginStyle);
-                GUILayout.Box("", GUILayout.Width(700));
-                DrawSimulationSection(stateData.StageSheet);
-                GUILayout.EndHorizontal();
+                        DrawEquipmentSlot(SelectedAuraContent, SelectedAura, () => { SelectedAura = null; SelectedAuraContent = new GUIContent("Aura"); });
+                        DrawEquipmentSlot(SelectedWeaponContent, SelectedWeapon, () => { SelectedWeapon = null; SelectedWeaponContent = new GUIContent("Weapon"); });
+                        DrawEquipmentSlot(SelectedArmorContent, SelectedArmor, () => { SelectedArmor = null; SelectedArmorContent = new GUIContent("Armor"); });
+                    }
+                    using (var horizontalScope = new GUILayout.HorizontalScope())
+                    {
+                        GUILayout.Space(140);
+                        DrawEquipmentSlot(SelectedBeltContent, SelectedBelt, () => { SelectedBelt = null; SelectedBeltContent = new GUIContent("Belt"); });
+                        DrawEquipmentSlot(SelectedNecklaceContent, SelectedNecklace, () => { SelectedNecklace = null; SelectedNecklaceContent = new GUIContent("Necklace"); });
+                    }
+                    using (var horizontalScope = new GUILayout.HorizontalScope())
+                    {
+                        GUILayout.Space(140);
+                        DrawEquipmentSlot(SelectedRing1Content, SelectedRing1, () => { SelectedRing1 = null; SelectedRing1Content = new GUIContent("Ring1"); });
+                        DrawEquipmentSlot(SelectedRing2Content, SelectedRing2, () => { SelectedRing2 = null; SelectedRing2Content = new GUIContent("Ring2"); });
+                    }
+                }
             }
-            GUILayout.EndVertical();
-            GUILayout.EndArea();
+
+            using (var areaScope = new GUILayout.AreaScope(_simulateLayoutRect))
+            {
+                using (var horizontalScope = new GUILayout.HorizontalScope())
+                {
+                    using (var verticalScope = new GUILayout.VerticalScope())
+                    {
+                        ControllablePicker(
+                            stateData.StageSheet.Keys.Select(x => x.ToString()).ToArray(),
+                            (_, index) => selectedStageId = index + 1,
+                            selectedStageId - 1);
+
+                        if (GUILayout.Button("Simulate"))
+                        {
+                            Simulate();
+                            PVEHelperPlugin.Log($"[StageGUI] Simulate button clicked {selectedStageId})");
+                        }
+                        DrawSimulationResultTextArea();
+                    }
+                    DrawPlayCountController();
+                }
+            }
         }
 
-        private void CloseButton()
+        private void DrawEquipmentSlot(GUIContent content, Equipment? equipment, Action onRemove)
         {
-            var style = new GUIStyle
+            GUIStyle centeredStyle = new GUIStyle(GUI.skin.box)
             {
-                margin =
-                {
-                    left = 960,
-                    top = 30,
-                    right = 20,
-                },
-                fixedWidth = 20,
-                fixedHeight = 20,
-                normal =
-                {
-                    textColor = Color.white,
-                },
-                fontSize = 20
+                alignment = TextAnchor.MiddleCenter
             };
 
-            // if (GUILayout.Button("X", style))
-            // {
-            //     PVEHelperPlugin.Log("Close simulation mode");
-            // }
+            using (var horizontalScope = new GUILayout.HorizontalScope())
+            {
+                GUILayout.Box(content, centeredStyle, GUILayout.Width(100), GUILayout.Height(100));
+                if (equipment != null)
+                {
+                    if (GUILayout.Button("x", GUILayout.Width(20), GUILayout.Height(20)))
+                    {
+                        onRemove.Invoke();
+                        PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Removed {content.text.ToLower()}");
+                    }
+                }
+                else
+                {
+                    GUILayout.Space(20);
+                }
+            }
+        }
+
+        private void DrawSimulationResultTextArea()
+        {
+            using (var horizontalScope = new GUILayout.HorizontalScope())
+            {
+                GUILayout.Label($"0 Wave Clear: {_wave0ClearCount}");
+                GUILayout.Label($"1 Wave Clear: {_wave1ClearCount}");
+                GUILayout.Label($"2 Wave Clear: {_wave2ClearCount}");
+                GUILayout.Label($"3 Wave Clear: {_wave3ClearCount}");
+            }
+        }
+
+        private void DrawPlayCountController()
+        {
+            using (var verticalScope = new GUILayout.VerticalScope())
+            {
+                if (GUILayout.Button("+", GUILayout.Width(20), GUILayout.Height(20)))
+                {
+                    playCount += 100;
+                }
+                GUILayout.Label(playCount + "", GUILayout.Width(20));
+                if (GUILayout.Button("-", GUILayout.Width(20), GUILayout.Height(20)))
+                {
+                    if (playCount >= 0)
+                    {
+                        playCount -= 100;
+                    }
+                }
+            }
         }
 
         private void ControllablePicker(string[] list, Action<string[], int> onChanged, int index = 0)
         {
-            var buttonStyle = new GUIStyle
-            {
-                margin =
-                {
-                    left = 10,
-                    right = 10,
-                },
-                normal =
-                {
-                    textColor = Color.white
-                },
-                alignment = TextAnchor.MiddleCenter,
-                fixedWidth = 20,
-                fixedHeight = 50,
-                fontSize = 20,
-                fontStyle = FontStyle.Bold
-            };
-
             void Btn(string text, int change)
             {
-                if (GUILayout.Button(text, buttonStyle))
+                if (GUILayout.Button(text))
                 {
                     if (index + change > 0 && index + change < list.Length)
                     {
@@ -145,161 +267,14 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 }
             }
 
-            var labelStyle = new GUIStyle
-            {
-                margin =
-                {
-                    left = 15,
-                    right = 15,
-                },
-                normal =
-                {
-                    textColor = Color.white
-                },
-                alignment = TextAnchor.MiddleCenter,
-                fixedWidth = 50,
-                fixedHeight = 50,
-                fontSize = 30,
-                fontStyle = FontStyle.Bold
-            };
-
-            var rectStyle = new GUIStyle
-            {
-                alignment = TextAnchor.MiddleCenter,
-            };
-
-            GUILayout.BeginHorizontal(rectStyle);
+            using (var horizontalScope = new GUILayout.HorizontalScope())
             {
                 Btn("<<", -5);
                 Btn("<", -1);
-                GUILayout.Label(list[index], labelStyle);
+                GUILayout.Label(list[index]);
                 Btn(">", 1);
                 Btn(">>", 5);
             }
-
-            GUILayout.EndHorizontal();
-        }
-
-        private void DrawSimulationSection(StageSheet stageSheet)
-        {
-            var titleStyle = new GUIStyle
-            {
-                margin =
-                {
-                    left = 10,
-                    right = 10,
-                },
-                normal =
-                {
-                    textColor = Color.white
-                },
-                alignment = TextAnchor.MiddleCenter,
-                // fixedWidth = 100,
-                // fixedHeight = 50,
-                fontSize = 30,
-                fontStyle = FontStyle.Bold
-            };
-
-            GUILayout.BeginVertical(GUILayout.Width(200));
-            GUILayout.Label("Stage", titleStyle);
-            ControllablePicker(
-                stageSheet.Keys.Select(x => x.ToString()).ToArray(),
-                (_, index) => selectedStageId = index + 1,
-                selectedStageId - 1);
-            SimulateButton();
-            SimulationResultTextArea();
-            GUILayout.EndVertical();
-        }
-
-        private void SimulateButton()
-        {
-            var style = new GUIStyle
-            {
-                margin =
-                {
-                    top = 30,
-                    bottom = 30,
-                },
-                padding =
-                {
-                    top = 10,
-                    bottom = 10,
-                    left = 10,
-                    right = 10,
-                },
-                fontSize = 25,
-                fontStyle = FontStyle.Bold,
-                normal =
-                {
-                    textColor = Color.white,
-                },
-                alignment = TextAnchor.MiddleCenter,
-                border =
-                {
-                    top = 2,
-                    bottom = 2,
-                    left = 2,
-                    right = 2,
-                },
-            };
-            if (GUILayout.Button("Simulate", style))
-            {
-                Simulate();
-                PVEHelperPlugin.Log($"[StageGUI] Simulate button clicked {selectedStageId})");
-            }
-        }
-
-        private void SimulationResultTextArea()
-        {
-            var style = new GUIStyle
-            {
-                margin =
-                {
-                    top = 30,
-                    bottom = 30,
-                },
-                padding =
-                {
-                    top = 1,
-                    bottom = 1,
-                    left = 10,
-                    right = 10,
-                },
-                fontSize = 20,
-                fontStyle = FontStyle.Bold,
-                normal =
-                {
-                    textColor = Color.white,
-                },
-                alignment = TextAnchor.MiddleCenter,
-                border =
-                {
-                    top = 2,
-                    bottom = 2,
-                    left = 2,
-                    right = 2,
-                },
-            };
-
-            GUILayout.TextArea($"0 Wave Clear: {_wave0ClearCount}", style);
-            GUILayout.TextArea($"1 Wave Clear: {_wave1ClearCount}", style);
-            GUILayout.TextArea($"2 Wave Clear: {_wave2ClearCount}", style);
-            GUILayout.TextArea($"3 Wave Clear: {_wave3ClearCount}", style);
-        }
-
-        private Texture2D CreateColorTexture(Rect rect, Color color)
-        {
-            int width = (int)rect.width, height = (int)rect.height;
-            Color[] buf = new Color[width * height];
-            for (int i = 0; i < buf.Length; i++)
-            {
-                buf[i] = color;
-            }
-
-            var texture = new Texture2D(width, height);
-            texture.SetPixels(buf);
-            texture.Apply();
-            return texture;
         }
 
         private async Task Simulate()
@@ -309,8 +284,6 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             _wave1ClearCount = -1;
             _wave2ClearCount = -1;
             _wave3ClearCount = -1;
-
-            const int playCount = 100;
 
             var clearWaveInfo = await UniTask.Run(() => BlockSimulation.Actions.HackAndSlashSimulation.Simulate(
                 _modInventoryManager.GetEquipments(),

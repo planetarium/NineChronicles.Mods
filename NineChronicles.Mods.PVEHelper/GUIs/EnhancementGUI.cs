@@ -1,14 +1,13 @@
 using Nekoyume.Model.Item;
 using NineChronicles.Mods.PVEHelper.Manager;
 using NineChronicles.Mods.PVEHelper.Models;
+using NineChronicles.Mods.PVEHelper.Extensions;
 using UnityEngine;
 
 namespace NineChronicles.Mods.PVEHelper.GUIs
 {
     public class EnhancementGUI : IGUI
     {
-        private readonly Rect _overlayRect;
-
         private readonly Rect _upgradeLayoutRect;
 
         private ModInventoryManager _modInventoryManager;
@@ -16,6 +15,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private InventoryGUI _inventoryGUI;
 
         public ModItem SelectedEquipment { get; set; }
+        public GUIContent SlotContent = new GUIContent();
 
         public EnhancementGUI(ModInventoryManager modInventoryManager, InventoryGUI inventoryGUI)
         {
@@ -24,26 +24,32 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
             _inventoryGUI.OnSlotSelected += tuple =>
             {
-                var modItem = new ModItem();
-
                 if (tuple.item is Equipment equipment)
                 {
-                    modItem.Id = equipment.NonFungibleId;
-                    modItem.EquipmentId = equipment.Id;
-                    modItem.Level = equipment.level;
-                    modItem.ExistsItem = true;
-                }
+                    var modItem = _modInventoryManager.GetItem(equipment.NonFungibleId);
 
-                SelectedEquipment = modItem;
+                    if (modItem is null)
+                    {
+                        modItem = new ModItem()
+                        {
+                            Id = equipment.NonFungibleId,
+                            EquipmentId = equipment.Id,
+                            Level = equipment.level,
+                            ExistsItem = true,
+                        };
+                    }
+                    SelectedEquipment = modItem;
+                    
+                    var slotText = $"Grade {equipment.Grade}" +
+                        $"\n{equipment.ElementalType}" +
+                        $"\n{equipment.GetName()}\n" +
+                        $"+{equipment.level}";
+                    SlotContent = new GUIContent(slotText);
+                }
             };
 
-            _overlayRect = new Rect(
-                100,
-                100,
-                GUIToolbox.ScreenWidthReference - 200,
-                GUIToolbox.ScreenHeightReference - 200);
             _upgradeLayoutRect = new Rect(
-                150,
+                GUIToolbox.ScreenWidthReference - 350,
                 GUIToolbox.ScreenHeightReference / 2 - 100,
                 150,
                 100);
@@ -52,50 +58,55 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         public void OnGUI()
         {
             GUI.matrix = GUIToolbox.GetGUIMatrix();
-            using (var overlayScope = new GUILayout.AreaScope(_overlayRect))
+
+            GUIStyle centeredStyle = new GUIStyle(GUI.skin.box)
             {
-                GUILayout.Box("Upgrade Menu", GUILayout.Width(_overlayRect.width), GUILayout.Height(_overlayRect.height));
+                alignment = TextAnchor.MiddleCenter
+            };
 
-                using (var areaScope = new GUILayout.AreaScope(_upgradeLayoutRect))
+            using (var areaScope = new GUILayout.AreaScope(_upgradeLayoutRect))
+            {
+                using (var horizontalScope = new GUILayout.HorizontalScope())
                 {
-                    using (var horizontalScope = new GUILayout.HorizontalScope())
+                    GUILayout.Box(SlotContent, centeredStyle, GUILayout.Width(100), GUILayout.Height(100));
+
+                    using (var verticalScope = new GUILayout.VerticalScope())
                     {
-                        GUILayout.Box("Selected Item", GUILayout.Width(100), GUILayout.Height(100));
-
-                        using (var verticalScope = new GUILayout.VerticalScope())
+                        if (GUILayout.Button("+", GUILayout.Width(20), GUILayout.Height(20)))
                         {
-                            if (GUILayout.Button("+", GUILayout.Width(20), GUILayout.Height(20)))
+                            if (SelectedEquipment != null)
                             {
-                                if (SelectedEquipment != null)
+                                PVEHelperPlugin.Log($"[EnhancementGUI] Upgrade button clicked, Selected equipment: {SelectedEquipment.Id}");
+                                SelectedEquipment.Enhancement();
+                                SlotContent = new GUIContent(SlotContent.text.Replace($"+{SelectedEquipment.Level - 1}", $"+{SelectedEquipment.Level}"));
+
+                                if (_modInventoryManager.GetItem(SelectedEquipment.Id) == null)
                                 {
-                                    SelectedEquipment.Enhancement();
-                                    if (_modInventoryManager.GetItem(SelectedEquipment.Id) == null)
-                                    {
-                                        _modInventoryManager.AddItem(SelectedEquipment);
-                                    }
-                                    _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
-                                    PVEHelperPlugin.Log("Upgrade button clicked");
+                                    PVEHelperPlugin.Log($"[EnhancementGUI] NotFound {SelectedEquipment.Id} in csv, add item");
+                                    _modInventoryManager.AddItem(SelectedEquipment);
                                 }
+                                _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
                             }
+                        }
 
-                            if (GUILayout.Button("-", GUILayout.Width(20), GUILayout.Height(20)))
+                        if (GUILayout.Button("-", GUILayout.Width(20), GUILayout.Height(20)))
+                        {
+                            if (SelectedEquipment != null)
                             {
-                                if (SelectedEquipment != null)
-                                {
-                                    SelectedEquipment.Downgrade();
+                                PVEHelperPlugin.Log($"[EnhancementGUI] Downgrade button clicked, Selected equipment: {SelectedEquipment.Id}");
+                                SelectedEquipment.Downgrade();
+                                SlotContent = new GUIContent(SlotContent.text.Replace($"+{SelectedEquipment.Level + 1}", $"+{SelectedEquipment.Level}"));
 
-                                    if (_modInventoryManager.GetItem(SelectedEquipment.Id) == null)
-                                    {
-                                        _modInventoryManager.AddItem(SelectedEquipment);
-                                    }
-                                    _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
-                                    PVEHelperPlugin.Log("Downgrade button clicked");
+                                if (_modInventoryManager.GetItem(SelectedEquipment.Id) == null)
+                                {
+                                    PVEHelperPlugin.Log($"[EnhancementGUI] NotFound {SelectedEquipment.Id} in csv, add item");
+                                    _modInventoryManager.AddItem(SelectedEquipment);
                                 }
+                                _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
                             }
                         }
                     }
                 }
-
             }
         }
     }

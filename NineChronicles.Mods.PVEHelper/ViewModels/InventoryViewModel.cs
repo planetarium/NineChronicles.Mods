@@ -107,7 +107,8 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
                 {
                     slotText = $"Grade {equipment.Grade}" +
                         $"\n{equipment.ElementalType}" +
-                        $"\n{equipment.GetName()}";
+                        $"\n{equipment.GetName()}\n" +
+                        $"+{equipment.level}";
                     tooltip = $"+{equipment.level} {equipment.GetName()}" +
                         $"\n{equipment.GetGradeText()} | {equipment.ElementalType.GetLocalizedString()} | {equipment.GetSubTypeText()}" +
                         $"\n{equipment.GetCPText()}";

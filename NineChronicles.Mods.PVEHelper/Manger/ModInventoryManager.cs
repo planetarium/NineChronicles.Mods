@@ -19,6 +19,7 @@ namespace NineChronicles.Mods.PVEHelper.Manager
         public Equipment SelectedWeapon { get; set; }
         public Equipment SelectedArmor { get; set; }
         public Equipment SelectedBelt { get; set; }
+        public Equipment SelectedNecklace { get; set; }
         public Equipment SelectedRing1 { get; set; }
         public Equipment SelectedRing2 { get; set; }
 
@@ -34,7 +35,7 @@ namespace NineChronicles.Mods.PVEHelper.Manager
             return new List<Equipment>() { SelectedAura, SelectedWeapon, SelectedArmor, SelectedBelt, SelectedRing1, SelectedRing2 }.FindAll(e => e != null);
         }
 
-        private void LoadItemsFromCsv()
+        public void LoadItemsFromCsv()
         {
             try
             {

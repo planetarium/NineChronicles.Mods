@@ -45,7 +45,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             EquipmentItemSubRecipeSheetV2 subRecipeSheet,
             EquipmentItemOptionSheet itemOptionSheet)
         {
-            foreach (var recipeRow in recipeSheet.OrderedList)
+            foreach (var recipeRow in recipeSheet.OrderedList.Reverse())
             {
                 if (!itemSheet.TryGetValue(recipeRow.ResultEquipmentId, out var itemRow))
                 {
@@ -94,7 +94,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 Id = System.Guid.NewGuid(),
                 EquipmentId = content.equipmentId,
                 Level = 0,
-                ExistsItem = true,
+                ExistsItem = false,
                 SubRecipeId = content.subRecipeId,
                 OptionIdList = content.itemStatOptions
                     .Where(e => e.enable)
