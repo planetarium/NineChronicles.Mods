@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Nekoyume.L10n;
 using Nekoyume.Model.Stat;
 using Nekoyume.TableData;
 using static NineChronicles.Mods.PVEHelper.ViewModels.ItemRecipesViewModel;
@@ -129,6 +130,7 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
         {
             public readonly int itemOptionId;
             public readonly int skillId;
+            public readonly string skillName;
             public readonly int skillDamageMin;
             public readonly int skillDamageMax;
             public readonly float skillChanceMin;
@@ -146,6 +148,7 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
             {
                 itemOptionId = row.Id;
                 skillId = row.SkillId;
+                skillName = L10nManager.Localize($"SKILL_NAME_{skillId}");
                 skillDamageMin = row.SkillDamageMin;
                 skillDamageMax = row.SkillDamageMax;
                 skillChanceMin = row.SkillChanceMin / 100f;

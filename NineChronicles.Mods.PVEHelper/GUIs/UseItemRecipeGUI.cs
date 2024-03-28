@@ -12,7 +12,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private const int _tabHeight = 40;
         private const int _tabCount = 3;
 
-        private static readonly Rect _tabRectPrefab = new Rect(0, 0, _tabWidth, _tabHeight);
+        private static readonly Rect _tabRectPrefab = new Rect(0f, 0f, _tabWidth, _tabHeight);
         // ~TabGUI
 
         // ItemOptionGUI
@@ -20,7 +20,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private const int _itemOptionHeight = 80;
         private const int _itemOptionCount = 4;
 
-        private static readonly Rect _itemOptionRectPrefab = new Rect(0, 0, _itemOptionWidth, _itemOptionHeight);
+        private static readonly Rect _itemOptionRectPrefab = new Rect(0f, 0f, _itemOptionWidth, _itemOptionHeight);
         // ~ItemOptionGUI
 
         private readonly UseItemRecipeViewModel _viewModel;
@@ -30,6 +30,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private readonly Rect _tabGroupRect;
 
         // pools
+        private readonly Rect _rootBoxRect;
         private readonly List<Rect> _tabRectPool = new List<Rect>();
         private Rect _mainStatRect;
         private readonly List<Rect> _itemOptionGroupRectPool = new List<Rect>();
@@ -50,7 +51,9 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 _itemOptionHeight * _itemOptionCount +
                 _tabHeight;
             _rootGroupRect = new Rect(positionX, positionY, width, height);
-            _tabGroupRect = new Rect(0, 0, _rootGroupRect.width, _tabHeight);
+            _tabGroupRect = new Rect(0f, 0f, _rootGroupRect.width, _tabHeight);
+
+            _rootBoxRect = new Rect(0f, 0f, width, height);
 
             for (int i = 0; i < _tabCount; i++)
             {
@@ -62,13 +65,14 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 _tabRectPool.Add(rect);
             }
 
-            _mainStatRect = new Rect(0f, _tabHeight + 10f, _rootGroupRect.width, _tabHeight - 10f);
+            _mainStatRect = new Rect(10f, _tabHeight + 10f, _rootGroupRect.width - 10f, 20f);
+
             for (int i = 0; i < _itemOptionCount; i++)
             {
                 var rect = new Rect(_itemOptionRectPrefab)
                 {
                     x = 0f,
-                    y = _tabHeight + _mainStatRect.height + (_itemOptionHeight * i),
+                    y = _tabHeight + _mainStatRect.height + 10f + ((_itemOptionHeight + 2f) * i),
                 };
                 _itemOptionGroupRectPool.Add(rect);
             }
@@ -84,7 +88,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             GUI.matrix = GUIToolbox.GetGUIMatrix();
             GUI.BeginGroup(_rootGroupRect);
-            GUI.Box(_rootGroupRect, string.Empty);
+            GUI.Box(_rootBoxRect, string.Empty);
             DrawTabs();
             DrawContent();
             DrawCreateButton();
@@ -141,22 +145,27 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 GUI.Box(_itemOptionRectPrefab, string.Empty);
                 var itemStatOption = content.itemStatOptions[i];
                 GUI.Label(
-                    new Rect(10f, 0f, 240f, 30f),
+                    new Rect(10f, 0f, 220f, 20f),
                     $"{itemStatOption.statType} {itemStatOption.minValue}~{itemStatOption.maxValue}");
-                GUI.Label(new Rect(250f, 0f, 50f, 30f), $"({itemStatOption.enableChance:P0})");
+                GUI.Label(new Rect(240f, 0f, 60f, 20f), $"({itemStatOption.enableChance:P0})");
                 itemStatOption.enable = GUI.Toggle(
-                    new Rect(10f, 60f, 90f, 20f),
+                    new Rect(10f, 40f, 90f, 20f),
                     itemStatOption.enable,
                     itemStatOption.enable
                         ? "Enabled"
                         : "Disabled");
                 if (itemStatOption.enable)
                 {
+                    GUI.skin.horizontalSlider.alignment = TextAnchor.MiddleLeft;
                     itemStatOption.ratioOfValueRange = GUI.HorizontalSlider(
-                    new Rect(100f, 60f, 190f, 20f),
-                    itemStatOption.ratioOfValueRange,
-                    0f,
-                    1f);
+                        new Rect(100f, 40f + 5f, 130f, 20f - 5f),
+                        itemStatOption.ratioOfValueRange,
+                        0f,
+                        1f);
+                    GUI.Label(new Rect(240f, 40f, 60f, 20f), $"({itemStatOption.ratioOfValueRange:P0})");
+                    var resultStat = itemStatOption.minValue +
+                        (itemStatOption.maxValue - itemStatOption.minValue) * itemStatOption.ratioOfValueRange;
+                    GUI.Label(new Rect(10f, 60f, 280f, 20f), $"{itemStatOption.statType} {resultStat}");
                 }
 
                 GUI.EndGroup();
@@ -167,24 +176,31 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 GUI.BeginGroup(_itemOptionGroupRectPool[itemStatOptionsCount + i]);
                 GUI.Box(_itemOptionRectPrefab, string.Empty);
                 var itemSkillOption = content.itemSkillOptions[i];
-                GUI.Label(new Rect(10f, 0f, 240f, 30f), $"{itemSkillOption.skillId}"); // TODO: Skill name
-                GUI.Label(new Rect(250f, 0f, 50f, 30f), $"({itemSkillOption.enableChance:P0})");
+                GUI.Label(new Rect(10f, 0f, 220f, 20f), $"{itemSkillOption.skillName}");
+                GUI.Label(new Rect(240f, 0f, 60f, 20f), $"({itemSkillOption.enableChance:P0})");
                 GUI.Label(
-                    new Rect(10f, 30f, 290f, 30f),
-                    $"{itemSkillOption.skillDamageMin}~{itemSkillOption.skillDamageMax}({itemSkillOption.skillChanceMin:P0}~{itemSkillOption.skillChanceMax:P0})");
+                    new Rect(10f, 20f, 290f, 20f),
+                    $"{itemSkillOption.skillDamageMin}~{itemSkillOption.skillDamageMax} ({itemSkillOption.skillChanceMin:P0}~{itemSkillOption.skillChanceMax:P0})");
                 itemSkillOption.enable = GUI.Toggle(
-                    new Rect(10f, 60f, 90f, 20f),
+                    new Rect(10f, 40f, 90f, 20f),
                     itemSkillOption.enable,
                     itemSkillOption.enable
                         ? "Enabled"
                         : "Disabled");
                 if (itemSkillOption.enable)
                 {
+                    GUI.skin.horizontalSlider.alignment = TextAnchor.MiddleLeft;
                     itemSkillOption.ratioOfValueRange = GUI.HorizontalSlider(
-                    new Rect(100f, 60f, 190f, 20f),
-                    itemSkillOption.ratioOfValueRange,
-                    0f,
-                    1f);
+                        new Rect(100f, 40f + 5f, 130f, 20f - 5f),
+                        itemSkillOption.ratioOfValueRange,
+                        0f,
+                        1f);
+                    GUI.Label(new Rect(240f, 40f, 60f, 20f), $"({itemSkillOption.ratioOfValueRange:P0})");
+                    var resultDamage = itemSkillOption.skillDamageMin +
+                        (itemSkillOption.skillDamageMax - itemSkillOption.skillDamageMin) * itemSkillOption.ratioOfValueRange;
+                    var resultChance = itemSkillOption.skillChanceMin +
+                        (itemSkillOption.skillChanceMax - itemSkillOption.skillChanceMin) * itemSkillOption.ratioOfValueRange;
+                    GUI.Label(new Rect(10f, 60f, 280f, 20f), $"{resultDamage} ({resultChance:P0})");
                 }
 
                 GUI.EndGroup();

@@ -4,18 +4,16 @@ using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using Nekoyume.Game;
+using Nekoyume.Model.Item;
 using Nekoyume.State;
 using Nekoyume.UI;
+using NineChronicles.Mods.PVEHelper.BlockSimulation;
 using NineChronicles.Mods.PVEHelper.GUIs;
 using NineChronicles.Mods.PVEHelper.Manager;
-using NineChronicles.Mods.PVEHelper.BlockSimulation;
 using NineChronicles.Mods.PVEHelper.Patches;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Nekoyume.Game;
-using System.Linq;
-using Nekoyume.Model.Item;
 
 namespace NineChronicles.Mods.PVEHelper
 {
@@ -34,6 +32,9 @@ namespace NineChronicles.Mods.PVEHelper
 
         private List<IDisposable> _disposables;
 
+        private Camera _mainCamera;
+        private Color _mainCameraBackgroundColor;
+        private int _mainCameraCullingMask;
         private EventSystem _eventSystem;
 
         // NOTE: Please add your GUIs here as alphabetical order.
@@ -189,6 +190,15 @@ namespace NineChronicles.Mods.PVEHelper
 
         private void DisableEventSystem()
         {
+            _mainCamera = Camera.main;
+            if (_mainCamera)
+            {
+                _mainCameraBackgroundColor = _mainCamera.backgroundColor;
+                _mainCameraCullingMask = _mainCamera.cullingMask;
+                _mainCamera.backgroundColor = Color.white;
+                _mainCamera.cullingMask = 0;
+            }
+
             if (_eventSystem != null)
             {
                 _eventSystem.enabled = false;
@@ -197,6 +207,13 @@ namespace NineChronicles.Mods.PVEHelper
 
         private void EnableEventSystem()
         {
+            if (_mainCamera)
+            {
+                _mainCamera.backgroundColor = _mainCameraBackgroundColor;
+                _mainCamera.cullingMask = _mainCameraCullingMask;
+                _mainCamera = null;
+            }
+
             if (_eventSystem == null)
             {
                 _eventSystem = FindObjectOfType<EventSystem>();
