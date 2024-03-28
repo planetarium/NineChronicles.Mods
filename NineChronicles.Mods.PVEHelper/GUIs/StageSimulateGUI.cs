@@ -187,11 +187,15 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                             (_, index) => selectedStageId = index + 1,
                             selectedStageId - 1);
 
+                        GUI.enabled = !_isCalculating;
                         if (GUILayout.Button("Simulate"))
                         {
                             Simulate();
                             PVEHelperPlugin.Log($"[StageGUI] Simulate button clicked {selectedStageId})");
                         }
+
+                        GUI.enabled = true;
+
                         DrawSimulationResultTextArea();
                     }
                     DrawPlayCountController();
@@ -226,12 +230,19 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
         private void DrawSimulationResultTextArea()
         {
-            using (var horizontalScope = new GUILayout.HorizontalScope())
+            if (_isCalculating)
             {
-                GUILayout.Label($"0 Wave Clear: {_wave0ClearCount}");
-                GUILayout.Label($"1 Wave Clear: {_wave1ClearCount}");
-                GUILayout.Label($"2 Wave Clear: {_wave2ClearCount}");
-                GUILayout.Label($"3 Wave Clear: {_wave3ClearCount}");
+                GUILayout.Label("Calculating...");
+            }
+            else
+            {
+                using (var horizontalScope = new GUILayout.HorizontalScope())
+                {
+                    GUILayout.Label($"0 Wave Clear: {_wave0ClearCount}");
+                    GUILayout.Label($"1 Wave Clear: {_wave1ClearCount}");
+                    GUILayout.Label($"2 Wave Clear: {_wave2ClearCount}");
+                    GUILayout.Label($"3 Wave Clear: {_wave3ClearCount}");
+                }   
             }
         }
 
@@ -239,11 +250,16 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             using (var verticalScope = new GUILayout.VerticalScope())
             {
+                GUI.enabled = !_isCalculating;
                 if (GUILayout.Button("+", GUILayout.Width(20), GUILayout.Height(20)))
                 {
                     playCount += 100;
                 }
+
+                GUI.enabled = true;
                 GUILayout.Label(playCount + "", GUILayout.Width(20));
+                
+                GUI.enabled = !_isCalculating;
                 if (GUILayout.Button("-", GUILayout.Width(20), GUILayout.Height(20)))
                 {
                     if (playCount >= 0)
@@ -251,6 +267,8 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                         playCount -= 100;
                     }
                 }
+
+                GUI.enabled = true;
             }
         }
 
@@ -258,6 +276,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             void Btn(string text, int change)
             {
+                GUI.enabled = !_isCalculating;
                 if (GUILayout.Button(text))
                 {
                     if (index + change > 0 && index + change < list.Length)
@@ -265,6 +284,8 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                         onChanged(list, index + change);
                     }
                 }
+
+                GUI.enabled = true;
             }
 
             using (var horizontalScope = new GUILayout.HorizontalScope())
