@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Logging;
+using Cysharp.Threading.Tasks;
 using HarmonyLib;
+using Nekoyume;
 using Nekoyume.Game;
 using Nekoyume.Model.Item;
 using Nekoyume.State;
@@ -20,9 +22,12 @@ namespace NineChronicles.Mods.PVEHelper
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     public class PVEHelperPlugin : BaseUnityPlugin
     {
-        private const string PluginGUID = "org.ninechronicles.mods.pvehelper";
-        private const string PluginName = "PVE Helper";
+        private const string PluginGUID = "org.ninechronicles.mods.athena";
+        private const string PluginName = "Athena";
         private const string PluginVersion = "0.1.0";
+
+        private const string PluginLastDayOfUseKey = PluginName + "_Last_Day_Of_Use";
+        private const string PluginDailyOpenKey = PluginName + "_Daily_Open";
 
         internal static PVEHelperPlugin Instance { get; private set; }
 
@@ -56,7 +61,7 @@ namespace NineChronicles.Mods.PVEHelper
         {
             if (Instance is not null)
             {
-                throw new InvalidOperationException("PVEHelperPlugin must be only one instance.");
+                throw new InvalidOperationException($"{nameof(PVEHelperPlugin)} must be only one instance.");
             }
 
             Instance = this;
@@ -75,6 +80,20 @@ namespace NineChronicles.Mods.PVEHelper
             };
 
             Logger.LogInfo("Loaded");
+        }
+
+        private async void TrackOnce()
+        {
+            if (Analyzer.Instance is null)
+            {
+                await UniTask.WaitUntil(() => Analyzer.Instance is not null);
+            }
+
+            var days = (DateTime.Now - new DateTime(2019, 3, 11)).Days;
+            if (days > PlayerPrefs.GetInt(PluginLastDayOfUseKey, 0))
+            {
+                Analyzer.Instance.Track(PluginDailyOpenKey);
+            }
         }
 
         private void Update()
@@ -170,6 +189,7 @@ namespace NineChronicles.Mods.PVEHelper
                 _stageSimulateGUI = new StageSimulateGUI(modInventoryManager, 1);
                 _overlayGUI = new OverlayGUI(() => _stageSimulateGUI.Show());
 
+                TrackOnce();
                 DisableEventSystem();
             }
 
