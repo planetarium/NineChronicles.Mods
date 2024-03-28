@@ -11,10 +11,13 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private int tabIndex;
         private IGUI currentUI;
 
-        public TabGUI(List<(string Name, Func<IGUI> UIGenerator)> uis)
+        private readonly Action _onClose;
+
+        public TabGUI(List<(string Name, Func<IGUI> UIGenerator)> uis, Action onClose)
         {
             _uis = uis;
             tabIndex = 0;
+            _onClose = onClose;
         }
 
         public void OnGUI()
@@ -44,11 +47,40 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                     currentUI = uiGenerator();
                 }
             }
+            
+            CloseButton();
 
             GUILayout.EndHorizontal();
             
             currentUI?.OnGUI();
             GUILayout.EndVertical();
+        }
+        
+        private void CloseButton()
+        {
+            var style = new GUIStyle
+            {
+                margin =
+                {
+                    left = 960,
+                    top = 30,
+                    right = 20,
+                },
+                fixedWidth = 40,
+                fixedHeight = 40,
+                normal =
+                {
+                    textColor = Color.black,
+                },
+                fontSize = 40,
+                fontStyle = FontStyle.Bold
+            };
+
+            if (GUI.Button(new Rect(GUIToolbox.ScreenWidthReference - 40, 0, 40, 40), "X", style))
+            {
+                PVEHelperPlugin.Log("Close TabGUI mode");
+                _onClose();
+            }
         }
     }
 }

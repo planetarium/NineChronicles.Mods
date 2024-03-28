@@ -96,18 +96,23 @@ namespace NineChronicles.Mods.PVEHelper
             }
         }
 
+        private void DisableModeGUI()
+        {
+            _enhancementGUI = null;
+            _equipGUI = null;
+            _inventoryGUI = null;
+            _itemCreationGUI = null;
+            _overlayGUI = null;
+            _stageSimulateGUI = null;
+            EnableEventSystem();
+        }
+
         private void Update()
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 Log("Escape key pressed.");
-                _enhancementGUI = null;
-                _equipGUI = null;
-                _inventoryGUI = null;
-                _itemCreationGUI = null;
-                _overlayGUI = null;
-                _stageSimulateGUI = null;
-                EnableEventSystem();
+                DisableModeGUI();
             }
 
             //if (_enhancementGUI is not null ||
@@ -127,7 +132,7 @@ namespace NineChronicles.Mods.PVEHelper
                     ("Create", CreateItemCreationGUI),
                     ("Enhancement", CreateEnhancementGUI),
                     ("Equipment", CreateEquipGUI),
-                });
+                }, DisableModeGUI);
 
                 TrackOnce();
                 DisableEventSystem();
