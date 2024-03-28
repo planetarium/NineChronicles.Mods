@@ -123,7 +123,7 @@ namespace NineChronicles.Mods.PVEHelper
 
                 _overlayGUI = new TabGUI(new List<(string Name, Func<IGUI> UI)>
                 {
-                    ("Simulate", () => new StageSimulateGUI(modInventoryManager, 1)),
+                    ("Simulate", () => new StageSimulateGUI(modInventoryManager)),
                     ("Create", CreateItemCreationGUI),
                     ("Enhancement", CreateEnhancementGUI),
                     ("Equipment", CreateEquipGUI),

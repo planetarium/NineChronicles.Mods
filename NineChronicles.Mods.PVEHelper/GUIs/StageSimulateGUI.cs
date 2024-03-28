@@ -24,8 +24,6 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private (WorldSheet WorldSheet, StageSheet StageSheet, int clearedStageId)? StateData { get; set; } = null;
         private DateTimeOffset? LastSheetsUpdated { get; set; } = null;
 
-        private readonly int _avatarIndex;
-
         private int _wave0ClearCount = 0;
         private int _wave1ClearCount = 0;
         private int _wave2ClearCount = 0;
@@ -33,7 +31,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         
         private ModInventoryManager _modInventoryManager;
 
-        public StageSimulateGUI(ModInventoryManager modInventoryManager, int avatarIndex)
+        public StageSimulateGUI(ModInventoryManager modInventoryManager)
         {
             _modInventoryManager = modInventoryManager;
 
@@ -44,8 +42,6 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 (GUIToolbox.ScreenHeightReference - height) / 2,
                 width,
                 height);
-
-            _avatarIndex = avatarIndex;
         }
 
         public void OnGUI()
