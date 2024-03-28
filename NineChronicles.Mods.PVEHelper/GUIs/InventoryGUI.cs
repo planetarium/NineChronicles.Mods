@@ -13,7 +13,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         // TabGUI
         private const int _tabWidth = 100;
         private const int _tabHeight = 40;
-        private const int _tabCount = 2; // temporary.
+        private const int _tabCount = 3; // temporary.
 
         private static readonly Rect _tabRectPrefab = new Rect(0, 0, _tabWidth, _tabHeight);
         // ~TabGUI
@@ -145,6 +145,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             DrawSlots();
             DrawPageNumbers();
             GUI.EndGroup();
+            DrawTooltip();
         }
 
         private void DrawTabs()
@@ -164,7 +165,8 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             var tabName = index switch
             {
                 0 => "Equipment",
-                1 => "The Other",
+                1 => "Aura",
+                2 => "The Other",
                 _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
             };
             var isSelected = _viewModel.CurrentTabIndex == index;
@@ -207,7 +209,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
             var isSelected = _viewModel.SelectedSlotIndex == index;
             GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
-            if (GUI.Button(iconRect, item.GetIcon()))
+            if (GUI.Button(iconRect, slot.slotGUIContent))
             {
                 if (isSelected)
                 {
@@ -269,6 +271,20 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             }
 
             GUI.backgroundColor = Color.white;
+        }
+
+        private void DrawTooltip()
+        {
+            var tooltip = GUI.tooltip;
+            if (string.IsNullOrEmpty(tooltip))
+            {
+                return;
+            }
+
+            var mousePosition = Event.current.mousePosition;
+            var tooltipRect = new Rect(mousePosition.x, mousePosition.y, 200, 220);
+            tooltipRect = GUIToolbox.MoveInsideScreen(tooltipRect, 10, 10);
+            GUI.Box(tooltipRect, tooltip);
         }
 
         public void Clear()

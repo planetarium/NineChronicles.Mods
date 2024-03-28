@@ -2,6 +2,7 @@
 using System.Linq;
 using Nekoyume.Model.Item;
 using Nekoyume.TableData;
+using NineChronicles.Mods.PVEHelper.Extensions;
 
 namespace NineChronicles.Mods.PVEHelper.ViewModels
 {
@@ -80,6 +81,8 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
             public readonly EquipmentItemRecipeSheet.Row recipeRow;
             public readonly ItemSubRecipe[] subRecipes;
 
+            public readonly string slotText;
+
             public ItemRecipe(
                 EquipmentItemSheet.Row equipmentRow,
                 EquipmentItemRecipeSheet.Row recipeRow,
@@ -95,6 +98,8 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
                         subRecipeRows[i],
                         itemOptionRows[i].ToArray());
                 }
+
+                slotText = $"Grade {equipmentRow.Grade}\n{equipmentRow.ElementalType}\n{equipmentRow.GetName()}";
             }
         }
 

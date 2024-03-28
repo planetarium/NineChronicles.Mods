@@ -204,10 +204,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             var isSelected = _viewModel.SelectedSlotIndex == index;
             var equipmentRow = itemRecipe.equipmentRow;
             GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
-            var buttonContent = new GUIContent(
-                $"{equipmentRow.ElementalType}({equipmentRow.Grade})",
-                equipmentRow.GetIcon());
-            if (GUI.Button(iconRect, buttonContent))
+            if (GUI.Button(iconRect, itemRecipe.slotText))
             {
                 if (isSelected)
                 {
