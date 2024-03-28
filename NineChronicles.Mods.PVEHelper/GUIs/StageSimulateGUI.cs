@@ -265,7 +265,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             if (GUILayout.Button("Simulate", style))
             {
                 Simulate();
-                PVEHelperPlugin.Log(selectedStageId);
+                PVEHelperPlugin.Log($"[StageGUI] Simulate button clicked {selectedStageId})");
             }
         }
 
@@ -330,7 +330,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             _wave2ClearCount = -1;
             _wave3ClearCount = -1;
 
-            const int playCount = 300;
+            const int playCount = 100;
 
             var clearWaveInfo = await UniTask.Run(() => BlockSimulation.Actions.HackAndSlashSimulation.Simulate(
                 _modInventoryManager.GetEquipments(),
@@ -346,7 +346,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             _wave2ClearCount = clearWaveInfo.TryGetValue(2, out var w2) ? w2 : 0;
             _wave3ClearCount = clearWaveInfo.TryGetValue(3, out var w3) ? w3 : 0;
 
-            PVEHelperPlugin.Log($"[StageGUI] Simulate 100: w0 ({_wave0ClearCount}) w1({_wave1ClearCount}) w2({_wave2ClearCount}) w3({_wave3ClearCount})");
+            PVEHelperPlugin.Log($"[StageGUI] Simulate {playCount}: w0 ({_wave0ClearCount}) w1({_wave1ClearCount}) w2({_wave2ClearCount}) w3({_wave3ClearCount})");
             _isCalculating = false;
         }
 

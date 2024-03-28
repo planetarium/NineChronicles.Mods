@@ -11,6 +11,7 @@ using Nekoyume.Model.State;
 using Nekoyume.Model.Item;
 using Nekoyume.State;
 using UnityEngine;
+using NineChronicles.Mods.PVEHelper.Extensions;
 
 namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
 {
@@ -28,6 +29,7 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
             randomSeed ??= new RandomImpl(DateTime.Now.Millisecond).Next();
             var signerAddress = states.AgentState.address;
             var avatarState = (AvatarState)states.CurrentAvatarState.Clone();
+
             // avatarState.inventory;
             var itemSlotState = states.CurrentItemSlotStates[BattleType.Adventure];
 
@@ -96,6 +98,8 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
                 tableSheets,
                 out var simulator,
                 out _);
+            PVEHelperPlugin.Log($"({nameof(HackAndSlashSimulation)}) Simulate Finish {simulator.Log.clearedWaveNumber}");
+
             return simulator.Log.clearedWaveNumber;
         }
 
@@ -109,6 +113,14 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
             long blockIndex = 0,
             int? randomSeed = null)
         {
+            PVEHelperPlugin.Log(
+                $"({nameof(HackAndSlashSimulation)}) Simulate Start\n" +
+                $"equipments: {string.Join(',', equipments.Select(e => e.NonFungibleId))}\n" +
+                $"worldId: {worldId}\n" +
+                $"stageId: {stageId}\n" +
+                $"blockIndex: {blockIndex}\n" +
+                $"randomSeed: {randomSeed}");
+
             var result = new Dictionary<int, int>();
 
             for (var i = 0; i < playCount; i++)
@@ -124,6 +136,8 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
                     result[clearWave] = 1;
                 }
             }
+            var formattedResult = string.Join(", ", result.Select(kv => $"{kv.Key}: {kv.Value}"));
+            PVEHelperPlugin.Log($"({nameof(HackAndSlashSimulation)}) Simulate Result: {formattedResult}");
 
             return result;
         }
