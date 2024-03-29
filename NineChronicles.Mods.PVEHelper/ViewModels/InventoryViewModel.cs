@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Nekoyume;
+using Nekoyume.Battle;
 using Nekoyume.Helper;
 using Nekoyume.Model.Item;
 using NineChronicles.Mods.PVEHelper.Extensions;
@@ -47,7 +48,7 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
                 slots = new List<Slot>();
                 for (var i = 0; i < slotCount; i++)
                 {
-                    slots.Add(new Slot(null, 0));
+                    slots.Add(new Slot(null, 0, false, false));
                 }
             }
 
@@ -64,22 +65,26 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
         {
             public IItem item;
             public int count;
+            public bool isExistsInBlockchain;
+            public bool isModded;
 
             public string slotText;
             public string tooltip;
             public GUIContent slotGUIContent;
 
-            public Slot(IItem item, int count)
+            public Slot(IItem item, int count, bool isExistsInBlockchain, bool isModded)
             {
-                Set(item, count);
+                Set(item, count, isExistsInBlockchain, isModded);
             }
 
-            public void Clear() => Set(null, 0);
+            public void Clear() => Set(null, 0, false, false);
 
-            public void Set(IItem item, int count)
+            public void Set(IItem item, int count, bool isExistsInBlockchain, bool isModded)
             {
                 this.item = item;
                 this.count = count;
+                this.isExistsInBlockchain = isExistsInBlockchain;
+                this.isModded = isModded;
                 UpdateSlotTextAndTooltip();
             }
 
@@ -212,24 +217,67 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
             }
         }
 
-        public void AddItem(IItem item, int count)
+        public void AddItem(IItem item, int count, bool isExistsInBlockchain, bool isModded)
         {
-            var tab = GetTab(item);
-            AddItem(tab, item, count);
-        }
-
-        private void AddItem(Tab tab, IItem item, int count)
-        {
-            var slot = GetSlotToAdd(tab, item);
-            var addableCount = int.MaxValue - slot.count;
-            if (addableCount >= count)
+            if (item is null)
             {
-                slot.Set(item, slot.count + count);
+                PVEHelperPlugin.Log("[InventoryViewModel] AddItem item is null");
                 return;
             }
 
-            slot.Set(item, int.MaxValue);
-            AddItem(tab, item, count - addableCount);
+            var tab = GetTab(item);
+            AddItem(tab, item, count, isExistsInBlockchain, isModded);
+        }
+
+        private void AddItem(Tab tab, IItem item, int count, bool isExistsInBlockchain, bool isModded)
+        {
+            var slot = GetSlotToAdd(tab, item);
+            if (slot.item is INonFungibleItem { })
+            {
+                return;
+            }
+
+            var addableCount = int.MaxValue - slot.count;
+            if (addableCount >= count)
+            {
+                slot.Set(item, slot.count + count, isExistsInBlockchain, isModded);
+                return;
+            }
+
+            slot.Set(item, int.MaxValue, isExistsInBlockchain, isModded);
+            AddItem(tab, item, count - addableCount, isExistsInBlockchain, isModded);
+        }
+
+        public void AddOrReplaceItem(IItem item, int count, bool isExistsInBlockchain, bool isModded)
+        {
+            if (item is null)
+            {
+                PVEHelperPlugin.Log("[InventoryViewModel] AddItem item is null");
+                return;
+            }
+
+            var tab = GetTab(item);
+            AddOrReplaceItem(tab, item, count, isExistsInBlockchain, isModded);
+        }
+
+        private void AddOrReplaceItem(Tab tab, IItem item, int count, bool isExistsInBlockchain, bool isModded)
+        {
+            var slot = GetSlotToAdd(tab, item);
+            if (slot.item is INonFungibleItem { })
+            {
+                slot.Set(item, count, isExistsInBlockchain, isModded);
+                return;
+            }
+
+            var addableCount = int.MaxValue - slot.count;
+            if (addableCount >= count)
+            {
+                slot.Set(item, slot.count + count, isExistsInBlockchain, isModded);
+                return;
+            }
+
+            slot.Set(item, int.MaxValue, isExistsInBlockchain, isModded);
+            AddItem(tab, item, count - addableCount, isExistsInBlockchain, isModded);
         }
 
         private Tab GetTab(IItem item)
@@ -315,6 +363,12 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
 
         public void RemoveItem(IItem item, int count)
         {
+            if (item is null)
+            {
+                PVEHelperPlugin.Log("[InventoryViewModel] RemoveItem item is null");
+                return;
+            }
+
             var tab = GetTab(item);
             RemoveItem(tab, item, count);
         }
@@ -323,13 +377,19 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
         {
             if (!TryGetSlotToRemove(tab, item, out var slot))
             {
+                PVEHelperPlugin.Log("[InventoryViewModel] RemoveItem !TryGetSlotToRemove");
                 return;
             }
 
             var removeableCount = slot.count;
-            if (removeableCount >= count)
+            if (removeableCount > count)
             {
                 slot.RemoveCount(count);
+                return;
+            }
+            else if (removeableCount == count)
+            {
+                slot.Clear();
                 return;
             }
 
@@ -389,12 +449,49 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
 
             if (targetSlots.Count == 0)
             {
+                PVEHelperPlugin.Log("[InventoryViewModel] TryGetSlotToRemove targetSlots.Count == 0");
                 slot = default;
                 return false;
             }
 
             slot = targetSlots.First();
-            return true;
+            return slot is not null;
+        }
+
+        public void Sort()
+        {
+            foreach (var tab in _tabs)
+            {
+                Sort(tab);
+            }
+        }
+
+        private void Sort(Tab tab)
+        {
+            var slotSources = tab.pages
+                .SelectMany(page => page.slots)
+                .Where(slot => slot.item is not null)
+                .Select(slot => (slot.item, slot.count, slot.isExistsInBlockchain, slot.isModded))
+                .ToList();
+            slotSources.Sort((s1, s2) =>
+            {
+                if (s1.item is not Equipment e1)
+                {
+                    return 1;
+                }
+
+                if (s2.item is not Equipment e2)
+                {
+                    return -1;
+                }
+
+                return CPHelper.GetCP(e2).CompareTo(CPHelper.GetCP(e1));
+            });
+            tab.Clear();
+            foreach (var (item, count, isExistsInBlockchain, isModded) in slotSources)
+            {
+                AddItem(item, count, isExistsInBlockchain, isModded);
+            }
         }
     }
 }

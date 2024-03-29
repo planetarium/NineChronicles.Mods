@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 using Bencodex.Types;
 using BepInEx.Logging;
 using Cysharp.Threading.Tasks;
-using NineChronicles.Mods.PVEHelper.Manager;
-using NineChronicles.Mods.PVEHelper.Extensions;
 using Nekoyume;
 using Nekoyume.Game;
+using Nekoyume.Model.Item;
 using Nekoyume.State;
 using Nekoyume.TableData;
-using Nekoyume.Model.Item;
+using NineChronicles.Mods.PVEHelper.Extensions;
+using NineChronicles.Mods.PVEHelper.Manager;
 using UnityEngine;
 
 namespace NineChronicles.Mods.PVEHelper.GUIs
@@ -29,13 +29,13 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
         private InventoryGUI _inventoryGUI;
 
-        public Equipment? SelectedAura { get; set; }
-        public Equipment? SelectedWeapon { get; set; }
-        public Equipment? SelectedArmor { get; set; }
-        public Equipment? SelectedBelt { get; set; }
-        public Equipment? SelectedNecklace { get; set; }
-        public Equipment? SelectedRing1 { get; set; }
-        public Equipment? SelectedRing2 { get; set; }
+        public Equipment SelectedAura { get; set; }
+        public Equipment SelectedWeapon { get; set; }
+        public Equipment SelectedArmor { get; set; }
+        public Equipment SelectedBelt { get; set; }
+        public Equipment SelectedNecklace { get; set; }
+        public Equipment SelectedRing1 { get; set; }
+        public Equipment SelectedRing2 { get; set; }
 
         public GUIContent SelectedAuraContent = new GUIContent("Aura");
         public GUIContent SelectedWeaponContent = new GUIContent("Weapon");
@@ -65,52 +65,114 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                     switch (equipment.ItemSubType)
                     {
                         case ItemSubType.Weapon:
-                            SelectedWeapon = equipment;
                             _modInventoryManager.SelectedWeapon = equipment;
+                            SelectedWeapon = equipment;
                             SelectedWeaponContent = CreateSlotText(equipment);
                             PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected weapon {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                         case ItemSubType.Armor:
-                            SelectedArmor = equipment;
                             _modInventoryManager.SelectedArmor = equipment;
+                            SelectedArmor = equipment;
                             SelectedArmorContent = CreateSlotText(equipment);
                             PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected armor {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                         case ItemSubType.Belt:
-                            SelectedBelt = equipment;
                             _modInventoryManager.SelectedBelt = equipment;
+                            SelectedBelt = equipment;
                             SelectedBeltContent = CreateSlotText(equipment);
                             PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected belt {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                         case ItemSubType.Necklace:
-                            SelectedNecklace = equipment;
                             _modInventoryManager.SelectedNecklace = equipment;
+                            SelectedNecklace = equipment;
                             SelectedNecklaceContent = CreateSlotText(equipment);
                             PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected necklace {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                         case ItemSubType.Ring:
                             if (SelectedRing1 == null)
                             {
-                                SelectedRing1 = equipment;
                                 _modInventoryManager.SelectedRing1 = equipment;
+                                SelectedRing1 = equipment;
                                 SelectedRing1Content = CreateSlotText(equipment);
                                 PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected ring1 {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             }
                             else
                             {
-                                SelectedRing2 = equipment;
                                 _modInventoryManager.SelectedRing2 = equipment;
+                                SelectedRing2 = equipment;
                                 SelectedRing2Content = CreateSlotText(equipment);
                                 PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected ring2 {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             }
                             break;
                         case ItemSubType.Aura:
-                            SelectedAura = equipment;
                             _modInventoryManager.SelectedAura = equipment;
+                            SelectedAura = equipment;
                             SelectedAuraContent = CreateSlotText(equipment);
                             PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected aura {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                     }
+                }
+            };
+            _inventoryGUI.OnSlotRemoveClicked += item =>
+            {
+                if (item is not Equipment equipment)
+                {
+                    return;
+                }
+
+                switch (equipment.ItemSubType)
+                {
+                    case ItemSubType.Weapon:
+                        if (equipment.NonFungibleId.Equals(SelectedWeapon.Id))
+                        {
+                            _modInventoryManager.SelectedWeapon = null;
+                            SelectedWeapon = null;
+                            SelectedWeaponContent = new GUIContent("Weapon");
+                        }
+
+                        break;
+                    case ItemSubType.Armor:
+                        if (equipment.NonFungibleId.Equals(SelectedArmor.Id))
+                        {
+                            _modInventoryManager.SelectedArmor = null;
+                            SelectedArmor = null;
+                            SelectedArmorContent = new GUIContent("Armor");
+                        }
+
+                        break;
+                    case ItemSubType.Belt:
+                        if (equipment.NonFungibleId.Equals(SelectedBelt.Id))
+                        {
+                            _modInventoryManager.SelectedBelt = null;
+                            SelectedBelt = null;
+                            SelectedBeltContent = new GUIContent("Belt");
+                        }
+
+                        break;
+                    case ItemSubType.Necklace:
+                        if (equipment.NonFungibleId.Equals(SelectedNecklace.Id))
+                        {
+                            _modInventoryManager.SelectedNecklace = null;
+                            SelectedNecklace = null;
+                            SelectedNecklaceContent = new GUIContent("Necklace");
+                        }
+
+                        break;
+                    case ItemSubType.Ring:
+                        if (equipment.NonFungibleId.Equals(SelectedRing1.Id))
+                        {
+                            _modInventoryManager.SelectedRing1 = null;
+                            SelectedRing1 = null;
+                            SelectedRing1Content = new GUIContent("Ring1");
+                        }
+                        else if (equipment.NonFungibleId.Equals(SelectedRing2.Id))
+                        {
+                            _modInventoryManager.SelectedRing2 = null;
+                            SelectedRing2 = null;
+                            SelectedRing2Content = new GUIContent("Ring2");
+                        }
+
+                        break;
                 }
             };
 
@@ -147,21 +209,56 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 {
                     using (var horizontalScope = new GUILayout.HorizontalScope())
                     {
-                        DrawEquipmentSlot(SelectedAuraContent, SelectedAura, () => { SelectedAura = null; SelectedAuraContent = new GUIContent("Aura"); });
-                        DrawEquipmentSlot(SelectedWeaponContent, SelectedWeapon, () => { SelectedWeapon = null; SelectedWeaponContent = new GUIContent("Weapon"); });
-                        DrawEquipmentSlot(SelectedArmorContent, SelectedArmor, () => { SelectedArmor = null; SelectedArmorContent = new GUIContent("Armor"); });
+                        DrawEquipmentSlot(SelectedAuraContent, SelectedAura, () =>
+                        {
+                            _modInventoryManager.SelectedAura = null;
+                            SelectedAura = null;
+                            SelectedAuraContent = new GUIContent("Aura");
+                        });
+                        DrawEquipmentSlot(SelectedWeaponContent, SelectedWeapon, () =>
+                        {
+                            _modInventoryManager.SelectedWeapon = null;
+                            SelectedWeapon = null;
+                            SelectedWeaponContent = new GUIContent("Weapon");
+                        });
+                        DrawEquipmentSlot(SelectedArmorContent, SelectedArmor, () =>
+                        {
+                            _modInventoryManager.SelectedArmor = null;
+                            SelectedArmor = null;
+                            SelectedArmorContent = new GUIContent("Armor");
+                        });
                     }
                     using (var horizontalScope = new GUILayout.HorizontalScope())
                     {
                         GUILayout.Space(136);
-                        DrawEquipmentSlot(SelectedBeltContent, SelectedBelt, () => { SelectedBelt = null; SelectedBeltContent = new GUIContent("Belt"); });
-                        DrawEquipmentSlot(SelectedNecklaceContent, SelectedNecklace, () => { SelectedNecklace = null; SelectedNecklaceContent = new GUIContent("Necklace"); });
+                        DrawEquipmentSlot(SelectedBeltContent, SelectedBelt, () =>
+                        {
+                            _modInventoryManager.SelectedBelt = null;
+                            SelectedBelt = null;
+                            SelectedBeltContent = new GUIContent("Belt");
+                        });
+                        DrawEquipmentSlot(SelectedNecklaceContent, SelectedNecklace, () =>
+                        {
+                            _modInventoryManager.SelectedNecklace = null;
+                            SelectedNecklace = null;
+                            SelectedNecklaceContent = new GUIContent("Necklace");
+                        });
                     }
                     using (var horizontalScope = new GUILayout.HorizontalScope())
                     {
                         GUILayout.Space(136);
-                        DrawEquipmentSlot(SelectedRing1Content, SelectedRing1, () => { SelectedRing1 = null; SelectedRing1Content = new GUIContent("Ring1"); });
-                        DrawEquipmentSlot(SelectedRing2Content, SelectedRing2, () => { SelectedRing2 = null; SelectedRing2Content = new GUIContent("Ring2"); });
+                        DrawEquipmentSlot(SelectedRing1Content, SelectedRing1, () =>
+                        {
+                            _modInventoryManager.SelectedRing1 = null;
+                            SelectedRing1 = null;
+                            SelectedRing1Content = new GUIContent("Ring1");
+                        });
+                        DrawEquipmentSlot(SelectedRing2Content, SelectedRing2, () =>
+                        {
+                            _modInventoryManager.SelectedRing2 = null;
+                            SelectedRing2 = null;
+                            SelectedRing2Content = new GUIContent("Ring2");
+                        });
                     }
                 }
             }
@@ -263,7 +360,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                     GUILayout.Label($"★: {_wave1ClearCount}");
                     GUILayout.Label($"★★: {_wave2ClearCount}");
                     GUILayout.Label($"★★★: {_wave3ClearCount}");
-                }   
+                }
             }
         }
 
@@ -279,7 +376,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
                 GUI.enabled = true;
                 GUILayout.Label(playCount + "", GUILayout.Width(30));
-                
+
                 GUI.enabled = !_isCalculating;
                 if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.Height(20)))
                 {

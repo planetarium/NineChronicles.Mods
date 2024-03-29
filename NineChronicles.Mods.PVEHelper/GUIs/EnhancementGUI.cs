@@ -1,7 +1,9 @@
+using Nekoyume.Game;
 using Nekoyume.Model.Item;
+using NineChronicles.Mods.PVEHelper.BlockSimulation;
+using NineChronicles.Mods.PVEHelper.Extensions;
 using NineChronicles.Mods.PVEHelper.Manager;
 using NineChronicles.Mods.PVEHelper.Models;
-using NineChronicles.Mods.PVEHelper.Extensions;
 using UnityEngine;
 
 namespace NineChronicles.Mods.PVEHelper.GUIs
@@ -39,12 +41,27 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                         };
                     }
                     SelectedEquipment = modItem;
-                    
+
                     var slotText = $"Grade {equipment.Grade}" +
                         $"\n{equipment.ElementalType}" +
                         $"\n{equipment.GetName()}\n" +
                         $"+{equipment.level}";
                     SlotContent = new GUIContent(slotText);
+                }
+            };
+            _inventoryGUI.OnSlotDeselected += () =>
+            {
+                SelectedEquipment = null;
+                SlotContent = new GUIContent();
+            };
+            _inventoryGUI.OnSlotRemoveClicked += item =>
+            {
+                if (SelectedEquipment is not null &&
+                    item is Equipment equipment &&
+                    equipment.NonFungibleId.Equals(SelectedEquipment.Id))
+                {
+                    SelectedEquipment = null;
+                    SlotContent = new GUIContent();
                 }
             };
 
@@ -85,7 +102,12 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                                     PVEHelperPlugin.Log($"[EnhancementGUI] NotFound {SelectedEquipment.Id} in csv, add item");
                                     _modInventoryManager.AddItem(SelectedEquipment);
                                 }
-                                _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
+                                else
+                                {
+                                    _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
+                                }
+
+                                UpdateInventoryItem();
                             }
                         }
 
@@ -102,12 +124,33 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                                     PVEHelperPlugin.Log($"[EnhancementGUI] NotFound {SelectedEquipment.Id} in csv, add item");
                                     _modInventoryManager.AddItem(SelectedEquipment);
                                 }
-                                _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
+                                else
+                                {
+                                    _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
+                                }
+
+                                UpdateInventoryItem();
                             }
                         }
                     }
                 }
             }
+        }
+
+        private void UpdateInventoryItem()
+        {
+            if (SelectedEquipment is null ||
+                !_inventoryGUI.TryGetSelectedSlot(out var slot) ||
+                slot.item is not Equipment equipment)
+            {
+                return;
+            }
+
+            equipment = ModItemFactory.ModifyLevel(
+                TableSheets.Instance,
+                equipment,
+                SelectedEquipment);
+            slot.Set(equipment, slot.count, slot.isExistsInBlockchain, isModded: true);
         }
     }
 }

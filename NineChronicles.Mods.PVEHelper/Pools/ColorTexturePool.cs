@@ -27,6 +27,8 @@ namespace NineChronicles.Mods.PVEHelper.Pools
         public static readonly Texture2D Dark = Get(new Color(.1f, .1f, .1f));
         public static readonly Texture2D Gray = Get(Color.gray);
         public static readonly Texture2D White = Get(Color.white);
+        public static readonly Texture2D Blue = Get(Color.blue);
+        public static readonly Texture2D Green = Get(Color.green);
 
         public static Texture2D Get(Color color) => Get(1, 1, color);
 
