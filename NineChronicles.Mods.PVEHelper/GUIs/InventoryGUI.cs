@@ -48,7 +48,8 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         // Styles
         private readonly GUIStyle _toolTipStyle = new GUIStyle(GUI.skin.box)
         {
-            normal = { background = ColorTexturePool.Get(new Color(0.1f, 0.1f, 0.1f, 1.0f)) }
+            normal = { background = ColorTexturePool.Get(new Color(0.1f, 0.1f, 0.1f, 1.0f)) },
+            wordWrap = true,
         };
         // ~Styles
 
