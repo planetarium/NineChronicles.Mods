@@ -20,17 +20,18 @@ namespace NineChronicles.Mods.PVEHelper.Models
 
         public void Enhancement()
         {
-            Level += 1;
+            if (Level < 21)
+            {
+                Level += 1;
+            }
         }
 
         public void Downgrade()
         {
-            if (Level <= 0)
+            if (Level > 0)
             {
-                throw new InvalidOperationException("Level cannot be downgraded further.");
+                Level -= 1;
             }
-
-            Level -= 1;
         }
     }
 }
