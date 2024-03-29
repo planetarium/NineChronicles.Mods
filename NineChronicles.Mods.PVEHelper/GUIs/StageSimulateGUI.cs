@@ -19,6 +19,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
     {
         private bool _isCalculating;
         private int selectedStageId = 0;
+        private int simulationStep = 0;
         private (WorldSheet WorldSheet, StageSheet StageSheet, int clearedStageId)? StateData { get; set; } = null;
         private DateTimeOffset? LastSheetsUpdated { get; set; } = null;
         private readonly Rect _selectLayoutRect;
@@ -232,7 +233,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             if (_isCalculating)
             {
-                GUILayout.Label("Calculating...");
+                GUILayout.Label($"Calculating... {simulationStep}/{playCount}");
             }
             else
             {
@@ -306,14 +307,16 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             _wave2ClearCount = -1;
             _wave3ClearCount = -1;
 
+            simulationStep = 0;
+
             var clearWaveInfo = await UniTask.Run(() => BlockSimulation.Actions.HackAndSlashSimulation.Simulate(
                 _modInventoryManager.GetEquipments(),
                 TableSheets.Instance,
                 States.Instance,
                 selectedStageId / 50,
                 selectedStageId,
-                playCount));
-
+                playCount,
+                onProgress: step => simulationStep = step));
 
             _wave0ClearCount = clearWaveInfo.TryGetValue(0, out var w0) ? w0 : 0;
             _wave1ClearCount = clearWaveInfo.TryGetValue(1, out var w1) ? w1 : 0;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Lib9c.Renderers;
 using Nekoyume;
 using Nekoyume.Action;
@@ -120,6 +121,7 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
             int worldId,
             int stageId,
             int playCount,
+            [CanBeNull] Action<int> onProgress = null,
             long blockIndex = 0,
             int? randomSeed = null)
         {
@@ -136,6 +138,8 @@ namespace NineChronicles.Mods.PVEHelper.BlockSimulation.Actions
             for (var i = 0; i < playCount; i++)
             {
                 var clearWave = Simulate(equipments, tableSheets, states, worldId, stageId, blockIndex, randomSeed);
+
+                onProgress?.Invoke(i + 1);
 
                 if (result.TryGetValue(clearWave, out var count))
                 {
