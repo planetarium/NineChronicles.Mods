@@ -217,7 +217,11 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
             var isSelected = _viewModel.SelectedSlotIndex == index;
             GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
-            if (GUI.Button(iconRect, slot.slotGUIContent))
+            var style = new GUIStyle(GUI.skin.button)
+            {
+                wordWrap = true,
+            };
+            if (GUI.Button(iconRect, slot.slotGUIContent, style))
             {
                 if (isSelected)
                 {
