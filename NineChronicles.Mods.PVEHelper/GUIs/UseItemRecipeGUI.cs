@@ -146,7 +146,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 var itemStatOption = content.itemStatOptions[i];
                 GUI.Label(
                     new Rect(10f, 0f, 220f, 20f),
-                    $"{itemStatOption.statType} {itemStatOption.minValue}~{itemStatOption.maxValue}");
+                    $"{itemStatOption.statType} {itemStatOption.minValue} ~ {itemStatOption.maxValue}");
                 GUI.Label(new Rect(240f, 0f, 60f, 20f), $"({itemStatOption.enableChance:P0})");
                 itemStatOption.enable = GUI.Toggle(
                     new Rect(10f, 40f, 90f, 20f),
@@ -180,7 +180,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 GUI.Label(new Rect(240f, 0f, 60f, 20f), $"({itemSkillOption.enableChance:P0})");
                 GUI.Label(
                     new Rect(10f, 20f, 290f, 20f),
-                    $"{itemSkillOption.skillDamageMin}~{itemSkillOption.skillDamageMax} ({itemSkillOption.skillChanceMin:P0}~{itemSkillOption.skillChanceMax:P0})");
+                    $"{itemSkillOption.skillDamageMin} ~ {itemSkillOption.skillDamageMax} ({itemSkillOption.skillChanceMin:P0} ~ {itemSkillOption.skillChanceMax:P0})");
                 itemSkillOption.enable = GUI.Toggle(
                     new Rect(10f, 40f, 90f, 20f),
                     itemSkillOption.enable,

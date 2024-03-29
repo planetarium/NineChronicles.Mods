@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Nekoyume.TableData;
-using Nekoyume.UI;
+using NineChronicles.Mods.PVEHelper.Extensions;
 using NineChronicles.Mods.PVEHelper.Manager;
 using NineChronicles.Mods.PVEHelper.ViewModels;
 using UnityEngine;
@@ -109,10 +109,10 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             };
 
             _modInventoryManager.AddItem(item);
-            NotificationSystem.Push(
-                Nekoyume.Model.Mail.MailType.System,
-                "Item created.",
-                Nekoyume.UI.Scroller.NotificationCell.NotificationType.Notification);
+            var itemName = _itemRecipesGUI.TryGetSelectedSlot(out var selectedSlot)
+                ? selectedSlot.itemRecipe.equipmentRow.GetName()
+                : content.equipmentId.ToString();
+            NotificationGUI.Notify($"Item Created\n{itemName}");
         }
     }
 }
