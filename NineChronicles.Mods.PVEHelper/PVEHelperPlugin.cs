@@ -5,7 +5,6 @@ using BepInEx.Logging;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Nekoyume;
-using Nekoyume.Battle;
 using Nekoyume.Game;
 using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Item;
@@ -96,6 +95,7 @@ namespace NineChronicles.Mods.PVEHelper
             if (days > PlayerPrefs.GetInt(PluginLastDayOfUseKey, 0))
             {
                 Analyzer.Instance.Track(PluginDailyOpenKey);
+                PlayerPrefs.SetInt(PluginLastDayOfUseKey, days);
             }
         }
 
@@ -253,58 +253,71 @@ namespace NineChronicles.Mods.PVEHelper
 
         private void CreateInventoryGUI()
         {
-            var inventoryGUI = new InventoryGUI(
-                positionX: 100,
-                positionY: 80,
-                slotCountPerPage: 15,
-                slotCountPerRow: 5);
-            inventoryGUI.Clear();
+            if (_inventoryGUI == null)
+            {
+                _inventoryGUI = new InventoryGUI(
+                    positionX: 100,
+                    positionY: 80,
+                    slotCountPerPage: 15,
+                    slotCountPerRow: 5);
+                _inventoryGUI.OnSlotRemoveClicked += item =>
+                {
+                    if (item is Equipment equipment)
+                    {
+                        modInventoryManager.DeleteItem(equipment.NonFungibleId);
+                    }
+                };
+            }
+            else
+            {
+                _inventoryGUI.Clear();
+            }
 
             var inventory = States.Instance.CurrentAvatarState?.inventory;
-            List<Equipment> equipments = new List<Equipment>();
-            if (inventory is not null)
+            if (inventory != null)
             {
-                foreach (var inventoryItem in inventory.Items)
+                foreach (var equipment in inventory.Equipments)
                 {
-                    if (inventoryItem.item is Equipment inventoryEquipment)
-                    {
-                        equipments.Add(inventoryEquipment);
-                    }
-                    else
-                    {
-                        inventoryGUI.AddItem(inventoryItem.item, inventoryItem.count);
-                    }
-                }
-                foreach (var modItem in modInventoryManager.GetAllItems())
-                {
-                    if (modItem.ExistsItem)
-                    {
-                        if (inventory.TryGetNonFungibleItem<Equipment>(modItem.Id, out var existsItem))
-                        {
-                            equipments.Remove(existsItem);
-                            var createdEquipment = ModItemFactory.ModifyLevel(TableSheets.Instance, existsItem, modItem);
-                            equipments.Add(createdEquipment);
-                        }
-                        else
-                        {
-                            Log(LogLevel.Info, $"Error {modItem.Id}");
-                        }
-                    }
-                    else
-                    {
-                        var createdEquipment = ModItemFactory.CreateEquipmentWithModItem(TableSheets.Instance, modItem);
-                        equipments.Add(createdEquipment);
-                    }
+                    _inventoryGUI.AddOrReplaceItem(equipment, isExistsInBlockchain: true, isModded: false);
                 }
             }
-            equipments.Sort((e1, e2) => CPHelper.GetCP(e2).CompareTo(CPHelper.GetCP(e1)));
 
-            foreach (var equipment in equipments)
+            var removeList = new List<Guid>();
+            foreach (var modItem in modInventoryManager.GetAllItems())
             {
-                inventoryGUI.AddItem(equipment);
+                Equipment equipment;
+                if (modItem.ExistsItem)
+                {
+                    if (inventory.TryGetNonFungibleItem(modItem.Id, out equipment))
+                    {
+                        equipment = ModItemFactory.ModifyLevel(
+                            TableSheets.Instance,
+                            equipment,
+                            modItem);
+                        _inventoryGUI.AddOrReplaceItem(equipment, isExistsInBlockchain: modItem.ExistsItem, isModded: true);
+                        continue;
+                    }
+
+                    // NOTE: If here, it means that the item in the blockchain is not in the inventory anymore.
+                    removeList.Add(modItem.Id);
+                    continue;
+                }
+
+                equipment = ModItemFactory.CreateEquipmentWithModItem(TableSheets.Instance, modItem);
+                if (equipment is null)
+                {
+                    continue;
+                }
+
+                _inventoryGUI.AddOrReplaceItem(equipment, isExistsInBlockchain: modItem.ExistsItem, isModded: true);
             }
 
-            _inventoryGUI = inventoryGUI;
+            foreach (var id in removeList)
+            {
+                modInventoryManager.DeleteItem(id);
+            }
+
+            _inventoryGUI.Sort();
         }
 
         private void RemoveInventory()

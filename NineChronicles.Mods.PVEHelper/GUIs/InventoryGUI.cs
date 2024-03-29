@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Nekoyume.Model.Item;
-using NineChronicles.Mods.PVEHelper.Extensions;
 using NineChronicles.Mods.PVEHelper.Pools;
 using NineChronicles.Mods.PVEHelper.ViewModels;
 using UnityEngine;
@@ -28,13 +27,16 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private const int _slotWidth = _itemIconWidth;
         private const int _slotHeight = _itemIconHeight + _itemNameHeight;
 
-        private static readonly Rect _itemIconRectPrefab = new Rect(0, 0, _itemIconWidth, _itemIconHeight);
-        private static readonly Rect _itemNameRectPrefab = new Rect(0, _itemIconHeight, _itemIconWidth, _itemNameHeight);
+        private static readonly Rect _itemIconRectPrefab = new Rect(0f, 0f, _itemIconWidth, _itemIconHeight);
+        private static readonly Rect _itemExistsRectPrefab = new Rect(0f, 0f, 8f, 8f);
+        private static readonly Rect _itemModdedRectPrefab = new Rect(0f, 0f, 8f, 8f);
         private static readonly Rect _itemCountRectPrefab = new Rect(
             _itemIconWidth - _itemCountWidth,
             _itemIconHeight - _itemCountHeight,
             _itemCountWidth,
             _itemCountHeight);
+        private static readonly Rect _itemNameRectPrefab = new Rect(0, _itemIconHeight, _itemIconWidth, _itemNameHeight);
+
         // ~SlotGUI
 
         // TageNumberGUI
@@ -46,6 +48,8 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         // ~TageNumberGUI
 
         // Styles
+        private GUIStyle _existsInBlockchainStyle;
+        private GUIStyle _moddedStyle;
         private GUIStyle _toolTipStyle;
         // ~Styles
 
@@ -64,12 +68,18 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         // pools
         private readonly Rect _rootBoxRect;
         private readonly List<Rect> _tabRectPool = new List<Rect>();
-        private readonly List<(Rect iconRect, Rect textRect, Rect countRect)> _slotRectPool =
-            new List<(Rect, Rect, Rect)>();
+        private readonly List<(
+            Rect iconRect,
+            Rect existsRect,
+            Rect moddedRect,
+            Rect countRect,
+            Rect nameRect)> _slotRectPool =
+            new List<(Rect, Rect, Rect, Rect, Rect)>();
         private readonly List<Rect> _pageNumerRectPool = new List<Rect>();
 
         public event Action<(IItem item, int count)> OnSlotSelected;
         public event Action OnSlotDeselected;
+        public event Action<IItem> OnSlotRemoveClicked;
 
         public InventoryGUI(
             int positionX,
@@ -112,18 +122,33 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                     x = _slotWidth * (i % _slotCountPerRow),
                     y = _slotHeight * rowIndex,
                 };
-                var nameRect = new Rect(_itemNameRectPrefab)
+                var existsRect = new Rect(_itemExistsRectPrefab)
                 {
-                    x = iconRect.x,
-                    y = iconRect.y + iconRect.height,
+                    x = iconRect.x + 2f,
+                    y = iconRect.y + 2f,
+                };
+                var moddedRect = new Rect(_itemModdedRectPrefab)
+                {
+                    x = iconRect.x + 2f + existsRect.width + 2f,
+                    y = iconRect.y + 2f,
                 };
                 var countRect = new Rect(_itemCountRectPrefab)
                 {
                     x = iconRect.x + iconRect.width - _itemCountWidth,
                     y = iconRect.y + iconRect.height - _itemCountHeight,
                 };
+                var nameRect = new Rect(_itemNameRectPrefab)
+                {
+                    x = iconRect.x,
+                    y = iconRect.y + iconRect.height,
+                };
 
-                _slotRectPool.Add((iconRect, nameRect, countRect));
+                _slotRectPool.Add((
+                    iconRect,
+                    existsRect,
+                    moddedRect,
+                    countRect,
+                    nameRect));
             }
 
             for (int i = 0; i < _pageNumberCount; i++)
@@ -199,7 +224,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
         private void DrawSlot(int index, InventoryViewModel.Slot slot)
         {
-            var (iconRect, nameRect, countRect) = _slotRectPool[index];
+            var (iconRect, existsRect, moddedRect, countRect, nameRect) = _slotRectPool[index];
             var item = slot.item;
             var count = slot.count;
 
@@ -233,13 +258,35 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 }
             }
 
-            GUI.backgroundColor = Color.white;
-            GUI.skin.label.fontStyle = isSelected ? FontStyle.Bold : FontStyle.Normal;
-            GUI.Label(nameRect, item.GetName());
-
             if (count > 1)
             {
                 GUI.Label(countRect, count.ToString());
+            }
+
+            if (slot.isExistsInBlockchain)
+            {
+                _existsInBlockchainStyle ??= new GUIStyle(GUI.skin.box)
+                {
+                    normal = { background = ColorTexturePool.Blue },
+                    active = { background = ColorTexturePool.Blue },
+                };
+                GUI.Box(existsRect, string.Empty, _existsInBlockchainStyle);
+            }
+
+            if (slot.isModded)
+            {
+                _moddedStyle ??= new GUIStyle(GUI.skin.box)
+                {
+                    normal = { background = ColorTexturePool.Green },
+                    active = { background = ColorTexturePool.Green },
+                };
+                GUI.Box(moddedRect, string.Empty, _moddedStyle);
+                if (GUI.Button(nameRect, "Remove"))
+                {
+                    PVEHelperPlugin.Log($"Remove button clicked.");
+                    RemoveItem(item, count);
+                    OnSlotRemoveClicked?.Invoke(item);
+                }
             }
         }
 
@@ -305,19 +352,30 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             _viewModel.Clear();
         }
 
-        public void AddItem(IItem item, int count)
+        public void AddItem(IItem item, int count, bool isExistsInBlockchain, bool isModded)
         {
-            _viewModel.AddItem(item, count);
+            _viewModel.AddItem(item, count, isExistsInBlockchain, isModded);
         }
 
-        public void AddItem(INonFungibleItem item)
+        public void AddOrReplaceItem(INonFungibleItem item, bool isExistsInBlockchain, bool isModded)
         {
-            _viewModel.AddItem(item, 1);
+            _viewModel.AddOrReplaceItem(item, 1, isExistsInBlockchain, isModded);
         }
 
         public void RemoveItem(IItem item, int count)
         {
             _viewModel.RemoveItem(item, count);
+        }
+
+        public void Sort()
+        {
+            _viewModel.Sort();
+        }
+
+        public bool TryGetSelectedSlot(out InventoryViewModel.Slot slot)
+        {
+            slot = _viewModel.SelectedSlot;
+            return slot is not null;
         }
     }
 }
