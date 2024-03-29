@@ -19,13 +19,13 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             _modInventoryManager = modInventoryManager;
             _itemRecipesGUI = new ItemRecipesGUI(
-                positionX: 100,
-                positionY: 100,
+                positionX: 0,
+                positionY: 60,
                 slotCountPerPage: 15,
                 slotCountPerRow: 5);
             _useItemRecipeGUI = new UseItemRecipeGUI(
-                positionX: 610,
-                positionY: 100);
+                positionX: 510,
+                positionY: 60);
 
             _itemRecipesGUI.OnSlotSelected += (itemRecipe) => _useItemRecipeGUI.SetItemRecipe(itemRecipe);
             _itemRecipesGUI.OnSlotDeselected += () => _useItemRecipeGUI.Clear();

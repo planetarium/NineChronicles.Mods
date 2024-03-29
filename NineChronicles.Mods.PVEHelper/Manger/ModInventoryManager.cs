@@ -1,12 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using Nekoyume.Model.Item;
 using NineChronicles.Mods.PVEHelper.Models;
 using NineChronicles.Mods.PVEHelper.Utils;
-using Nekoyume.Model.Item;
-using System.Collections.Generic;
 
 namespace NineChronicles.Mods.PVEHelper.Manager
 {

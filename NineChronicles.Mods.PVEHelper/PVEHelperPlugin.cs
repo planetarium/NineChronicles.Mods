@@ -254,8 +254,8 @@ namespace NineChronicles.Mods.PVEHelper
         private void CreateInventoryGUI()
         {
             var inventoryGUI = new InventoryGUI(
-                positionX: 100,
-                positionY: 100,
+                positionX: 0,
+                positionY: 60,
                 slotCountPerPage: 15,
                 slotCountPerRow: 5);
             inventoryGUI.Clear();

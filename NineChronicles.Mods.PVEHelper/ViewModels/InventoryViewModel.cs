@@ -234,12 +234,15 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
 
         private Tab GetTab(IItem item)
         {
-            var tabIndex = item switch
+            var tabIndex = item.ItemSubType switch
             {
-                Equipment equipment => equipment.ItemSubType != ItemSubType.Aura
-                    ? 0
-                    : 1,
-                _ => 2, // TODO: Add more tabs
+                ItemSubType.Weapon => 0,
+                ItemSubType.Armor => 1,
+                ItemSubType.Belt => 2,
+                ItemSubType.Necklace => 3,
+                ItemSubType.Ring => 4,
+                ItemSubType.Aura => 5,
+                _ => 6,
             };
             return _tabs[tabIndex];
         }
