@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Nekoyume.Model.Item;
 using NineChronicles.Mods.PVEHelper.Extensions;
+using NineChronicles.Mods.PVEHelper.Pools;
 using NineChronicles.Mods.PVEHelper.ViewModels;
 using UnityEngine;
 
@@ -43,6 +44,13 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
         private static readonly Rect _pageNumberRectPrefab = new Rect(0, 0, _pageNumberWidth, _pageNumberHeight);
         // ~TageNumberGUI
+
+        // Styles
+        private readonly GUIStyle _toolTipStyle = new GUIStyle(GUI.skin.box)
+        {
+            normal = { background = ColorTexturePool.Get(new Color(0.1f, 0.1f, 0.1f, 1.0f)) }
+        };
+        // ~Styles
 
         private readonly int _slotCountPerPage;
         private readonly int _slotCountPerRow;
@@ -284,7 +292,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             var mousePosition = Event.current.mousePosition;
             var tooltipRect = new Rect(mousePosition.x, mousePosition.y, 200, 220);
             tooltipRect = GUIToolbox.MoveInsideScreen(tooltipRect, 10, 10);
-            GUI.Box(tooltipRect, tooltip);
+            GUI.Box(tooltipRect, tooltip, _toolTipStyle);
         }
 
         public void Clear()
