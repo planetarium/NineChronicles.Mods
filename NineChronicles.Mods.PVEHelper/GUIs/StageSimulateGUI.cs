@@ -115,8 +115,8 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             };
 
             _selectLayoutRect = new Rect(
-                GUIToolbox.ScreenWidthReference - 400,
-                GUIToolbox.ScreenHeightReference / 2 - 160,
+                GUIToolbox.ScreenWidthReference - 450,
+                GUIToolbox.ScreenHeightReference / 2 - 230,
                 400,
                 800);
             _simulateLayoutRect = new Rect(
@@ -153,13 +153,13 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                     }
                     using (var horizontalScope = new GUILayout.HorizontalScope())
                     {
-                        GUILayout.Space(140);
+                        GUILayout.Space(136);
                         DrawEquipmentSlot(SelectedBeltContent, SelectedBelt, () => { SelectedBelt = null; SelectedBeltContent = new GUIContent("Belt"); });
                         DrawEquipmentSlot(SelectedNecklaceContent, SelectedNecklace, () => { SelectedNecklace = null; SelectedNecklaceContent = new GUIContent("Necklace"); });
                     }
                     using (var horizontalScope = new GUILayout.HorizontalScope())
                     {
-                        GUILayout.Space(140);
+                        GUILayout.Space(136);
                         DrawEquipmentSlot(SelectedRing1Content, SelectedRing1, () => { SelectedRing1 = null; SelectedRing1Content = new GUIContent("Ring1"); });
                         DrawEquipmentSlot(SelectedRing2Content, SelectedRing2, () => { SelectedRing2 = null; SelectedRing2Content = new GUIContent("Ring2"); });
                     }
