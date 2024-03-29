@@ -19,6 +19,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
     {
         private bool _isCalculating;
         private int selectedStageId = 0;
+        private int simulationStep = 0;
         private (WorldSheet WorldSheet, StageSheet StageSheet, int clearedStageId)? StateData { get; set; } = null;
         private DateTimeOffset? LastSheetsUpdated { get; set; } = null;
         private readonly Rect _selectLayoutRect;
@@ -187,11 +188,15 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                             (_, index) => selectedStageId = index + 1,
                             selectedStageId - 1);
 
+                        GUI.enabled = !_isCalculating;
                         if (GUILayout.Button("Simulate"))
                         {
                             Simulate();
                             PVEHelperPlugin.Log($"[StageGUI] Simulate button clicked {selectedStageId})");
                         }
+
+                        GUI.enabled = true;
+
                         DrawSimulationResultTextArea();
                     }
                     DrawPlayCountController();
@@ -226,12 +231,19 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
         private void DrawSimulationResultTextArea()
         {
-            using (var horizontalScope = new GUILayout.HorizontalScope())
+            if (_isCalculating)
             {
-                GUILayout.Label($"0 Wave Clear: {_wave0ClearCount}");
-                GUILayout.Label($"1 Wave Clear: {_wave1ClearCount}");
-                GUILayout.Label($"2 Wave Clear: {_wave2ClearCount}");
-                GUILayout.Label($"3 Wave Clear: {_wave3ClearCount}");
+                GUILayout.Label($"Simulating... {simulationStep}/{playCount}");
+            }
+            else
+            {
+                using (var horizontalScope = new GUILayout.HorizontalScope())
+                {
+                    GUILayout.Label($"0 Wave Clear: {_wave0ClearCount}");
+                    GUILayout.Label($"1 Wave Clear: {_wave1ClearCount}");
+                    GUILayout.Label($"2 Wave Clear: {_wave2ClearCount}");
+                    GUILayout.Label($"3 Wave Clear: {_wave3ClearCount}");
+                }   
             }
         }
 
@@ -239,18 +251,25 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             using (var verticalScope = new GUILayout.VerticalScope())
             {
-                if (GUILayout.Button("+", GUILayout.Width(20), GUILayout.Height(20)))
+                GUI.enabled = !_isCalculating;
+                if (GUILayout.Button("+", GUILayout.Width(30), GUILayout.Height(20)))
                 {
                     playCount += 100;
                 }
-                GUILayout.Label(playCount + "", GUILayout.Width(20));
-                if (GUILayout.Button("-", GUILayout.Width(20), GUILayout.Height(20)))
+
+                GUI.enabled = true;
+                GUILayout.Label(playCount + "", GUILayout.Width(30));
+                
+                GUI.enabled = !_isCalculating;
+                if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.Height(20)))
                 {
                     if (playCount >= 0)
                     {
                         playCount -= 100;
                     }
                 }
+
+                GUI.enabled = true;
             }
         }
 
@@ -258,6 +277,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             void Btn(string text, int change)
             {
+                GUI.enabled = !_isCalculating;
                 if (GUILayout.Button(text))
                 {
                     if (index + change > 0 && index + change < list.Length)
@@ -265,6 +285,8 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                         onChanged(list, index + change);
                     }
                 }
+
+                GUI.enabled = true;
             }
 
             using (var horizontalScope = new GUILayout.HorizontalScope())
@@ -285,14 +307,16 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             _wave2ClearCount = -1;
             _wave3ClearCount = -1;
 
+            simulationStep = 0;
+
             var clearWaveInfo = await UniTask.Run(() => BlockSimulation.Actions.HackAndSlashSimulation.Simulate(
                 _modInventoryManager.GetEquipments(),
                 TableSheets.Instance,
                 States.Instance,
                 selectedStageId / 50,
                 selectedStageId,
-                playCount));
-
+                playCount,
+                onProgress: step => simulationStep = step));
 
             _wave0ClearCount = clearWaveInfo.TryGetValue(0, out var w0) ? w0 : 0;
             _wave1ClearCount = clearWaveInfo.TryGetValue(1, out var w1) ? w1 : 0;
