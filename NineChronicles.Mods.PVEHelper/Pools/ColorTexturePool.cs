@@ -23,6 +23,11 @@ namespace NineChronicles.Mods.PVEHelper.Pools
 
         private static readonly List<CachedTexture> _cachedTextures = new List<CachedTexture>();
 
+        public static readonly Texture2D Black = Get(Color.black);
+        public static readonly Texture2D Dark = Get(new Color(.1f, .1f, .1f));
+        public static readonly Texture2D Gray = Get(Color.gray);
+        public static readonly Texture2D White = Get(Color.white);
+
         public static Texture2D Get(Color color) => Get(1, 1, color);
 
         public static Texture2D Get(int width, int height, Color color)

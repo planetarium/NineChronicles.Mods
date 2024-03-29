@@ -46,11 +46,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         // ~TageNumberGUI
 
         // Styles
-        private readonly GUIStyle _toolTipStyle = new GUIStyle(GUI.skin.box)
-        {
-            normal = { background = ColorTexturePool.Get(new Color(0.1f, 0.1f, 0.1f, 1.0f)) },
-            wordWrap = true,
-        };
+        private GUIStyle _toolTipStyle;
         // ~Styles
 
         private readonly int _slotCountPerPage;
@@ -297,6 +293,11 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             var mousePosition = Event.current.mousePosition;
             var tooltipRect = new Rect(mousePosition.x, mousePosition.y, 200, 220);
             tooltipRect = GUIToolbox.MoveInsideScreen(tooltipRect, 10, 10);
+            _toolTipStyle ??= new GUIStyle(GUI.skin.box)
+            {
+                normal = { background = ColorTexturePool.Dark },
+                wordWrap = true,
+            };
             GUI.Box(tooltipRect, tooltip, _toolTipStyle);
         }
 

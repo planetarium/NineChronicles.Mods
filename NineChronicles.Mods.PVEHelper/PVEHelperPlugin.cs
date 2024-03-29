@@ -48,7 +48,8 @@ namespace NineChronicles.Mods.PVEHelper
         // private EquipGUI _equipGUI;
         private InventoryGUI _inventoryGUI;
         private ItemCreationGUI _itemCreationGUI;
-        private IGUI _overlayGUI;
+        private NotificationGUI _notificationGUI;
+        private IGUI _tabGUI;
         private StageSimulateGUI _stageSimulateGUI;
 
         public static void Log(LogLevel logLevel, object data)
@@ -103,7 +104,8 @@ namespace NineChronicles.Mods.PVEHelper
             // _equipGUI = null;
             _inventoryGUI = null;
             _itemCreationGUI = null;
-            _overlayGUI = null;
+            _notificationGUI = null;
+            _tabGUI = null;
             _stageSimulateGUI = null;
             EnableEventSystem();
         }
@@ -116,7 +118,7 @@ namespace NineChronicles.Mods.PVEHelper
                 DisableModeGUI();
             }
 
-            if (_overlayGUI is not null)
+            if (_tabGUI is not null)
             {
                 return;
             }
@@ -164,13 +166,14 @@ namespace NineChronicles.Mods.PVEHelper
                 //     }
                 // }
 
-                _overlayGUI = new TabGUI(new List<(string Name, Func<IGUI> UI)>
+                _tabGUI = new TabGUI(new List<(string Name, Func<IGUI> UI)>
                 {
                     // ("Simulate", CreateSimulateGUI),
                     ("Create", CreateItemCreationGUI),
                     ("Enhancement", CreateEnhancementGUI),
                     ("Simulate", CreateStageSimulateGUI),
                 }, DisableModeGUI);
+                _notificationGUI = new NotificationGUI();
 
                 TrackOnce();
                 DisableEventSystem();
@@ -314,8 +317,10 @@ namespace NineChronicles.Mods.PVEHelper
             // _equipGUI?.OnGUI();
             _inventoryGUI?.OnGUI();
             _itemCreationGUI?.OnGUI();
-            _overlayGUI?.OnGUI();
+            _tabGUI?.OnGUI();
             _stageSimulateGUI?.OnGUI();
+            _notificationGUI?.OnGUI();
+
         }
 
         //private void OnDestroy()
