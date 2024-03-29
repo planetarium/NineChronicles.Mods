@@ -56,47 +56,36 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             _modInventoryManager = modInventoryManager;
             _inventoryGUI = inventoryGUI;
 
-            SelectedAura = modInventoryManager.SelectedAura;
-            SelectedWeapon = modInventoryManager.SelectedWeapon;
-            SelectedArmor = modInventoryManager.SelectedArmor;
-            SelectedBelt = modInventoryManager.SelectedBelt;
-            SelectedNecklace = modInventoryManager.SelectedNecklace;
-            SelectedRing1 = modInventoryManager.SelectedRing1;
-            SelectedRing2 = modInventoryManager.SelectedRing2;
+            InitEquipments();
 
             _inventoryGUI.OnSlotSelected += tuple =>
             {
                 if (tuple.item is Equipment equipment)
                 {
-                    var slotText = $"Grade {equipment.Grade}" +
-                        $"\n{equipment.ElementalType}" +
-                        $"\n{equipment.GetName()}\n" +
-                        $"+{equipment.level}";
-
                     switch (equipment.ItemSubType)
                     {
                         case ItemSubType.Weapon:
                             SelectedWeapon = equipment;
                             _modInventoryManager.SelectedWeapon = equipment;
-                            SelectedWeaponContent = new GUIContent(slotText);
+                            SelectedWeaponContent = CreateSlotText(equipment);
                             PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected weapon {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                         case ItemSubType.Armor:
                             SelectedArmor = equipment;
                             _modInventoryManager.SelectedArmor = equipment;
-                            SelectedArmorContent = new GUIContent(slotText);
+                            SelectedArmorContent = CreateSlotText(equipment);
                             PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected armor {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                         case ItemSubType.Belt:
                             SelectedBelt = equipment;
                             _modInventoryManager.SelectedBelt = equipment;
-                            SelectedBeltContent = new GUIContent(slotText);
+                            SelectedBeltContent = CreateSlotText(equipment);
                             PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected belt {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                         case ItemSubType.Necklace:
                             SelectedNecklace = equipment;
                             _modInventoryManager.SelectedNecklace = equipment;
-                            SelectedNecklaceContent = new GUIContent(slotText);
+                            SelectedNecklaceContent = CreateSlotText(equipment);
                             PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected necklace {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                         case ItemSubType.Ring:
@@ -104,21 +93,21 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                             {
                                 SelectedRing1 = equipment;
                                 _modInventoryManager.SelectedRing1 = equipment;
-                                SelectedRing1Content = new GUIContent(slotText);
+                                SelectedRing1Content = CreateSlotText(equipment);
                                 PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected ring1 {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             }
                             else
                             {
                                 SelectedRing2 = equipment;
                                 _modInventoryManager.SelectedRing2 = equipment;
-                                SelectedRing2Content = new GUIContent(slotText);
+                                SelectedRing2Content = CreateSlotText(equipment);
                                 PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected ring2 {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             }
                             break;
                         case ItemSubType.Aura:
                             SelectedAura = equipment;
                             _modInventoryManager.SelectedAura = equipment;
-                            SelectedAuraContent = new GUIContent(slotText);
+                            SelectedAuraContent = CreateSlotText(equipment);
                             PVEHelperPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected aura {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                     }
@@ -202,6 +191,34 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                     DrawPlayCountController();
                 }
             }
+        }
+
+        private void InitEquipments()
+        {
+            SelectedAura = _modInventoryManager.SelectedAura;
+            SelectedWeapon = _modInventoryManager.SelectedWeapon;
+            SelectedArmor = _modInventoryManager.SelectedArmor;
+            SelectedBelt = _modInventoryManager.SelectedBelt;
+            SelectedNecklace = _modInventoryManager.SelectedNecklace;
+            SelectedRing1 = _modInventoryManager.SelectedRing1;
+            SelectedRing2 = _modInventoryManager.SelectedRing2;
+
+            SelectedAuraContent = CreateSlotText(SelectedAura);
+            SelectedWeaponContent = CreateSlotText(SelectedWeapon);
+            SelectedArmorContent = CreateSlotText(SelectedArmor);
+            SelectedBeltContent = CreateSlotText(SelectedBelt);
+            SelectedNecklaceContent = CreateSlotText(SelectedNecklace);
+            SelectedRing1Content = CreateSlotText(SelectedRing1);
+            SelectedRing2Content = CreateSlotText(SelectedRing2);
+        }
+
+        private GUIContent CreateSlotText(Equipment equipment)
+        {
+            var slotText = $"Grade {equipment.Grade}" +
+                $"\n{equipment.ElementalType}" +
+                $"\n{equipment.GetName()}\n" +
+                $"+{equipment.level}";
+            return new GUIContent(slotText);
         }
 
         private void DrawEquipmentSlot(GUIContent content, Equipment? equipment, Action onRemove)
