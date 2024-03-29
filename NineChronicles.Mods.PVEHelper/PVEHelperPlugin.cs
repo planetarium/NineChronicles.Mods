@@ -7,6 +7,7 @@ using HarmonyLib;
 using Nekoyume;
 using Nekoyume.Battle;
 using Nekoyume.Game;
+using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Item;
 using Nekoyume.State;
 using Nekoyume.UI;
@@ -127,44 +128,44 @@ namespace NineChronicles.Mods.PVEHelper
             {
                 Log("space key pressed.");
 
-                // var itemSlotState = States.Instance.CurrentItemSlotStates[BattleType.Adventure];
+                var itemSlotState = States.Instance.CurrentItemSlotStates[BattleType.Adventure];
 
-                // foreach (var equipmentId in itemSlotState.Equipments)
-                // {
-                //     var inventory = States.Instance.CurrentAvatarState?.inventory;
+                foreach (var equipmentId in itemSlotState.Equipments)
+                {
+                    var inventory = States.Instance.CurrentAvatarState?.inventory;
 
-                //     if (inventory.TryGetNonFungibleItem<Equipment>(equipmentId, out var equipment))
-                //     {
-                //         switch (equipment.ItemSubType)
-                //         {
-                //             case ItemSubType.Weapon:
-                //                 modInventoryManager.SelectedWeapon = equipment;
-                //                 break;
-                //             case ItemSubType.Armor:
-                //                 modInventoryManager.SelectedArmor = equipment;
-                //                 break;
-                //             case ItemSubType.Belt:
-                //                 modInventoryManager.SelectedBelt = equipment;
-                //                 break;
-                //             case ItemSubType.Necklace:
-                //                 modInventoryManager.SelectedNecklace = equipment;
-                //                 break;
-                //             case ItemSubType.Ring:
-                //                 if (modInventoryManager.SelectedRing1 == null)
-                //                 {
-                //                     modInventoryManager.SelectedRing1 = equipment;
-                //                 }
-                //                 else
-                //                 {
-                //                     modInventoryManager.SelectedRing2 = equipment;
-                //                 }
-                //                 break;
-                //             case ItemSubType.Aura:
-                //                 modInventoryManager.SelectedAura = equipment;
-                //                 break;
-                //         }
-                //     }
-                // }
+                    if (inventory.TryGetNonFungibleItem<Equipment>(equipmentId, out var equipment))
+                    {
+                        switch (equipment.ItemSubType)
+                        {
+                            case ItemSubType.Weapon:
+                                modInventoryManager.SelectedWeapon = equipment;
+                                break;
+                            case ItemSubType.Armor:
+                                modInventoryManager.SelectedArmor = equipment;
+                                break;
+                            case ItemSubType.Belt:
+                                modInventoryManager.SelectedBelt = equipment;
+                                break;
+                            case ItemSubType.Necklace:
+                                modInventoryManager.SelectedNecklace = equipment;
+                                break;
+                            case ItemSubType.Ring:
+                                if (modInventoryManager.SelectedRing1 == null)
+                                {
+                                    modInventoryManager.SelectedRing1 = equipment;
+                                }
+                                else
+                                {
+                                    modInventoryManager.SelectedRing2 = equipment;
+                                }
+                                break;
+                            case ItemSubType.Aura:
+                                modInventoryManager.SelectedAura = equipment;
+                                break;
+                        }
+                    }
+                }
 
                 _tabGUI = new TabGUI(new List<(string Name, Func<IGUI> UI)>
                 {
