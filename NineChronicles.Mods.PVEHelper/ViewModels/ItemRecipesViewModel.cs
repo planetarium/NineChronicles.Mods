@@ -132,17 +132,14 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
         public int PageCount => _tabs[CurrentTabIndex].pages.Count;
         public IEnumerable<Slot> CurrentPageSlots => _tabs[CurrentTabIndex].pages[CurrentPageIndex].slots;
 
-        public ItemRecipesViewModel(int itemCountPerEachPage)
+        public ItemRecipesViewModel(int tabCount, int itemCountPerEachPage)
         {
             _slotCountPerEachPage = itemCountPerEachPage;
-            _tabs = new List<Tab>
+            _tabs = new List<Tab>();
+            for (int i = 0; i < tabCount; i++)
             {
-                new Tab(0, itemCountPerEachPage),
-                new Tab(1, itemCountPerEachPage),
-                new Tab(2, itemCountPerEachPage),
-                new Tab(3, itemCountPerEachPage),
-                new Tab(4, itemCountPerEachPage),
-            };
+                _tabs.Add(new Tab(i, _slotCountPerEachPage));
+            }
         }
 
         public bool IsEmptyPage(int pageIndex)
@@ -206,6 +203,7 @@ namespace NineChronicles.Mods.PVEHelper.ViewModels
                 ItemSubType.Belt => 2,
                 ItemSubType.Necklace => 3,
                 ItemSubType.Ring => 4,
+                ItemSubType.Aura => 5,
                 _ => -1,
             };
             if (tabIndex == -1)

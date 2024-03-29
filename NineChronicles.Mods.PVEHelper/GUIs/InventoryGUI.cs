@@ -14,7 +14,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         // TabGUI
         private const int _tabWidth = 100;
         private const int _tabHeight = 40;
-        private const int _tabCount = 3; // temporary.
+        private const int _tabCount = 3;
 
         private static readonly Rect _tabRectPrefab = new Rect(0, 0, _tabWidth, _tabHeight);
         // ~TabGUI
@@ -82,7 +82,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             _slotCountPerPage = slotCountPerPage;
             _slotCountPerRow = slotCountPerRow;
-            _viewModel = new InventoryViewModel(slotCountPerPage);
+            _viewModel = new InventoryViewModel(_tabCount, slotCountPerPage);
 
             var inventoryWith = _slotWidth * slotCountPerRow;
             var slotRowCount = slotCountPerPage / slotCountPerRow;

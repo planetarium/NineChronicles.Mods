@@ -11,9 +11,9 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
     public class ItemRecipesGUI : IGUI
     {
         // TabGUI
-        private const int _tabWidth = 100;
+        private const int _tabWidth = 80;
         private const int _tabHeight = 40;
-        private const int _tabCount = 5;
+        private const int _tabCount = 6;
 
         private static readonly Rect _tabRectPrefab = new Rect(0, 0, _tabWidth, _tabHeight);
         // ~TabGUI
@@ -74,7 +74,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             _slotCountPerPage = slotCountPerPage;
             _slotCountPerRow = slotCountPerRow;
-            _viewModel = new ItemRecipesViewModel(slotCountPerPage);
+            _viewModel = new ItemRecipesViewModel(_tabCount, slotCountPerPage);
 
             var width = _slotWidth * slotCountPerRow;
             var slotRowCount = slotCountPerPage / slotCountPerRow;
@@ -163,6 +163,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 2 => "Belt",
                 3 => "Necklace",
                 4 => "Ring",
+                5 => "Aura",
                 _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
             };
             var isSelected = _viewModel.CurrentTabIndex == index;
