@@ -14,7 +14,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         // TabGUI
         private const int _tabWidth = 100;
         private const int _tabHeight = 40;
-        private const int _tabCount = 3;
+        private const int _tabCount = 7;
 
         private static readonly Rect _tabRectPrefab = new Rect(0, 0, _tabWidth, _tabHeight);
         // ~TabGUI
@@ -40,7 +40,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         // TageNumberGUI
         private const int _pageNumberWidth = 100;
         private const int _pageNumberHeight = 40;
-        private const int _pageNumberCount = 5; // temporary.
+        private const int _pageNumberCount = 5;
 
         private static readonly Rect _pageNumberRectPrefab = new Rect(0, 0, _pageNumberWidth, _pageNumberHeight);
         // ~TageNumberGUI
@@ -56,12 +56,13 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         private readonly InventoryViewModel _viewModel;
 
         // groups
-        private readonly Rect _inventoryGroupRect;
+        private readonly Rect _rootGroupRect;
         private readonly Rect _tabGroupRect;
         private readonly Rect _slotGroupRect;
         private readonly Rect _pageNumberGroupRect;
 
         // pools
+        private readonly Rect _rootBoxRect;
         private readonly List<Rect> _tabRectPool = new List<Rect>();
         private readonly List<(Rect iconRect, Rect textRect, Rect countRect)> _slotRectPool =
             new List<(Rect, Rect, Rect)>();
@@ -80,23 +81,25 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             _slotCountPerRow = slotCountPerRow;
             _viewModel = new InventoryViewModel(_tabCount, slotCountPerPage);
 
-            var inventoryWith = _slotWidth * slotCountPerRow;
+            var width = _slotWidth * slotCountPerRow;
             var slotRowCount = slotCountPerPage / slotCountPerRow;
-            var inventoryHeight =
-                _tabHeight +
+            var height =
+                _tabHeight * 2f +
                 _slotHeight * slotRowCount +
                 _pageNumberHeight;
-            _inventoryGroupRect = new Rect(positionX, positionY, inventoryWith, inventoryHeight);
-            _tabGroupRect = new Rect(0, 0, inventoryWith, _tabHeight);
-            _slotGroupRect = new Rect(0, _tabHeight, inventoryWith, _slotHeight * slotRowCount);
-            _pageNumberGroupRect = new Rect(0, _tabHeight + _slotHeight * slotRowCount, inventoryWith, _pageNumberHeight);
+            _rootGroupRect = new Rect(positionX, positionY, width, height);
+            _tabGroupRect = new Rect(0, 0, width, _tabHeight * 2f);
+            _slotGroupRect = new Rect(0, _tabGroupRect.height, width, _slotHeight * slotRowCount);
+            _pageNumberGroupRect = new Rect(0, _tabGroupRect.height + _slotGroupRect.height, width, _pageNumberHeight);
+
+            _rootBoxRect = new Rect(0f, 0f, width, height);
 
             for (int i = 0; i < _tabCount; i++)
             {
                 var rect = new Rect(_tabRectPrefab)
                 {
-                    x = i * _tabWidth,
-                    y = 0,
+                    x = i < 5 ? i * _tabWidth : (i - 5) * _tabWidth,
+                    y = i < 5 ? 0 : _tabHeight,
                 };
                 _tabRectPool.Add(rect);
             }
@@ -133,19 +136,11 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             }
         }
 
-        // ------ ------
-        // | T1 | | T2 |
-        // ----------------------------------
-        // | I1 | | I2 | | I3 | | I4 | | I5 |
-        // ----------------------------------
-        // | I5 | | I6 | | I7 | | I8 | | I9 |
-        // ----------------------------------
-        // | P1 | | P2 | | P3 | | P4 | | P5 |
-        // ----------------------------------
         public void OnGUI()
         {
             GUI.matrix = GUIToolbox.GetGUIMatrix();
-            GUI.BeginGroup(_inventoryGroupRect);
+            GUI.BeginGroup(_rootGroupRect);
+            GUI.Box(_rootBoxRect, string.Empty);
             DrawTabs();
             DrawSlots();
             DrawPageNumbers();
@@ -169,9 +164,13 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             var rect = _tabRectPool[index];
             var tabName = index switch
             {
-                0 => "Equipment",
-                1 => "Aura",
-                2 => "The Other",
+                0 => "Weapon",
+                1 => "Armor",
+                2 => "Belt",
+                3 => "Necklace",
+                4 => "Ring",
+                5 => "Aura",
+                6 => "The Other",
                 _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
             };
             var isSelected = _viewModel.CurrentTabIndex == index;
