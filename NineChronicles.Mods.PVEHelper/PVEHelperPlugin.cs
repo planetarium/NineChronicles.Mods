@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using BepInEx;
 using BepInEx.Logging;
 using Cysharp.Threading.Tasks;
@@ -9,7 +8,6 @@ using Nekoyume;
 using Nekoyume.Battle;
 using Nekoyume.Game;
 using Nekoyume.Model.Item;
-using Nekoyume.Model.EnumType;
 using Nekoyume.State;
 using Nekoyume.UI;
 using NineChronicles.Mods.PVEHelper.BlockSimulation;
@@ -118,17 +116,15 @@ namespace NineChronicles.Mods.PVEHelper
                 DisableModeGUI();
             }
 
-            //if (_enhancementGUI is not null ||
-            //    _itemCreationGUI is not null ||
-            //    _stageSimulateGUI is not null)
-            //{
-            //    return;
-            //}
+            if (_overlayGUI is not null)
+            {
+                return;
+            }
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 Log("space key pressed.");
-                
+
                 // var itemSlotState = States.Instance.CurrentItemSlotStates[BattleType.Adventure];
 
                 // foreach (var equipmentId in itemSlotState.Equipments)
