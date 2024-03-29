@@ -118,10 +118,10 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 GUIToolbox.ScreenWidthReference - 450,
                 GUIToolbox.ScreenHeightReference / 2 - 230,
                 400,
-                800);
+                500);
             _simulateLayoutRect = new Rect(
                 GUIToolbox.ScreenWidthReference - 350,
-                GUIToolbox.ScreenHeightReference - 160,
+                GUIToolbox.ScreenHeightReference - 210,
                 200,
                 400);
         }
@@ -172,10 +172,14 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
                 {
                     using (var verticalScope = new GUILayout.VerticalScope())
                     {
+                        GUILayout.Label("Choose stage to simulate");
                         ControllablePicker(
                             stateData.StageSheet.Keys.Select(x => x.ToString()).ToArray(),
                             (_, index) => selectedStageId = index + 1,
                             selectedStageId - 1);
+
+                        GUILayout.Label("Play Count");
+                        DrawPlayCountController();
 
                         GUI.enabled = !_isCalculating;
                         if (GUILayout.Button("Simulate"))
@@ -188,7 +192,6 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
 
                         DrawSimulationResultTextArea();
                     }
-                    DrawPlayCountController();
                 }
             }
         }
@@ -256,17 +259,17 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
             {
                 using (var horizontalScope = new GUILayout.HorizontalScope())
                 {
-                    GUILayout.Label($"0 Wave Clear: {_wave0ClearCount}");
-                    GUILayout.Label($"1 Wave Clear: {_wave1ClearCount}");
-                    GUILayout.Label($"2 Wave Clear: {_wave2ClearCount}");
-                    GUILayout.Label($"3 Wave Clear: {_wave3ClearCount}");
+                    GUILayout.Label($"Fail: {_wave0ClearCount}");
+                    GUILayout.Label($"★: {_wave1ClearCount}");
+                    GUILayout.Label($"★★: {_wave2ClearCount}");
+                    GUILayout.Label($"★★★: {_wave3ClearCount}");
                 }   
             }
         }
 
         private void DrawPlayCountController()
         {
-            using (var verticalScope = new GUILayout.VerticalScope())
+            using (var verticalScope = new GUILayout.HorizontalScope())
             {
                 GUI.enabled = !_isCalculating;
                 if (GUILayout.Button("+", GUILayout.Width(30), GUILayout.Height(20)))
