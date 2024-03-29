@@ -233,7 +233,7 @@ namespace NineChronicles.Mods.PVEHelper.GUIs
         {
             if (_isCalculating)
             {
-                GUILayout.Label($"Calculating... {simulationStep}/{playCount}");
+                GUILayout.Label($"Simulating... {simulationStep}/{playCount}");
             }
             else
             {
