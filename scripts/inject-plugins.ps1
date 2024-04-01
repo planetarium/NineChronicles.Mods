@@ -1,6 +1,6 @@
 # 스크립트 설정
 $dotenvPath = ".\.env.xml"
-$projectName = "NineChronicles.Mods.PVEHelper"
+$projectName = "NineChronicles.Mods.Athena"
 $solutionDirectory = Get-Location
 $publishConfiguration = "Release"
 
@@ -39,7 +39,7 @@ function Copy-DllToPluginDir {
         [string]$sourcePath,
         [string]$nineChroniclesDir
     )
-    $dllFile = "NineChronicles.Mods.PVEHelper.dll"
+    $dllFile = "NineChronicles.Mods.Athena.dll"
     $targetPath = Join-Path -Path $nineChroniclesDir -ChildPath "BepInEx\plugins"
     $sourceDllPath = Join-Path -Path $sourcePath -ChildPath $dllFile
 
