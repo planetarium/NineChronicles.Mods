@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Logging;
-using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Nekoyume;
 using Nekoyume.Game;
@@ -14,6 +13,7 @@ using NineChronicles.Mods.Athena.BlockSimulation;
 using NineChronicles.Mods.Athena.GUIs;
 using NineChronicles.Mods.Athena.Manager;
 using NineChronicles.Mods.Athena.Patches;
+using NineChronicles.Mods.Shared.Utils;
 using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -82,21 +82,6 @@ namespace NineChronicles.Mods.Athena
             };
 
             Logger.LogInfo("Loaded");
-        }
-
-        private async void TrackOnce()
-        {
-            if (Analyzer.Instance is null)
-            {
-                await UniTask.WaitUntil(() => Analyzer.Instance is not null);
-            }
-
-            var days = (DateTime.Now - new DateTime(2019, 3, 11)).Days;
-            if (days > PlayerPrefs.GetInt(PluginLastDayOfUseKey, 0))
-            {
-                Analyzer.Instance.Track(PluginDailyOpenKey);
-                PlayerPrefs.SetInt(PluginLastDayOfUseKey, days);
-            }
         }
 
         private void DisableModeGUI()
@@ -176,7 +161,7 @@ namespace NineChronicles.Mods.Athena
                 }, DisableModeGUI);
                 _notificationGUI = new NotificationGUI();
 
-                TrackOnce();
+                AnalyticsUtils.TrackOnce(PluginName);
                 DisableEventSystem();
             }
         }

@@ -3,14 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>9.0</LangVersion>
-    <RootNamespace>NineChronicles.Mods.Athena</RootNamespace>
+    <RootNamespace>NineChronicles.Mods.Wallet</RootNamespace>
   </PropertyGroup>
 
-  <Import Project="..\.env.xml" />
-
-  <ItemGroup>
-    <ProjectReference Include="..\NineChronicles.Mods.Shared\NineChronicles.Mods.Shared.csproj" />
-  </ItemGroup>
+  <Import Project="..\.env.xml"/>
 
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -83,5 +79,5 @@
       <HintPath>$(NINECHRONICLES_DIR)\BepInEx\core\BepInEx.dll</HintPath>
     </Reference>
   </ItemGroup>
-
+  
 </Project>
