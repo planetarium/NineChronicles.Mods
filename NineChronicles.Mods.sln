@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NineChronicles.Mods.PVEHelper", "NineChronicles.Mods.PVEHelper\NineChronicles.Mods.PVEHelper.csproj", "{EDA8E2BF-27A4-4B90-A160-AD7BF75B00EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NineChronicles.Mods.Athena", "NineChronicles.Mods.Athena\NineChronicles.Mods.Athena.csproj", "{DE1CA732-244E-488E-8F92-81D37A695DB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EDA8E2BF-27A4-4B90-A160-AD7BF75B00EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EDA8E2BF-27A4-4B90-A160-AD7BF75B00EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EDA8E2BF-27A4-4B90-A160-AD7BF75B00EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EDA8E2BF-27A4-4B90-A160-AD7BF75B00EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE1CA732-244E-488E-8F92-81D37A695DB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE1CA732-244E-488E-8F92-81D37A695DB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE1CA732-244E-488E-8F92-81D37A695DB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE1CA732-244E-488E-8F92-81D37A695DB6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
