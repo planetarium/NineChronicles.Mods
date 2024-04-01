@@ -25,7 +25,7 @@ namespace NineChronicles.Mods.Athena
     {
         private const string PluginGUID = "org.ninechronicles.mods.athena";
         private const string PluginName = "Athena";
-        private const string PluginVersion = "0.1.0";
+        private const string PluginVersion = "0.1.1";
 
         private const string PluginLastDayOfUseKey = PluginName + "_Last_Day_Of_Use";
         private const string PluginDailyOpenKey = PluginName + "_Daily_Open";
