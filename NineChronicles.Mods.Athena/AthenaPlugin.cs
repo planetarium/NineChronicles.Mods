@@ -10,7 +10,7 @@ using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Item;
 using Nekoyume.State;
 using Nekoyume.UI;
-using NineChronicles.Mods.Athena.BlockSimulation;
+using NineChronicles.Mods.Athena.Factories;
 using NineChronicles.Mods.Athena.GUIs;
 using NineChronicles.Mods.Athena.Manager;
 using NineChronicles.Mods.Athena.Patches;
@@ -58,6 +58,7 @@ namespace NineChronicles.Mods.Athena
         }
 
         public static void Log(object data) => Log(LogLevel.Info, data);
+        public static void LogWarning(object data) => Log(LogLevel.Warning, data);
 
         private void Awake()
         {

@@ -6,10 +6,11 @@ using Nekoyume.Model.Item;
 using Nekoyume.Model.Skill;
 using Nekoyume.Model.Stat;
 using Nekoyume.Model.State;
+using NineChronicles.Mods.Athena.BlockSimulation;
 using NineChronicles.Mods.Athena.Models;
 
 
-namespace NineChronicles.Mods.Athena.BlockSimulation
+namespace NineChronicles.Mods.Athena.Factories
 {
     public static class ModItemFactory
     {
@@ -29,9 +30,6 @@ namespace NineChronicles.Mods.Athena.BlockSimulation
                 return null;
             }
 
-            var randomSeed = new RandomImpl(DateTime.Now.Millisecond).Next();
-            IRandom random = new RandomImpl(randomSeed);
-
             var equipmentItemSheet = tableSheets.EquipmentItemSheet;
             var enhancementCostSheetV3 = tableSheets.EnhancementCostSheetV3;
             var recipeSheet = tableSheets.EquipmentItemRecipeSheet;
@@ -48,7 +46,9 @@ namespace NineChronicles.Mods.Athena.BlockSimulation
             var equipment = (Equipment)ItemFactory.CreateItemUsable(
                 itemRow,
                 modItem.Id,
-                1);
+                requiredBlockIndex: 0);
+
+            // NOTE: This condition about `Grade` can be changed.
             if (equipment.Grade == 0)
             {
                 return equipment;
@@ -73,36 +73,38 @@ namespace NineChronicles.Mods.Athena.BlockSimulation
                 .Where(e => optionSheet.ContainsKey(e))
                 .Select(e => optionSheet[e])
                 .ToArray();
-                foreach (var optionRow in options)
+                foreach (var (optionId, ratio) in modItem.GetOptionTuples())
                 {
+                    if (!optionSheet.TryGetValue(optionId, out var optionRow))
+                    {
+                        AthenaPlugin.LogWarning($"Option not found: {optionId}");
+                        continue;
+                    }
+
                     var optionIndex = modItem.OptionIdList.IndexOf(optionRow.Id);
-                    var ratio = modItem.RatioOfOptionValueRangeList is null
-                        ? 1f
-                        : modItem.RatioOfOptionValueRangeList.Count > optionIndex
-                            ? modItem.RatioOfOptionValueRangeList[optionIndex]
-                            : 1f;
                     if (optionRow.StatType == StatType.NONE)
                     {
                         var skillRow = skillSheet[optionRow.SkillId];
                         var skill = SkillFactory.Get(
                             skillRow,
-                            (int)(optionRow.SkillDamageMax * ratio),
-                            (int)(optionRow.SkillChanceMax * ratio),
-                            (int)(optionRow.StatDamageRatioMax * ratio),
+                            (long)(optionRow.SkillDamageMin + ((optionRow.SkillDamageMax - optionRow.SkillDamageMin) * ratio)),
+                            (int)(optionRow.SkillChanceMin + ((optionRow.SkillChanceMax - optionRow.SkillChanceMin) * ratio)),
+                            (int)(optionRow.StatDamageRatioMin + ((optionRow.StatDamageRatioMax - optionRow.StatDamageRatioMin) * ratio)),
                             optionRow.ReferencedStatType);
                         equipment.Skills.Add(skill);
-
                         continue;
                     }
 
                     equipment.StatsMap.AddStatAdditionalValue(
                         optionRow.StatType,
-                        (decimal)(optionRow.StatMax * ratio));
+                        (decimal)(optionRow.StatMin + ((optionRow.StatMax - optionRow.StatMin) * ratio)));
                 }
             }
 
             if (modItem.Level > 0)
             {
+                // NOTE: Set fake ratio to 1 for getting the maximum value.
+                IRandom random = new RandomFakeImpl(0, 1m);
                 equipment.SetLevel(random, modItem.Level, enhancementCostSheetV3);
             }
 
