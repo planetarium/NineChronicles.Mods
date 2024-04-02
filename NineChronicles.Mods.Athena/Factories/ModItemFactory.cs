@@ -73,7 +73,7 @@ namespace NineChronicles.Mods.Athena.Factories
                 .Where(e => optionSheet.ContainsKey(e))
                 .Select(e => optionSheet[e])
                 .ToArray();
-                foreach (var (optionId, ratio) in modItem.OptionTuples)
+                foreach (var (optionId, ratio) in modItem.GetOptionTuples())
                 {
                     if (!optionSheet.TryGetValue(optionId, out var optionRow))
                     {
@@ -87,9 +87,9 @@ namespace NineChronicles.Mods.Athena.Factories
                         var skillRow = skillSheet[optionRow.SkillId];
                         var skill = SkillFactory.Get(
                             skillRow,
-                            (int)(optionRow.SkillDamageMax * ratio),
-                            (int)(optionRow.SkillChanceMax * ratio),
-                            (int)(optionRow.StatDamageRatioMax * ratio),
+                            (long)(optionRow.SkillDamageMin + ((optionRow.SkillDamageMax - optionRow.SkillDamageMin) * ratio)),
+                            (int)(optionRow.SkillChanceMin + ((optionRow.SkillChanceMax - optionRow.SkillChanceMin) * ratio)),
+                            (int)(optionRow.StatDamageRatioMin + ((optionRow.StatDamageRatioMax - optionRow.StatDamageRatioMin) * ratio)),
                             optionRow.ReferencedStatType);
                         equipment.Skills.Add(skill);
                         continue;
@@ -97,7 +97,7 @@ namespace NineChronicles.Mods.Athena.Factories
 
                     equipment.StatsMap.AddStatAdditionalValue(
                         optionRow.StatType,
-                        (decimal)(optionRow.StatMax * ratio));
+                        (decimal)(optionRow.StatMin + ((optionRow.StatMax - optionRow.StatMin) * ratio)));
                 }
             }
 

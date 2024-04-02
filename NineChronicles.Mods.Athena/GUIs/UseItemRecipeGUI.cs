@@ -164,7 +164,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                         1f);
                     GUI.Label(new Rect(240f, 40f, 60f, 20f), $"({itemStatOption.ratioOfValueRange:P0})");
                     var resultStat = itemStatOption.minValue +
-                        (itemStatOption.maxValue - itemStatOption.minValue) * itemStatOption.ratioOfValueRange;
+                        (int)((itemStatOption.maxValue - itemStatOption.minValue) * itemStatOption.ratioOfValueRange);
                     GUI.Label(new Rect(10f, 60f, 280f, 20f), $"{itemStatOption.statType} {resultStat}");
                 }
 
@@ -197,9 +197,9 @@ namespace NineChronicles.Mods.Athena.GUIs
                         1f);
                     GUI.Label(new Rect(240f, 40f, 60f, 20f), $"({itemSkillOption.ratioOfValueRange:P0})");
                     var resultDamage = itemSkillOption.skillDamageMin +
-                        (itemSkillOption.skillDamageMax - itemSkillOption.skillDamageMin) * itemSkillOption.ratioOfValueRange;
+                        (int)((itemSkillOption.skillDamageMax - itemSkillOption.skillDamageMin) * itemSkillOption.ratioOfValueRange);
                     var resultChance = itemSkillOption.skillChanceMin +
-                        (itemSkillOption.skillChanceMax - itemSkillOption.skillChanceMin) * itemSkillOption.ratioOfValueRange;
+                        (int)((itemSkillOption.skillChanceMax - itemSkillOption.skillChanceMin) * itemSkillOption.ratioOfValueRange);
                     GUI.Label(new Rect(10f, 60f, 280f, 20f), $"{resultDamage} ({resultChance:P0})");
                 }
 
