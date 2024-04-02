@@ -30,9 +30,6 @@ namespace NineChronicles.Mods.Athena.Factories
                 return null;
             }
 
-            var randomSeed = new RandomImpl(DateTime.Now.Millisecond).Next();
-            IRandom random = new RandomImpl(randomSeed);
-
             var equipmentItemSheet = tableSheets.EquipmentItemSheet;
             var enhancementCostSheetV3 = tableSheets.EnhancementCostSheetV3;
             var recipeSheet = tableSheets.EquipmentItemRecipeSheet;
@@ -104,6 +101,8 @@ namespace NineChronicles.Mods.Athena.Factories
 
             if (modItem.Level > 0)
             {
+                // NOTE: Set fake ratio to 1 for getting the maximum value.
+                IRandom random = new RandomFakeImpl(0, 1m);
                 equipment.SetLevel(random, modItem.Level, enhancementCostSheetV3);
             }
 
