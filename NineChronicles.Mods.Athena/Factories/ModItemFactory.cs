@@ -46,7 +46,9 @@ namespace NineChronicles.Mods.Athena.Factories
             var equipment = (Equipment)ItemFactory.CreateItemUsable(
                 itemRow,
                 modItem.Id,
-                1);
+                requiredBlockIndex: 0);
+
+            // NOTE: This condition about `Grade` can be changed.
             if (equipment.Grade == 0)
             {
                 return equipment;
@@ -71,14 +73,15 @@ namespace NineChronicles.Mods.Athena.Factories
                 .Where(e => optionSheet.ContainsKey(e))
                 .Select(e => optionSheet[e])
                 .ToArray();
-                foreach (var optionRow in options)
+                foreach (var (optionId, ratio) in modItem.OptionTuples)
                 {
+                    if (!optionSheet.TryGetValue(optionId, out var optionRow))
+                    {
+                        AthenaPlugin.LogWarning($"Option not found: {optionId}");
+                        continue;
+                    }
+
                     var optionIndex = modItem.OptionIdList.IndexOf(optionRow.Id);
-                    var ratio = modItem.RatioOfOptionValueRangeList is null
-                        ? 1f
-                        : modItem.RatioOfOptionValueRangeList.Count > optionIndex
-                            ? modItem.RatioOfOptionValueRangeList[optionIndex]
-                            : 1f;
                     if (optionRow.StatType == StatType.NONE)
                     {
                         var skillRow = skillSheet[optionRow.SkillId];
@@ -89,7 +92,6 @@ namespace NineChronicles.Mods.Athena.Factories
                             (int)(optionRow.StatDamageRatioMax * ratio),
                             optionRow.ReferencedStatType);
                         equipment.Skills.Add(skill);
-
                         continue;
                     }
 

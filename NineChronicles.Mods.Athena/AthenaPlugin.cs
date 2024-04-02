@@ -58,6 +58,7 @@ namespace NineChronicles.Mods.Athena
         }
 
         public static void Log(object data) => Log(LogLevel.Info, data);
+        public static void LogWarning(object data) => Log(LogLevel.Warning, data);
 
         private void Awake()
         {
