@@ -6,10 +6,11 @@ using Nekoyume.Model.Item;
 using Nekoyume.Model.Skill;
 using Nekoyume.Model.Stat;
 using Nekoyume.Model.State;
+using NineChronicles.Mods.Athena.BlockSimulation;
 using NineChronicles.Mods.Athena.Models;
 
 
-namespace NineChronicles.Mods.Athena.BlockSimulation
+namespace NineChronicles.Mods.Athena.Factories
 {
     public static class ModItemFactory
     {

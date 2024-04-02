@@ -10,7 +10,7 @@ using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Item;
 using Nekoyume.State;
 using Nekoyume.UI;
-using NineChronicles.Mods.Athena.BlockSimulation;
+using NineChronicles.Mods.Athena.Factories;
 using NineChronicles.Mods.Athena.GUIs;
 using NineChronicles.Mods.Athena.Manager;
 using NineChronicles.Mods.Athena.Patches;
