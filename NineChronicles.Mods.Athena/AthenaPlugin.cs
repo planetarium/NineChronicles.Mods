@@ -27,6 +27,7 @@ namespace NineChronicles.Mods.Athena
         private const string PluginName = "Athena";
         private const string PluginVersion = "0.1.1";
 
+        private const string PluginInstallationKey = PluginName + "_Installation";
         private const string PluginLastDayOfUseKey = PluginName + "_Last_Day_Of_Use";
         private const string PluginDailyOpenKey = PluginName + "_Daily_Open";
 
@@ -62,6 +63,8 @@ namespace NineChronicles.Mods.Athena
 
         private void Awake()
         {
+            TrackOnceInstallation();
+
             if (Instance is not null)
             {
                 throw new InvalidOperationException($"{nameof(AthenaPlugin)} must be only one instance.");
@@ -85,7 +88,21 @@ namespace NineChronicles.Mods.Athena
             Logger.LogInfo("Loaded");
         }
 
-        private async void TrackOnce()
+        private async void TrackOnceInstallation()
+        {
+            if (Analyzer.Instance is null)
+            {
+                await UniTask.WaitUntil(() => Analyzer.Instance is not null);
+            }
+
+            if (PlayerPrefs.GetInt(PluginInstallationKey, 0) == 0)
+            {
+                Analyzer.Instance.Track(PluginInstallationKey);
+                PlayerPrefs.SetInt(PluginInstallationKey, 1);
+            }
+        }
+
+        private async void TrackOnceDailyOpen()
         {
             if (Analyzer.Instance is null)
             {
@@ -177,7 +194,7 @@ namespace NineChronicles.Mods.Athena
                 }, DisableModeGUI);
                 _notificationGUI = new NotificationGUI();
 
-                TrackOnce();
+                TrackOnceDailyOpen();
                 DisableEventSystem();
             }
         }
