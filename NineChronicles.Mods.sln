@@ -5,6 +5,8 @@ VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NineChronicles.Mods.Athena", "NineChronicles.Mods.Athena\NineChronicles.Mods.Athena.csproj", "{DE1CA732-244E-488E-8F92-81D37A695DB6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdHoc.BurnAsset", "AdHoc.BurnAsset\AdHoc.BurnAsset.csproj", "{EECED0F2-D9AF-4886-A23B-CBA82B9D7B76}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{DE1CA732-244E-488E-8F92-81D37A695DB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE1CA732-244E-488E-8F92-81D37A695DB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE1CA732-244E-488E-8F92-81D37A695DB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EECED0F2-D9AF-4886-A23B-CBA82B9D7B76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EECED0F2-D9AF-4886-A23B-CBA82B9D7B76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EECED0F2-D9AF-4886-A23B-CBA82B9D7B76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EECED0F2-D9AF-4886-A23B-CBA82B9D7B76}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
