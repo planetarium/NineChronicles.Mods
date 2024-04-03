@@ -9,12 +9,10 @@ using Nekoyume.Game;
 using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Item;
 using Nekoyume.State;
-using Nekoyume.UI;
 using NineChronicles.Mods.Athena.Factories;
 using NineChronicles.Mods.Athena.GUIs;
 using NineChronicles.Mods.Athena.Manager;
 using NineChronicles.Mods.Athena.Patches;
-using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -35,9 +33,7 @@ namespace NineChronicles.Mods.Athena
 
         private Harmony _harmony;
 
-        private ModInventoryManager modInventoryManager = new ModInventoryManager("../../mod_inventory.csv");
-
-        private List<IDisposable> _disposables;
+        private ModInventoryManager _modInventoryManager;
 
         private Camera _mainCamera;
         private Color _mainCameraBackgroundColor;
@@ -46,12 +42,11 @@ namespace NineChronicles.Mods.Athena
 
         // NOTE: Please add your GUIs here as alphabetical order.
         private EnhancementGUI _enhancementGUI;
-        // private EquipGUI _equipGUI;
-        private InventoryGUI _inventoryGUI;
         private ItemCreationGUI _itemCreationGUI;
+        private InventoryGUI _inventoryGUI;
         private NotificationGUI _notificationGUI;
-        private IGUI _tabGUI;
         private StageSimulateGUI _stageSimulateGUI;
+        private IGUI _tabGUI;
 
         public static void Log(LogLevel logLevel, object data)
         {
@@ -60,11 +55,10 @@ namespace NineChronicles.Mods.Athena
 
         public static void Log(object data) => Log(LogLevel.Info, data);
         public static void LogWarning(object data) => Log(LogLevel.Warning, data);
+        public static void LogError(object data) => Log(LogLevel.Error, data);
 
         private void Awake()
         {
-            TrackOnceInstallation();
-
             if (Instance is not null)
             {
                 throw new InvalidOperationException($"{nameof(AthenaPlugin)} must be only one instance.");
@@ -76,16 +70,15 @@ namespace NineChronicles.Mods.Athena
             _harmony = new Harmony(PluginGUID);
             _harmony.PatchAll(typeof(AthenaPlugin));
             _harmony.PatchAll(typeof(BattlePreparationWidgetPatch));
+            _modInventoryManager = new ModInventoryManager("../../mod_inventory.csv");
 
+            Log("Loaded");
+        }
+
+        private void Start()
+        {
+            TrackOnceInstallation();
             _eventSystem = FindObjectOfType<EventSystem>();
-
-            _disposables = new List<IDisposable>
-            {
-                Widget.OnEnableStaticObservable.Subscribe(OnWidgetEnable),
-                Widget.OnDisableStaticObservable.Subscribe(OnWidgetDisable)
-            };
-
-            Logger.LogInfo("Loaded");
         }
 
         private async void TrackOnceInstallation()
@@ -120,7 +113,6 @@ namespace NineChronicles.Mods.Athena
         private void DisableModeGUI()
         {
             _enhancementGUI = null;
-            // _equipGUI = null;
             _inventoryGUI = null;
             _itemCreationGUI = null;
             _notificationGUI = null;
@@ -157,29 +149,29 @@ namespace NineChronicles.Mods.Athena
                         switch (equipment.ItemSubType)
                         {
                             case ItemSubType.Weapon:
-                                modInventoryManager.SelectedWeapon = equipment;
+                                _modInventoryManager.SelectedWeapon = equipment;
                                 break;
                             case ItemSubType.Armor:
-                                modInventoryManager.SelectedArmor = equipment;
+                                _modInventoryManager.SelectedArmor = equipment;
                                 break;
                             case ItemSubType.Belt:
-                                modInventoryManager.SelectedBelt = equipment;
+                                _modInventoryManager.SelectedBelt = equipment;
                                 break;
                             case ItemSubType.Necklace:
-                                modInventoryManager.SelectedNecklace = equipment;
+                                _modInventoryManager.SelectedNecklace = equipment;
                                 break;
                             case ItemSubType.Ring:
-                                if (modInventoryManager.SelectedRing1 == null)
+                                if (_modInventoryManager.SelectedRing1 == null)
                                 {
-                                    modInventoryManager.SelectedRing1 = equipment;
+                                    _modInventoryManager.SelectedRing1 = equipment;
                                 }
                                 else
                                 {
-                                    modInventoryManager.SelectedRing2 = equipment;
+                                    _modInventoryManager.SelectedRing2 = equipment;
                                 }
                                 break;
                             case ItemSubType.Aura:
-                                modInventoryManager.SelectedAura = equipment;
+                                _modInventoryManager.SelectedAura = equipment;
                                 break;
                         }
                     }
@@ -247,7 +239,7 @@ namespace NineChronicles.Mods.Athena
             RemoveInventory();
 
             var tableSheets = TableSheets.Instance;
-            var ui = new ItemCreationGUI(modInventoryManager);
+            var ui = new ItemCreationGUI(_modInventoryManager);
             ui.SetItemRecipes(
                 tableSheets.EquipmentItemSheet,
                 tableSheets.EquipmentItemRecipeSheet,
@@ -260,13 +252,13 @@ namespace NineChronicles.Mods.Athena
         private IGUI CreateEnhancementGUI()
         {
             CreateInventoryGUI();
-            return new EnhancementGUI(modInventoryManager, _inventoryGUI);
+            return new EnhancementGUI(_modInventoryManager, _inventoryGUI);
         }
 
         private IGUI CreateStageSimulateGUI()
         {
             CreateInventoryGUI();
-            return new StageSimulateGUI(modInventoryManager, _inventoryGUI);
+            return new StageSimulateGUI(_modInventoryManager, _inventoryGUI);
         }
 
         private void CreateInventoryGUI()
@@ -282,7 +274,7 @@ namespace NineChronicles.Mods.Athena
                 {
                     if (item is Equipment equipment)
                     {
-                        modInventoryManager.DeleteItem(equipment.NonFungibleId);
+                        _modInventoryManager.DeleteItem(equipment.NonFungibleId);
                     }
                 };
             }
@@ -301,7 +293,7 @@ namespace NineChronicles.Mods.Athena
             }
 
             var removeList = new List<Guid>();
-            foreach (var modItem in modInventoryManager.GetAllItems())
+            foreach (var modItem in _modInventoryManager.GetAllItems())
             {
                 Equipment equipment;
                 if (modItem.ExistsItem)
@@ -332,7 +324,7 @@ namespace NineChronicles.Mods.Athena
 
             foreach (var id in removeList)
             {
-                modInventoryManager.DeleteItem(id);
+                _modInventoryManager.DeleteItem(id);
             }
 
             _inventoryGUI.Sort();
@@ -346,57 +338,11 @@ namespace NineChronicles.Mods.Athena
         private void OnGUI()
         {
             _enhancementGUI?.OnGUI();
-            // _equipGUI?.OnGUI();
             _inventoryGUI?.OnGUI();
             _itemCreationGUI?.OnGUI();
             _tabGUI?.OnGUI();
             _stageSimulateGUI?.OnGUI();
             _notificationGUI?.OnGUI();
-
-        }
-
-        //private void OnDestroy()
-        //{
-        //    if (Instance != this)
-        //    {
-        //        return;
-        //    }
-
-        //    Instance = null;
-
-        //    _harmony.UnpatchSelf();
-        //    _harmony = null;
-
-        //    foreach (var disposable in _disposables)
-        //    {
-        //        disposable.Dispose();
-        //    }
-
-        //    modInventoryManager.SaveItemsToCsv();
-
-        //    Logger.LogInfo("Unloaded");
-        //}
-
-        private void OnWidgetEnable(Widget widget)
-        {
-            switch (widget)
-            {
-                case Menu:
-                    break;
-                case BattlePreparation:
-                    // do nothing: show BattlePreparationWidgetPatch_OnShow((worldId, stageId))
-                    break;
-            }
-        }
-
-        private void OnWidgetDisable(Widget widget)
-        {
-            switch (widget)
-            {
-                case BattlePreparation:
-                    _enhancementGUI = null;
-                    break;
-            }
         }
     }
 }

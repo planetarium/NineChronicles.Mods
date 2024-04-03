@@ -43,6 +43,13 @@ namespace NineChronicles.Mods.Athena.Manager
             }
             catch (FileNotFoundException)
             {
+                AthenaPlugin.Log("No csv file found. Creating new empty list.");
+                items = ImmutableList<ModItem>.Empty;
+            }
+            catch (Exception e)
+            {
+                AthenaPlugin.LogError(e.Message);
+                AthenaPlugin.Log("Failed to load items from csv file. Creating new empty list.");
                 items = ImmutableList<ModItem>.Empty;
             }
         }

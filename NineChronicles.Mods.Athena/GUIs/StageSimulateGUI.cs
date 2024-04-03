@@ -56,6 +56,7 @@ namespace NineChronicles.Mods.Athena.GUIs
             _modInventoryManager = modInventoryManager;
             _inventoryGUI = inventoryGUI;
 
+            InitStateData();
             InitEquipments();
 
             _inventoryGUI.OnSlotSelected += tuple =>
@@ -189,14 +190,12 @@ namespace NineChronicles.Mods.Athena.GUIs
         }
         public void OnGUI()
         {
-            GUI.matrix = GUIToolbox.GetGUIMatrix();
-
-            UpdateStateData();
-
-            if (!(StateData is { } stateData))
+            if (StateData is not { } stateData)
             {
                 return;
             }
+
+            GUI.matrix = GUIToolbox.GetGUIMatrix();
 
             if (selectedStageId == 0)
             {
@@ -291,6 +290,15 @@ namespace NineChronicles.Mods.Athena.GUIs
                     }
                 }
             }
+        }
+
+        private void InitStateData()
+        {
+            var tableSheets = TableSheets.Instance;
+            var stid = States.Instance.CurrentAvatarState.worldInformation.TryGetLastClearedStageId(out int stageId)
+                ? stageId
+                : 0;
+            StateData = (tableSheets.WorldSheet, tableSheets.StageSheet, stid);
         }
 
         private void InitEquipments()
@@ -416,7 +424,7 @@ namespace NineChronicles.Mods.Athena.GUIs
             }
         }
 
-        private async Task Simulate()
+        private async void Simulate()
         {
             _isCalculating = true;
             _wave0ClearCount = -1;
