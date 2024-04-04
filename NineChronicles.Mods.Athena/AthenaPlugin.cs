@@ -77,11 +77,11 @@ namespace NineChronicles.Mods.Athena
 
         private void Start()
         {
-            TrackOnceInstallation();
+            TrackInstallation();
             _eventSystem = FindObjectOfType<EventSystem>();
         }
 
-        private async void TrackOnceInstallation()
+        private async void TrackInstallation()
         {
             if (Analyzer.Instance is null)
             {
@@ -95,7 +95,7 @@ namespace NineChronicles.Mods.Athena
             }
         }
 
-        private async void TrackOnceDailyOpen()
+        private async void TrackDailyOpen()
         {
             if (Analyzer.Instance is null)
             {
@@ -186,7 +186,7 @@ namespace NineChronicles.Mods.Athena
                 }, DisableModeGUI);
                 _notificationGUI = new NotificationGUI();
 
-                TrackOnceDailyOpen();
+                TrackDailyOpen();
                 DisableEventSystem();
             }
         }

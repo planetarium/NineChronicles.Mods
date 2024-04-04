@@ -48,8 +48,6 @@ namespace NineChronicles.Mods.Athena.GUIs
         // ~TageNumberGUI
 
         // Styles
-        private GUIStyle _existsInBlockchainStyle;
-        private GUIStyle _moddedStyle;
         private GUIStyle _toolTipStyle;
         // ~Styles
 
@@ -265,22 +263,18 @@ namespace NineChronicles.Mods.Athena.GUIs
 
             if (slot.isExistsInBlockchain)
             {
-                _existsInBlockchainStyle ??= new GUIStyle(GUI.skin.box)
-                {
-                    normal = { background = ColorTexturePool.Blue },
-                    active = { background = ColorTexturePool.Blue },
-                };
-                GUI.Box(existsRect, string.Empty, _existsInBlockchainStyle);
+                GUI.Box(
+                    existsRect,
+                    InventoryViewModel.Slot.existsInBlockchainGUIContent,
+                    InventoryViewModel.Slot.existsInBlockchainStyle);
             }
 
             if (slot.isModded)
             {
-                _moddedStyle ??= new GUIStyle(GUI.skin.box)
-                {
-                    normal = { background = ColorTexturePool.Green },
-                    active = { background = ColorTexturePool.Green },
-                };
-                GUI.Box(moddedRect, string.Empty, _moddedStyle);
+                GUI.Box(
+                    moddedRect,
+                    InventoryViewModel.Slot.moddedGUIContent,
+                    InventoryViewModel.Slot.moddedStyle);
                 if (GUI.Button(nameRect, "Remove"))
                 {
                     AthenaPlugin.Log($"Remove button clicked.");
