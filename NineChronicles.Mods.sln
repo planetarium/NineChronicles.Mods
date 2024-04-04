@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdHoc.BurnAsset", "AdHoc.Bu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NineChronicles.Modules.BlockSimulation", "NineChronicles.Modules.BlockSimulation\NineChronicles.Modules.BlockSimulation.csproj", "{93BCEEF2-F74E-400D-BBD0-2FCB31FDEDBC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdHoc.RetrieveAvatarAssets", "AdHoc.RetrieveAvatarAssets\AdHoc.RetrieveAvatarAssets.csproj", "{D0FB2F30-9962-48AC-B604-63D7BE146B88}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{93BCEEF2-F74E-400D-BBD0-2FCB31FDEDBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93BCEEF2-F74E-400D-BBD0-2FCB31FDEDBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93BCEEF2-F74E-400D-BBD0-2FCB31FDEDBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0FB2F30-9962-48AC-B604-63D7BE146B88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0FB2F30-9962-48AC-B604-63D7BE146B88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0FB2F30-9962-48AC-B604-63D7BE146B88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0FB2F30-9962-48AC-B604-63D7BE146B88}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
