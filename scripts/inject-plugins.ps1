@@ -37,9 +37,9 @@ function Publish-Project {
 function Copy-DllToPluginDir {
     param (
         [string]$sourcePath,
+        [string]$dllFile,
         [string]$nineChroniclesDir
     )
-    $dllFile = "NineChronicles.Mods.Athena.dll"
     $targetPath = Join-Path -Path $nineChroniclesDir -ChildPath "BepInEx\plugins"
     $sourceDllPath = Join-Path -Path $sourcePath -ChildPath $dllFile
 
@@ -60,4 +60,5 @@ function Copy-DllToPluginDir {
 
 $nineChroniclesDir = Get-NineChroniclesDirFromEnv
 $publishOutputPath = Publish-Project -projectName $projectName -solutionDirectory $solutionDirectory -publishConfiguration $publishConfiguration
-Copy-DllToPluginDir -sourcePath "$projectName\bin\$publishConfiguration\netstandard2.1" -nineChroniclesDir $nineChroniclesDir
+Copy-DllToPluginDir -sourcePath "$projectName\bin\$publishConfiguration\netstandard2.1" -dllFile "NineChronicles.Modules.BlockSimulation.dll" -nineChroniclesDir $nineChroniclesDir
+Copy-DllToPluginDir -sourcePath "$projectName\bin\$publishConfiguration\netstandard2.1" -dllFile "NineChronicles.Mods.Athena.dll" -nineChroniclesDir $nineChroniclesDir

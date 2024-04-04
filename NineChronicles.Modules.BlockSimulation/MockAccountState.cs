@@ -12,7 +12,7 @@ using Libplanet.Store.Trie;
 using Libplanet.Types.Assets;
 using Libplanet.Types.Consensus;
 
-namespace NineChronicles.Mods.Athena.BlockSimulation
+namespace NineChronicles.Modules.BlockSimulation
 {
     /// <summary>
     /// A mock implementation of <see cref="IAccountState"/> with various overloaded methods for

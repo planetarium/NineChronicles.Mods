@@ -7,16 +7,15 @@ using Nekoyume;
 using Nekoyume.Action;
 using Nekoyume.Game;
 using Nekoyume.Model.EnumType;
+using Nekoyume.Model.Item;
 using Nekoyume.Model.Skill;
 using Nekoyume.Model.State;
-using Nekoyume.Model.Item;
 using Nekoyume.State;
 using UnityEngine;
-using NineChronicles.Mods.Athena.Extensions;
 
-namespace NineChronicles.Mods.Athena.BlockSimulation.Actions
+namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
 {
-    public static class HackAndSlashSimulation
+    public static class HackAndSlashSimulator
     {
         public static int Simulate(
             List<Equipment> equipments,
@@ -25,7 +24,8 @@ namespace NineChronicles.Mods.Athena.BlockSimulation.Actions
             int worldId,
             int stageId,
             long blockIndex = 0,
-            int? randomSeed = null)
+            int? randomSeed = null,
+            Action<string> onLog = null)
         {
             randomSeed ??= new RandomImpl(DateTime.Now.Millisecond).Next();
             var signerAddress = states.AgentState.address;
@@ -34,7 +34,7 @@ namespace NineChronicles.Mods.Athena.BlockSimulation.Actions
             // avatarState.inventory;
             var itemSlotState = states.CurrentItemSlotStates[BattleType.Adventure];
 
-            foreach(var equipment in equipments)
+            foreach (var equipment in equipments)
             {
                 if (!avatarState.inventory.HasNonFungibleItem(equipment.NonFungibleId))
                 {
@@ -44,9 +44,9 @@ namespace NineChronicles.Mods.Athena.BlockSimulation.Actions
 
             avatarState.EquipEquipments(equipments.Select(e => e.NonFungibleId).ToList());
             var equippedCount = avatarState.inventory.Equipments.Count(equip => equip.equipped);
-            AthenaPlugin.Log($"equippedCount: {equippedCount} / equipments.Count: {equipments.Count}");
+            onLog?.Invoke($"equippedCount: {equippedCount} / equipments.Count: {equipments.Count}");
             var equippedIds = avatarState.inventory.Equipments.Where(equip => equip.equipped).Select(equip => equip.ItemId.ToString()).ToList();
-            AthenaPlugin.Log(string.Join("\n", equippedIds));
+            onLog?.Invoke(string.Join("\n", equippedIds));
 
             var skillState = States.Instance.CrystalRandomSkillState;
             var key = string.Format("HackAndSlash.SelectedBonusSkillId.{0}", avatarState.address);
@@ -81,7 +81,7 @@ namespace NineChronicles.Mods.Athena.BlockSimulation.Actions
                 AvatarAddress = avatarState.address,
             };
 
-            AthenaPlugin.Log(action.PlainValue.Inspect());
+            onLog?.Invoke(action.PlainValue.Inspect());
 
             var eval = new ActionEvaluation<HackAndSlash>
             {
@@ -109,7 +109,7 @@ namespace NineChronicles.Mods.Athena.BlockSimulation.Actions
                 tableSheets,
                 out var simulator,
                 out _);
-            AthenaPlugin.Log($"({nameof(HackAndSlashSimulation)}) Simulate Finish {simulator.Log.clearedWaveNumber}");
+            onLog?.Invoke($"({nameof(HackAndSlashSimulator)}) Simulate Finish {simulator.Log.clearedWaveNumber}");
 
             return simulator.Log.clearedWaveNumber;
         }
@@ -123,10 +123,11 @@ namespace NineChronicles.Mods.Athena.BlockSimulation.Actions
             int playCount,
             [CanBeNull] Action<int> onProgress = null,
             long blockIndex = 0,
-            int? randomSeed = null)
+            int? randomSeed = null,
+            Action<string> onLog = null)
         {
-            AthenaPlugin.Log(
-                $"({nameof(HackAndSlashSimulation)}) Simulate Start\n" +
+            onLog?.Invoke(
+                $"({nameof(HackAndSlashSimulator)}) Simulate Start\n" +
                 $"equipments: {string.Join(',', equipments.Select(e => e.NonFungibleId))}\n" +
                 $"worldId: {worldId}\n" +
                 $"stageId: {stageId}\n" +
@@ -151,7 +152,7 @@ namespace NineChronicles.Mods.Athena.BlockSimulation.Actions
                 }
             }
             var formattedResult = string.Join(", ", result.Select(kv => $"{kv.Key}: {kv.Value}"));
-            AthenaPlugin.Log($"({nameof(HackAndSlashSimulation)}) Simulate Result: {formattedResult}");
+            onLog?.Invoke($"({nameof(HackAndSlashSimulator)}) Simulate Result: {formattedResult}");
 
             return result;
         }

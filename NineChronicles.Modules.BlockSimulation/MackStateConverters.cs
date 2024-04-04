@@ -2,7 +2,7 @@
 using Libplanet.Store.Trie;
 using Libplanet.Types.Assets;
 
-namespace NineChronicles.Mods.Athena.BlockSimulation
+namespace NineChronicles.Modules.BlockSimulation
 {
     internal static class MockKeyConverters
     {
