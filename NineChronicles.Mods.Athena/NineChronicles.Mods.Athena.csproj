@@ -6,7 +6,7 @@
     <RootNamespace>NineChronicles.Mods.Athena</RootNamespace>
   </PropertyGroup>
 
-  <Import Project="..\.env.xml"></Import>
+  <Import Project="..\.env.xml"/>
 
   <ItemGroup>
     <ProjectReference Include="..\NineChronicles.Modules.BlockSimulation\NineChronicles.Modules.BlockSimulation.csproj" />
@@ -14,64 +14,64 @@
 
   <ItemGroup>
     <Reference Include="UnityEngine">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UnityEngine.UIModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Bencodex">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\Bencodex.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Bencodex.dll</HintPath>
     </Reference>
     <Reference Include="Lib9c">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\Lib9c.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Lib9c.dll</HintPath>
     </Reference>
     <Reference Include="Libplanet.Action">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\Libplanet.Action.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Libplanet.Action.dll</HintPath>
     </Reference>
     <Reference Include="Libplanet.Common">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\Libplanet.Common.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Libplanet.Common.dll</HintPath>
     </Reference>
     <Reference Include="Libplanet.Crypto">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\Libplanet.Crypto.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Libplanet.Crypto.dll</HintPath>
     </Reference>
     <Reference Include="Libplanet.Store">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\Libplanet.Store.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Libplanet.Store.dll</HintPath>
     </Reference>
     <Reference Include="Libplanet.Types">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\Libplanet.Types.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Libplanet.Types.dll</HintPath>
     </Reference>
     <Reference Include="Nekoyume">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\Nekoyume.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Nekoyume.dll</HintPath>
     </Reference>
     <Reference Include="System.Collections.Immutable">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\System.Collections.Immutable.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\System.Collections.Immutable.dll</HintPath>
     </Reference>
     <Reference Include="UniRx">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UniRx.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UniRx.dll</HintPath>
     </Reference>
     <Reference Include="UniTask">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\UniTask.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UniTask.dll</HintPath>
     </Reference>
     <Reference Include="BalanceTool">
-      <HintPath>$(NINECHRONICLES_DIR)\NineChronicles_Data\Managed\BalanceTool.dll</HintPath>
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\BalanceTool.dll</HintPath>
     </Reference>
   </ItemGroup>
 
