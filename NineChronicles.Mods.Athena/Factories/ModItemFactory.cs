@@ -6,8 +6,8 @@ using Nekoyume.Model.Item;
 using Nekoyume.Model.Skill;
 using Nekoyume.Model.Stat;
 using Nekoyume.Model.State;
-using NineChronicles.Mods.Athena.BlockSimulation;
 using NineChronicles.Mods.Athena.Models;
+using NineChronicles.Modules.BlockSimulation;
 
 
 namespace NineChronicles.Mods.Athena.Factories
@@ -116,13 +116,13 @@ namespace NineChronicles.Mods.Athena.Factories
             Equipment existsItem,
             ModItem modItem)
         {
-            var randomSeed = new RandomImpl(DateTime.Now.Millisecond).Next();
-            IRandom random = new RandomImpl(randomSeed);
             var enhancementCostSheetV3 = tableSheets.EnhancementCostSheetV3;
             var equipment = new Equipment((Bencodex.Types.Dictionary)existsItem.Serialize());
 
             if (modItem.Level > 0)
             {
+                // NOTE: Set fake ratio to 1 for getting the maximum value.
+                IRandom random = new RandomFakeImpl(0, 1m);
                 equipment.SetLevel(random, modItem.Level, enhancementCostSheetV3);
             }
 

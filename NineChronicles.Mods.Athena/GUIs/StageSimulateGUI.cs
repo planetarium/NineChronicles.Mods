@@ -11,6 +11,7 @@ using Nekoyume.State;
 using Nekoyume.TableData;
 using NineChronicles.Mods.Athena.Extensions;
 using NineChronicles.Mods.Athena.Manager;
+using NineChronicles.Modules.BlockSimulation.ActionSimulators;
 using UnityEngine;
 
 namespace NineChronicles.Mods.Athena.GUIs
@@ -434,7 +435,7 @@ namespace NineChronicles.Mods.Athena.GUIs
 
             simulationStep = 0;
 
-            var clearWaveInfo = await UniTask.Run(() => BlockSimulation.Actions.HackAndSlashSimulation.Simulate(
+            var clearWaveInfo = await UniTask.Run(() => HackAndSlashSimulator.Simulate(
                 _modInventoryManager.GetEquipments(),
                 TableSheets.Instance,
                 States.Instance,

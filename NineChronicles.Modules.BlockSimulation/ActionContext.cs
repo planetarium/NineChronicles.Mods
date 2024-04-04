@@ -6,7 +6,7 @@ using Libplanet.Crypto;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
 
-namespace NineChronicles.Mods.Athena.BlockSimulation
+namespace NineChronicles.Modules.BlockSimulation
 {
     public class ActionContext : IActionContext
     {

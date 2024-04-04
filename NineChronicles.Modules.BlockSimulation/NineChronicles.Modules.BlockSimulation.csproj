@@ -2,15 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <LangVersion>9.0</LangVersion>
-    <RootNamespace>NineChronicles.Mods.Athena</RootNamespace>
+    <Langversion>9.0</Langversion>
+    <RootNamespace>NineChronicles.Modules.BlockSimulation</RootNamespace>
   </PropertyGroup>
 
   <Import Project="..\.env.xml"></Import>
-
-  <ItemGroup>
-    <ProjectReference Include="..\NineChronicles.Modules.BlockSimulation\NineChronicles.Modules.BlockSimulation.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="UnityEngine">

@@ -14,7 +14,7 @@ using Nekoyume.Module;
 using Nekoyume.State;
 using Nekoyume.TableData;
 
-namespace NineChronicles.Mods.Athena.BlockSimulation
+namespace NineChronicles.Modules.BlockSimulation
 {
     public static class WorldFactory
     {

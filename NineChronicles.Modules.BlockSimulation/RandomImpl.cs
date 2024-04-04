@@ -1,6 +1,6 @@
 ﻿using Libplanet.Action;
 
-namespace NineChronicles.Mods.Athena.BlockSimulation
+namespace NineChronicles.Modules.BlockSimulation
 {
     public class RandomImpl : IRandom
     {
