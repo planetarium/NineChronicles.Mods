@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace NineChronicles.Mods.Athena.Utils
 {
@@ -19,12 +21,14 @@ namespace NineChronicles.Mods.Athena.Utils
             var csv = new StringBuilder();
             var properties = typeof(T).GetProperties();
 
-            var header = string.Join(delimiter.ToString(), properties.Select(prop => prop.Name));
+            var header = string.Join(delimiter, properties.Select(prop => prop.Name));
             csv.AppendLine(header);
 
+            var currentCulture = Thread.CurrentThread.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             foreach (var item in data)
             {
-                var line = string.Join(delimiter.ToString(), properties.Select(prop =>
+                var line = string.Join(delimiter, properties.Select(prop =>
                 {
                     var value = prop.GetValue(item);
                     if (value is IEnumerable<object> collection && value is not string)
@@ -47,6 +51,7 @@ namespace NineChronicles.Mods.Athena.Utils
             }
 
             File.WriteAllText(filePath, csv.ToString());
+            Thread.CurrentThread.CurrentCulture = currentCulture;
         }
     }
 }
