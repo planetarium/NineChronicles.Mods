@@ -185,20 +185,10 @@ namespace NineChronicles.Mods.Athena.GUIs
         private void DrawTab(int index)
         {
             var rect = _tabRectPool[index];
-            var tabName = index switch
-            {
-                0 => "Weapon",
-                1 => "Armor",
-                2 => "Belt",
-                3 => "Necklace",
-                4 => "Ring",
-                5 => "Aura",
-                6 => "The Other",
-                _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
-            };
             var isSelected = _viewModel.CurrentTabIndex == index;
             GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
             GUI.skin.button.fontStyle = isSelected ? FontStyle.Bold : FontStyle.Normal;
+            var tabName = _viewModel.CurrentTab.name;
             if (GUI.Button(rect, tabName))
             {
                 _viewModel.SelectTab(index);

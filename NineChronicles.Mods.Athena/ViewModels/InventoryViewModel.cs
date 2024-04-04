@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Nekoyume;
 using Nekoyume.Battle;
@@ -12,14 +13,26 @@ namespace NineChronicles.Mods.Athena.ViewModels
 {
     public class InventoryViewModel
     {
-        private class Tab
+        public class Tab
         {
             public readonly int index;
+            public readonly string name;
             public readonly List<Page> pages;
 
             public Tab(int index, int slotCount)
             {
                 this.index = index;
+                name = index switch
+                {
+                    0 => "Weapon",
+                    1 => "Armor",
+                    2 => "Belt",
+                    3 => "Necklace",
+                    4 => "Ring",
+                    5 => "Aura",
+                    6 => "The Other",
+                    _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
+                };
                 pages = new List<Page>();
                 AddPage(slotCount);
             }
@@ -38,7 +51,7 @@ namespace NineChronicles.Mods.Athena.ViewModels
             }
         }
 
-        private class Page
+        public class Page
         {
             public readonly int index;
             public readonly List<Slot> slots;
@@ -175,7 +188,9 @@ namespace NineChronicles.Mods.Athena.ViewModels
         private readonly List<Tab> _tabs;
 
         public int CurrentTabIndex { get; private set; } = 0;
+        public Tab CurrentTab => _tabs[CurrentTabIndex];
         public int CurrentPageIndex { get; private set; } = 0;
+        public Page CurrentPage => _tabs[CurrentTabIndex].pages[CurrentPageIndex];
 
         /// <summary>
         /// -1: No slot selected
@@ -191,6 +206,12 @@ namespace NineChronicles.Mods.Athena.ViewModels
 
         public InventoryViewModel(int tabCount, int itemCountPerEachPage)
         {
+            if (tabCount < 1)
+            {
+                AthenaPlugin.Log("[InventoryViewModel] tabCount < 1");
+                tabCount = 1;
+            }
+
             _slotCountPerEachPage = itemCountPerEachPage;
             _tabs = new List<Tab>();
             for (var i = 0; i < tabCount; i++)
@@ -308,7 +329,7 @@ namespace NineChronicles.Mods.Athena.ViewModels
                 ItemSubType.Necklace => 3,
                 ItemSubType.Ring => 4,
                 ItemSubType.Aura => 5,
-                _ => 6,
+                _ => _tabs.Count, // The Other
             };
             return _tabs[tabIndex];
         }
