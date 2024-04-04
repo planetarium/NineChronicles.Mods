@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Nekoyume.Model.Item;
 using Nekoyume.TableData;
@@ -8,14 +9,25 @@ namespace NineChronicles.Mods.Athena.ViewModels
 {
     public class ItemRecipesViewModel
     {
-        private class Tab
+        public class Tab
         {
             public readonly int index;
+            public readonly string name;
             public readonly List<Page> pages;
 
             public Tab(int index, int slotCount)
             {
                 this.index = index;
+                name = index switch
+                {
+                    0 => "Weapon",
+                    1 => "Armor",
+                    2 => "Belt",
+                    3 => "Necklace",
+                    4 => "Ring",
+                    5 => "Aura",
+                    _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
+                };
                 pages = new List<Page>();
                 AddPage(slotCount);
             }
@@ -34,7 +46,7 @@ namespace NineChronicles.Mods.Athena.ViewModels
             }
         }
 
-        private class Page
+        public class Page
         {
             public readonly int index;
             public readonly List<Slot> slots;
@@ -64,7 +76,7 @@ namespace NineChronicles.Mods.Athena.ViewModels
 
             public Slot(ItemRecipe itemRecipe)
             {
-                this.itemRecipe = itemRecipe;
+                Set(itemRecipe);
             }
 
             public void Clear() => Set(null);
@@ -91,6 +103,7 @@ namespace NineChronicles.Mods.Athena.ViewModels
             {
                 this.equipmentRow = equipmentRow;
                 this.recipeRow = recipeRow;
+
                 subRecipes = new ItemSubRecipe[subRecipeRows.Length];
                 for (var i = 0; i < subRecipeRows.Length; i++)
                 {
@@ -121,7 +134,9 @@ namespace NineChronicles.Mods.Athena.ViewModels
         private readonly List<Tab> _tabs;
 
         public int CurrentTabIndex { get; private set; } = 0;
+        public Tab CurrentTab => _tabs[CurrentTabIndex];
         public int CurrentPageIndex { get; private set; } = 0;
+        public Page CurrentPage => _tabs[CurrentTabIndex].pages[CurrentPageIndex];
 
         /// <summary>
         /// -1: No slot selected
@@ -134,6 +149,12 @@ namespace NineChronicles.Mods.Athena.ViewModels
 
         public ItemRecipesViewModel(int tabCount, int itemCountPerEachPage)
         {
+            if (tabCount <= 0)
+            {
+                AthenaPlugin.Log("[ItemRecipesViewModel] tabCount < 1");
+                tabCount = 1;
+            }
+
             _slotCountPerEachPage = itemCountPerEachPage;
             _tabs = new List<Tab>();
             for (int i = 0; i < tabCount; i++)

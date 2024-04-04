@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NineChronicles.Mods.Athena.Extensions;
 using NineChronicles.Mods.Athena.ViewModels;
 using UnityEngine;
 using static NineChronicles.Mods.Athena.ViewModels.ItemRecipesViewModel;
@@ -156,19 +155,10 @@ namespace NineChronicles.Mods.Athena.GUIs
         private void DrawTab(int index)
         {
             var rect = _tabRectPool[index];
-            var tabName = index switch
-            {
-                0 => "Weapon",
-                1 => "Armor",
-                2 => "Belt",
-                3 => "Necklace",
-                4 => "Ring",
-                5 => "Aura",
-                _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
-            };
             var isSelected = _viewModel.CurrentTabIndex == index;
             GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
             GUI.skin.button.fontStyle = isSelected ? FontStyle.Bold : FontStyle.Normal;
+            var tabName = _viewModel.CurrentTab.name;
             if (GUI.Button(rect, tabName))
             {
                 _viewModel.SelectTab(index);
@@ -192,16 +182,28 @@ namespace NineChronicles.Mods.Athena.GUIs
 
         private void DrawSlot(int index, Slot slot)
         {
-            var (iconRect, nameRect, countRect) = _slotRectPool[index];
             var itemRecipe = slot.itemRecipe;
             if (itemRecipe is null)
             {
-                GUI.enabled = false;
-                GUI.Button(iconRect, "Empty");
-                GUI.enabled = true;
-                return;
+                DrawSlotAsEmpty(index);
             }
+            else
+            {
+                DrawSlotAsEquipment(index, itemRecipe);
+            }
+        }
 
+        private void DrawSlotAsEmpty(int index)
+        {
+            var (iconRect, _, _) = _slotRectPool[index];
+            GUI.enabled = false;
+            GUI.Button(iconRect, "Empty");
+            GUI.enabled = true;
+        }
+
+        private void DrawSlotAsEquipment(int index, ItemRecipe itemRecipe)
+        {
+            var (iconRect, _, _) = _slotRectPool[index];
             var isSelected = _viewModel.SelectedSlotIndex == index;
             var equipmentRow = itemRecipe.equipmentRow;
             GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
@@ -227,7 +229,6 @@ namespace NineChronicles.Mods.Athena.GUIs
 
             GUI.backgroundColor = Color.white;
             GUI.skin.label.fontStyle = isSelected ? FontStyle.Bold : FontStyle.Normal;
-            GUI.Label(nameRect, equipmentRow.GetName());
         }
 
         private void DrawPageNumbers()
