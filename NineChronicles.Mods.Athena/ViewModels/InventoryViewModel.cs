@@ -5,6 +5,7 @@ using Nekoyume.Battle;
 using Nekoyume.Helper;
 using Nekoyume.Model.Item;
 using NineChronicles.Mods.Athena.Extensions;
+using NineChronicles.Mods.Athena.Pools;
 using UnityEngine;
 
 namespace NineChronicles.Mods.Athena.ViewModels
@@ -63,6 +64,23 @@ namespace NineChronicles.Mods.Athena.ViewModels
 
         public class Slot
         {
+            public static readonly GUIContent existsInBlockchainGUIContent =
+                new GUIContent(string.Empty, "Exists in blockchain");
+            public static readonly GUIStyle existsInBlockchainStyle = new GUIStyle(GUI.skin.box)
+            {
+                normal = { background = ColorTexturePool.Blue },
+                hover = { background = ColorTexturePool.Blue },
+                active = { background = ColorTexturePool.Blue },
+            };
+            public static readonly GUIContent moddedGUIContent =
+                new GUIContent(string.Empty, "Modded");
+            public static readonly GUIStyle moddedStyle = new GUIStyle(GUI.skin.box)
+            {
+                normal = { background = ColorTexturePool.Green },
+                hover = { background = ColorTexturePool.Green },
+                active = { background = ColorTexturePool.Green },
+            };
+
             public IItem item;
             public int count;
             public bool isExistsInBlockchain;
