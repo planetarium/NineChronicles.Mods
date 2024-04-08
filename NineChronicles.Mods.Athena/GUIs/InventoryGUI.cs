@@ -188,7 +188,9 @@ namespace NineChronicles.Mods.Athena.GUIs
             var isSelected = _viewModel.CurrentTabIndex == index;
             GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
             GUI.skin.button.fontStyle = isSelected ? FontStyle.Bold : FontStyle.Normal;
-            var tabName = _viewModel.CurrentTab.name;
+            var tabName = _viewModel.TryGetTab(index, out var tab)
+                ? tab.name
+                : $"Tab {index}";
             if (GUI.Button(rect, tabName))
             {
                 _viewModel.SelectTab(index);
