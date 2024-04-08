@@ -227,13 +227,18 @@ namespace NineChronicles.Mods.Athena.ViewModels
                 ItemSubType.Aura => 5,
                 _ => -1,
             };
-            if (tabIndex == -1)
+            return TryGetTab(tabIndex, out tab);
+        }
+
+        public bool TryGetTab(int index, out Tab tab)
+        {
+            if (index < 0 || index >= _tabs.Count)
             {
                 tab = null;
                 return false;
             }
 
-            tab = _tabs[tabIndex];
+            tab = _tabs[index];
             return true;
         }
 

@@ -334,6 +334,18 @@ namespace NineChronicles.Mods.Athena.ViewModels
             return _tabs[tabIndex];
         }
 
+        public bool TryGetTab(int index, out Tab tab)
+        {
+            if (index < 0 || index >= _tabs.Count)
+            {
+                tab = default;
+                return false;
+            }
+
+            tab = _tabs[index];
+            return true;
+        }
+
         private Page GetOrCreatePageHasEmptySlot(Tab tab)
         {
             foreach (var page in tab.pages)
