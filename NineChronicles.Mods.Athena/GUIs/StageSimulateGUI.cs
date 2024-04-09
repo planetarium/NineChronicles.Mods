@@ -435,12 +435,17 @@ namespace NineChronicles.Mods.Athena.GUIs
 
             simulationStep = 0;
 
+            var states = States.Instance;
+            var (_, costumes) = states.GetEquippedItems(Nekoyume.Model.EnumType.BattleType.Adventure);
             var clearWaveInfo = await UniTask.Run(() => HackAndSlashSimulator.Simulate(
                 _modInventoryManager.GetEquipments(),
-                TableSheets.Instance,
-                States.Instance,
+                costumes,
+                Array.Empty<Consumable>(),
                 selectedStageId / 50,
                 selectedStageId,
+                stageBuffId: null,
+                TableSheets.Instance,
+                states,
                 playCount,
                 onProgress: step => simulationStep = step));
 
