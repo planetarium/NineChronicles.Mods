@@ -83,7 +83,7 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
         }
 
         public static Dictionary<int, int> Simulate(
-            List<Equipment> equipments,
+            IEnumerable<Equipment> equipments,
             IEnumerable<Costume> costumes,
             IEnumerable<Consumable> consumables,
             int worldId,
@@ -97,11 +97,15 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
             int? randomSeed = null,
             Action<string> onLog = null)
         {
+            equipments ??= Array.Empty<Equipment>();
+            costumes ??= Array.Empty<Costume>();
+            consumables ??= Array.Empty<Consumable>();
+
             onLog?.Invoke(
                 $"({nameof(HackAndSlashSimulator)}) Simulate Start\n" +
-                $"equipments: {(equipments == null ? string.Empty : string.Join(',', equipments.Select(e => e.NonFungibleId)))}\n" +
-                $"costumes: {(costumes == null ? string.Empty : string.Join(',', costumes.Select(e => e.NonFungibleId)))}\n" +
-                $"consumables: {(consumables == null ? string.Empty : string.Join(',', consumables.Select(e => e.NonFungibleId)))}\n" +
+                $"equipments: {string.Join(',', equipments.Select(e => e.NonFungibleId))}\n" +
+                $"costumes: {string.Join(',', costumes.Select(e => e.NonFungibleId))}\n" +
+                $"consumables: {string.Join(',', consumables.Select(e => e.NonFungibleId))}\n" +
                 $"worldId: {worldId}\n" +
                 $"stageId: {stageId}\n" +
                 $"stageBuffId: {stageBuffId}\n" +
