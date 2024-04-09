@@ -1,10 +1,7 @@
 using System;
 using System.Linq;
-using System.Threading.Tasks;
-using Bencodex.Types;
 using BepInEx.Logging;
 using Cysharp.Threading.Tasks;
-using Nekoyume;
 using Nekoyume.Game;
 using Nekoyume.Model.Item;
 using Nekoyume.State;
@@ -435,12 +432,17 @@ namespace NineChronicles.Mods.Athena.GUIs
 
             simulationStep = 0;
 
+            var states = States.Instance;
+            var (_, costumes) = states.GetEquippedItems(Nekoyume.Model.EnumType.BattleType.Adventure);
             var clearWaveInfo = await UniTask.Run(() => HackAndSlashSimulator.Simulate(
-                _modInventoryManager.GetEquipments(),
-                TableSheets.Instance,
-                States.Instance,
-                selectedStageId / 50,
+                equipments: _modInventoryManager.GetEquipments(),
+                costumes,
+                consumables: null,
+                worldId: selectedStageId / 50,
                 selectedStageId,
+                stageBuffId: null,
+                TableSheets.Instance,
+                states,
                 playCount,
                 onProgress: step => simulationStep = step));
 
@@ -451,35 +453,6 @@ namespace NineChronicles.Mods.Athena.GUIs
 
             AthenaPlugin.Log($"[StageGUI] Simulate {playCount}: w0 ({_wave0ClearCount}) w1({_wave1ClearCount}) w2({_wave2ClearCount}) w3({_wave3ClearCount})");
             _isCalculating = false;
-        }
-
-        private async Task UpdateStateData()
-        {
-            if (LastSheetsUpdated is { } lastSheetsUpdated &&
-                DateTimeOffset.UtcNow.Subtract(lastSheetsUpdated).CompareTo(TimeSpan.FromSeconds(30)) <= 0)
-            {
-                return;
-            }
-
-            LastSheetsUpdated = DateTimeOffset.UtcNow;
-
-            var sheets = await Game.instance.Agent.GetSheetsAsync(new[]
-            {
-                Addresses.GetSheetAddress<WorldSheet>(),
-                Addresses.GetSheetAddress<StageSheet>(),
-            });
-
-            var worldSheet = new WorldSheet();
-            worldSheet.Set((Text)sheets[Addresses.GetSheetAddress<WorldSheet>()]);
-
-            var stageSheet = new StageSheet();
-            stageSheet.Set((Text)sheets[Addresses.GetSheetAddress<StageSheet>()]);
-
-            var stid = States.Instance.CurrentAvatarState.worldInformation.TryGetLastClearedStageId(out int stageId)
-                ? stageId
-                : 0;
-
-            StateData = (worldSheet, stageSheet, stid);
         }
     }
 }

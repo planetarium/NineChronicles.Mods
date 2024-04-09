@@ -10,101 +10,69 @@ using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Item;
 using Nekoyume.Model.Skill;
 using Nekoyume.Model.State;
-using Nekoyume.State;
-using UnityEngine;
+using Nekoyume.TableData;
+using Nekoyume.TableData.Crystal;
+using States = Nekoyume.State.States;
 
 namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
 {
     public static class HackAndSlashSimulator
     {
         public static int Simulate(
-            List<Equipment> equipments,
-            TableSheets tableSheets,
-            States states,
+            AvatarState avatarState,
+            IEnumerable<Equipment> equipments,
+            IEnumerable<Costume> costumes,
+            IEnumerable<Consumable> consumables,
             int worldId,
             int stageId,
+            int? stageBuffId,
+            TableSheets tableSheets,
+            States states,
             long blockIndex = 0,
             int? randomSeed = null,
             Action<string> onLog = null)
         {
-            randomSeed ??= new RandomImpl(DateTime.Now.Millisecond).Next();
-            var signerAddress = states.AgentState.address;
-            var avatarState = (AvatarState)states.CurrentAvatarState.Clone();
-
-            // avatarState.inventory;
-            var itemSlotState = states.CurrentItemSlotStates[BattleType.Adventure];
-
-            foreach (var equipment in equipments)
-            {
-                if (!avatarState.inventory.HasNonFungibleItem(equipment.NonFungibleId))
-                {
-                    avatarState.inventory.AddItem(equipment);
-                }
-            }
-
-            avatarState.EquipEquipments(equipments.Select(e => e.NonFungibleId).ToList());
-            var equippedCount = avatarState.inventory.Equipments.Count(equip => equip.equipped);
-            onLog?.Invoke($"equippedCount: {equippedCount} / equipments.Count: {equipments.Count}");
-            var equippedIds = avatarState.inventory.Equipments.Where(equip => equip.equipped).Select(equip => equip.ItemId.ToString()).ToList();
-            onLog?.Invoke(string.Join("\n", equippedIds));
-
-            var skillState = States.Instance.CrystalRandomSkillState;
-            var key = string.Format("HackAndSlash.SelectedBonusSkillId.{0}", avatarState.address);
-            var skillId = PlayerPrefs.GetInt(key, 0);
-            if (skillId == 0 &&
-                skillState != null &&
-                skillState.SkillIds.Any())
-            {
-                skillId = skillState.SkillIds
-                    .Select(buffId =>
-                        TableSheets.Instance.CrystalRandomBuffSheet
-                            .TryGetValue(buffId, out var bonusBuffRow)
-                            ? bonusBuffRow
-                            : null)
-                    .Where(x => x != null)
-                    .OrderBy(x => x.Rank)
-                    .ThenBy(x => x.Id)
-                    .First()
-                    .Id;
-            }
-
+            equipments ??= new List<Equipment>();
+            costumes ??= new List<Costume>();
+            consumables ??= new List<Consumable>();
+            avatarState ??= MakeFlyweightAvatarState(
+                states.CurrentAvatarState,
+                equipments,
+                costumes,
+                consumables);
             var action = new HackAndSlash
             {
-                Costumes = itemSlotState.Costumes,
-                Equipments = itemSlotState.Equipments,
-                Foods = new List<Guid>(),
-                RuneInfos = States.Instance.CurrentRuneSlotStates[BattleType.Adventure]
-                    .GetEquippedRuneSlotInfos(),
+                Costumes = costumes.Select(e => e.NonFungibleId).ToList(),
+                Equipments = equipments.Select(e => e.NonFungibleId).ToList(),
+                Foods = consumables.Select(e => e.NonFungibleId).ToList(),
+                RuneInfos = states.CurrentRuneSlotStates[BattleType.Adventure].GetEquippedRuneSlotInfos(),
                 WorldId = worldId,
                 StageId = stageId,
-                StageBuffId = skillId == 0 ? null : skillId,
+                StageBuffId = stageBuffId,
                 AvatarAddress = avatarState.address,
             };
-
             onLog?.Invoke(action.PlainValue.Inspect());
 
+            randomSeed ??= new RandomImpl(DateTime.Now.Millisecond).Next();
             var eval = new ActionEvaluation<HackAndSlash>
             {
                 PreviousState = default,
                 OutputState = default,
                 BlockIndex = blockIndex,
                 RandomSeed = randomSeed.Value,
-                Signer = signerAddress,
+                Signer = states.AgentState.address,
                 Action = action,
             };
-            var skillsOnWaveStart = new List<Skill>();
-            if (eval.Action.StageBuffId.HasValue)
-            {
-                var skill = CrystalRandomSkillState.GetSkill(
-                    eval.Action.StageBuffId.Value,
-                    tableSheets.CrystalRandomBuffSheet,
-                    tableSheets.SkillSheet);
-                skillsOnWaveStart.Add(skill);
-            }
+            var runeStates = states.GetEquippedRuneStates(BattleType.Adventure);
+            var collectionState = states.CollectionState;
+            var skillsOnWaveStart = GetSkillsOnWaveStart(
+                stageBuffId,
+                tableSheets.CrystalRandomBuffSheet,
+                tableSheets.SkillSheet);
             eval.GetHackAndSlashReward(
                 avatarState,
-                States.Instance.GetEquippedRuneStates(BattleType.Adventure),
-                States.Instance.CollectionState,
+                runeStates,
+                collectionState,
                 skillsOnWaveStart,
                 tableSheets,
                 out var simulator,
@@ -115,46 +83,115 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
         }
 
         public static Dictionary<int, int> Simulate(
-            List<Equipment> equipments,
-            TableSheets tableSheets,
-            States states,
+            IEnumerable<Equipment> equipments,
+            IEnumerable<Costume> costumes,
+            IEnumerable<Consumable> consumables,
             int worldId,
             int stageId,
+            int? stageBuffId,
+            TableSheets tableSheets,
+            States states,
             int playCount,
             [CanBeNull] Action<int> onProgress = null,
             long blockIndex = 0,
             int? randomSeed = null,
             Action<string> onLog = null)
         {
+            equipments ??= Array.Empty<Equipment>();
+            costumes ??= Array.Empty<Costume>();
+            consumables ??= Array.Empty<Consumable>();
+
             onLog?.Invoke(
                 $"({nameof(HackAndSlashSimulator)}) Simulate Start\n" +
                 $"equipments: {string.Join(',', equipments.Select(e => e.NonFungibleId))}\n" +
+                $"costumes: {string.Join(',', costumes.Select(e => e.NonFungibleId))}\n" +
+                $"consumables: {string.Join(',', consumables.Select(e => e.NonFungibleId))}\n" +
                 $"worldId: {worldId}\n" +
                 $"stageId: {stageId}\n" +
+                $"stageBuffId: {stageBuffId}\n" +
+                $"playCount: {playCount}\n" +
                 $"blockIndex: {blockIndex}\n" +
                 $"randomSeed: {randomSeed}");
-
-            var result = new Dictionary<int, int>();
-
+            var result = new Dictionary<int, int>
+            {
+                { 0, 0 },
+                { 1, 0 },
+                { 2, 0 },
+                { 3, 0 },
+            };
+            var avatarState = MakeFlyweightAvatarState(
+                states.CurrentAvatarState,
+                equipments,
+                costumes,
+                consumables);
             for (var i = 0; i < playCount; i++)
             {
-                var clearWave = Simulate(equipments, tableSheets, states, worldId, stageId, blockIndex, randomSeed);
-
+                var clearWave = Simulate(
+                    avatarState,
+                    equipments,
+                    costumes,
+                    consumables,
+                    worldId,
+                    stageId,
+                    stageBuffId,
+                    tableSheets,
+                    states,
+                    blockIndex,
+                    randomSeed,
+                    onLog: onLog);
+                result[clearWave] += 1;
                 onProgress?.Invoke(i + 1);
-
-                if (result.TryGetValue(clearWave, out var count))
-                {
-                    result[clearWave] = count + 1;
-                }
-                else
-                {
-                    result[clearWave] = 1;
-                }
             }
+
             var formattedResult = string.Join(", ", result.Select(kv => $"{kv.Key}: {kv.Value}"));
             onLog?.Invoke($"({nameof(HackAndSlashSimulator)}) Simulate Result: {formattedResult}");
 
             return result;
+        }
+
+        public static AvatarState MakeFlyweightAvatarState(
+            AvatarState avatarState,
+            IEnumerable<Equipment> equipments,
+            IEnumerable<Costume> costumes,
+            IEnumerable<Consumable> consumables)
+        {
+            avatarState.inventory = new Inventory();
+            var cloned = (AvatarState)avatarState.Clone();
+            foreach (var equipment in equipments)
+            {
+                equipment.Equip();
+                cloned.inventory.AddNonFungibleItem(equipment);
+            }
+
+            foreach (var costume in costumes)
+            {
+                costume.Equip();
+                cloned.inventory.AddNonFungibleItem(costume);
+            }
+
+            foreach (var consumable in consumables)
+            {
+                cloned.inventory.AddFungibleItem(consumable);
+            }
+
+            return cloned;
+        }
+
+        public static List<Skill> GetSkillsOnWaveStart(
+            int? stageBuffId,
+            CrystalRandomBuffSheet crystalRandomBuffSheet,
+            SkillSheet skillSheet)
+        {
+            if (!stageBuffId.HasValue)
+            {
+                return new List<Skill>();
+            }
+
+            var skill = CrystalRandomSkillState.GetSkill(
+                    stageBuffId.Value,
+                    crystalRandomBuffSheet,
+                    skillSheet);
+            return new List<Skill> { skill };
         }
     }
 }
