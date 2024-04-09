@@ -114,6 +114,7 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                 $"randomSeed: {randomSeed}");
             var result = new Dictionary<int, int>
             {
+                { 0, 0 },
                 { 1, 0 },
                 { 2, 0 },
                 { 3, 0 },
@@ -136,7 +137,8 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                     tableSheets,
                     states,
                     blockIndex,
-                    randomSeed);
+                    randomSeed,
+                    onLog: onLog);
                 result[clearWave] += 1;
                 onProgress?.Invoke(i + 1);
             }
