@@ -155,8 +155,8 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
             IEnumerable<Costume> costumes,
             IEnumerable<Consumable> consumables)
         {
-            avatarState.inventory = new Inventory();
             var cloned = (AvatarState)avatarState.Clone();
+            cloned.inventory = new Inventory();
             foreach (var equipment in equipments)
             {
                 equipment.Equip();
