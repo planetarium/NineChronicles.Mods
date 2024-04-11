@@ -179,9 +179,9 @@ namespace NineChronicles.Mods.Athena
 
                 _tabGUI = new TabGUI(new List<(string Name, Func<IGUI> UI)>
                 {
-                    // ("Simulate", CreateSimulateGUI),
                     ("Create", CreateItemCreationGUI),
                     ("Enhancement", CreateEnhancementGUI),
+                    ("Rune", CreateRuneManagementGUI),
                     ("Simulate", CreateStageSimulateGUI),
                 }, DisableModeGUI);
                 _notificationGUI = new NotificationGUI();
@@ -253,6 +253,11 @@ namespace NineChronicles.Mods.Athena
         {
             CreateInventoryGUI();
             return new EnhancementGUI(_modInventoryManager, _inventoryGUI);
+        }
+
+        private IGUI CreateRuneManagementGUI()
+        {
+            return new RuneManagementGUI();
         }
 
         private IGUI CreateStageSimulateGUI()

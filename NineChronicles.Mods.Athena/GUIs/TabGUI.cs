@@ -22,7 +22,7 @@ namespace NineChronicles.Mods.Athena.GUIs
 
         public void OnGUI()
         {
-            UnityEngine.GUI.matrix = GUIToolbox.GetGUIMatrix();
+            GUI.matrix = GUIToolbox.GetGUIMatrix();
 
             using var scope = new GUILayout.AreaScope(new Rect(
                 0,
@@ -47,15 +47,15 @@ namespace NineChronicles.Mods.Athena.GUIs
                     currentUI = uiGenerator();
                 }
             }
-            
+
             CloseButton();
 
             GUILayout.EndHorizontal();
-            
+
             currentUI?.OnGUI();
             GUILayout.EndVertical();
         }
-        
+
         private void CloseButton()
         {
             var style = new GUIStyle
