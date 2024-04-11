@@ -2,6 +2,7 @@
 // using System.Collections.Generic;
 // using Libplanet.Crypto;
 // using Nekoyume.Action;
+// using Nekoyume.Blockchain;
 // using Nekoyume.Arena;
 // using Nekoyume.Model;
 // using Nekoyume.Model.State;
@@ -17,7 +18,7 @@
 
 // namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
 // {
-//     public static class ModArenaSimulator
+//     public static class BattleArenaSimulator
 //     {
 //         public static float ExecuteArena(
 //             TableSheets tableSheets,
@@ -51,6 +52,12 @@
 
 //             var enemyAvatarStateValue = Game.instance.Agent.GetAvatarStatesAsync(new[] { enemyAvatarAddress }).GetAwaiter().GetResult();
 //             var enemyAvatarState = enemyAvatarStateValue[enemyAvatarAddress];
+
+//             // ActionRenderHandler 안에 PrepareBattleArena, ResponseBattleArenaAsync에서 하는걸 구현한다고 생각하면 됨
+//             // GetArenaPlayerDigest
+//             // outputStates를 얻는 방법
+//             // ()
+//             // R
 
 //             var enemyItemSlotStateAddress = ItemSlotState.DeriveAddress(enemyAvatarAddress, BattleType.Arena);
 //             var enemyItemSlotState = states.TryGetLegacyState(enemyItemSlotStateAddress, out List rawEnemyItemSlotState)

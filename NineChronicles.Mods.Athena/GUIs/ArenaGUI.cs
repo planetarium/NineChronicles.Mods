@@ -1,156 +1,84 @@
+using System.Collections.Generic;
 using Nekoyume.Game;
 using Nekoyume.Model.Item;
+using NineChronicles.Mods.Athena.Components;
 using NineChronicles.Mods.Athena.Extensions;
 using NineChronicles.Mods.Athena.Factories;
 using NineChronicles.Mods.Athena.Manager;
 using NineChronicles.Mods.Athena.Models;
+using Nekoyume.UI;
+using Nekoyume.UI.Model;
 using UnityEngine;
+using Nekoyume.GraphQL;
+using System.Threading.Tasks;
+using UnityEngine.Rendering;
 
 namespace NineChronicles.Mods.Athena.GUIs
 {
-    public class EnhancementGUI : IGUI
+    public class ArenaGUI : IGUI
     {
-        private readonly Rect _upgradeLayoutRect;
+        private readonly Rect _arenaLayoutRect;
 
-        private ModInventoryManager _modInventoryManager;
-
-        private InventoryGUI _inventoryGUI;
-
-        public ModItem SelectedEquipment { get; set; }
         public GUIContent SlotContent = new GUIContent();
 
-        public EnhancementGUI(ModInventoryManager modInventoryManager, InventoryGUI inventoryGUI)
+        public List<AvatarInfo> avatarInfos = new List<AvatarInfo>();
+
+        public ArenaGUI()
         {
-            _modInventoryManager = modInventoryManager;
-            _inventoryGUI = inventoryGUI;
+            _arenaLayoutRect = new Rect(
+                100,
+                100,
+                GUIToolbox.ScreenWidthReference - 200,
+                GUIToolbox.ScreenHeightReference - 100);
+            LoadRank();
+        }
 
-            _inventoryGUI.OnSlotSelected += tuple =>
+        private async Task LoadRank()
+        {
+            var apiClient = Game.instance.ApiClient;
+
+            if (apiClient.IsInitialized)
             {
-                if (tuple.item is Equipment equipment)
-                {
-                    var modItem = _modInventoryManager.GetItem(equipment.NonFungibleId);
+                var query =
+                    $@"query {{
+                            abilityRanking(limit: 20) {{
+                                ranking
+                                avatarAddress
+                                name
+                                avatarLevel
+                                armorId
+                                titleId
+                                cp
+                            }}
+                        }}";
 
-                    if (modItem is null)
+                var response = await apiClient.GetObjectAsync<AbilityRankingResponse>(query);
+                if (response is null)
+                {
+                    AthenaPlugin.Log($"Failed getting response : {nameof(AbilityRankingResponse)}");
+                    return;
+                }
+
+                foreach (var abilityRanking in response.AbilityRanking)
+                {
+                    var avatarInfo = new AvatarInfo
                     {
-                        modItem = new ModItem()
-                        {
-                            Id = equipment.NonFungibleId,
-                            EquipmentId = equipment.Id,
-                            Level = equipment.level,
-                            ExistsItem = true,
-                        };
-                    }
-                    SelectedEquipment = modItem;
-
-                    var slotText = $"Grade {equipment.Grade}" +
-                        $"\n{equipment.ElementalType}" +
-                        $"\n{equipment.GetName()}\n" +
-                        $"+{equipment.level}";
-                    SlotContent = new GUIContent(slotText);
+                        Name = abilityRanking.Name,
+                        Cp = abilityRanking.Cp
+                    };
+                    avatarInfos.Add(avatarInfo);
                 }
-            };
-            _inventoryGUI.OnSlotDeselected += () =>
-            {
-                SelectedEquipment = null;
-                SlotContent = new GUIContent();
-            };
-            _inventoryGUI.OnSlotRemoveClicked += item =>
-            {
-                if (SelectedEquipment is not null &&
-                    item is Equipment equipment &&
-                    equipment.NonFungibleId.Equals(SelectedEquipment.Id))
-                {
-                    SelectedEquipment = null;
-                    SlotContent = new GUIContent();
-                }
-            };
-
-            _upgradeLayoutRect = new Rect(
-                GUIToolbox.ScreenWidthReference - 350,
-                GUIToolbox.ScreenHeightReference / 2 - 100,
-                150,
-                100);
+            }
         }
 
         public void OnGUI()
         {
             GUI.matrix = GUIToolbox.GetGUIMatrix();
 
-            GUIStyle centeredStyle = new GUIStyle(GUI.skin.box)
+            using (var areaScope = new GUILayout.AreaScope(_arenaLayoutRect))
             {
-                alignment = TextAnchor.MiddleCenter
-            };
-
-            using (var areaScope = new GUILayout.AreaScope(_upgradeLayoutRect))
-            {
-                using (var horizontalScope = new GUILayout.HorizontalScope())
-                {
-                    GUILayout.Box(SlotContent, centeredStyle, GUILayout.Width(100), GUILayout.Height(100));
-
-                    using (var verticalScope = new GUILayout.VerticalScope())
-                    {
-                        if (GUILayout.Button("+", GUILayout.Width(20), GUILayout.Height(20)))
-                        {
-                            if (SelectedEquipment != null)
-                            {
-                                AthenaPlugin.Log($"[EnhancementGUI] Upgrade button clicked, Selected equipment: {SelectedEquipment.Id}");
-                                SelectedEquipment.Enhancement();
-                                SlotContent = new GUIContent(SlotContent.text.Replace($"+{SelectedEquipment.Level - 1}", $"+{SelectedEquipment.Level}"));
-
-                                if (_modInventoryManager.GetItem(SelectedEquipment.Id) == null)
-                                {
-                                    AthenaPlugin.Log($"[EnhancementGUI] NotFound {SelectedEquipment.Id} in csv, add item");
-                                    _modInventoryManager.AddItem(SelectedEquipment);
-                                }
-                                else
-                                {
-                                    _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
-                                }
-
-                                UpdateInventoryItem();
-                            }
-                        }
-
-                        if (GUILayout.Button("-", GUILayout.Width(20), GUILayout.Height(20)))
-                        {
-                            if (SelectedEquipment != null)
-                            {
-                                AthenaPlugin.Log($"[EnhancementGUI] Downgrade button clicked, Selected equipment: {SelectedEquipment.Id}");
-                                SelectedEquipment.Downgrade();
-                                SlotContent = new GUIContent(SlotContent.text.Replace($"+{SelectedEquipment.Level + 1}", $"+{SelectedEquipment.Level}"));
-
-                                if (_modInventoryManager.GetItem(SelectedEquipment.Id) == null)
-                                {
-                                    AthenaPlugin.Log($"[EnhancementGUI] NotFound {SelectedEquipment.Id} in csv, add item");
-                                    _modInventoryManager.AddItem(SelectedEquipment);
-                                }
-                                else
-                                {
-                                    _modInventoryManager.UpdateItem(SelectedEquipment.Id, SelectedEquipment);
-                                }
-
-                                UpdateInventoryItem();
-                            }
-                        }
-                    }
-                }
+                ArenaSimulateBoard.DrawArenaBoard(avatarInfos);
             }
-        }
-
-        private void UpdateInventoryItem()
-        {
-            if (SelectedEquipment is null ||
-                !_inventoryGUI.TryGetSelectedSlot(out var slot) ||
-                slot.item is not Equipment equipment)
-            {
-                return;
-            }
-
-            equipment = ModItemFactory.ModifyLevel(
-                TableSheets.Instance,
-                equipment,
-                SelectedEquipment);
-            slot.Set(equipment, slot.count, slot.isExistsInBlockchain, isModded: true);
         }
     }
 }

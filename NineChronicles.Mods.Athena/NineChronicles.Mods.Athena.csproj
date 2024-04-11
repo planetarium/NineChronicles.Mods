@@ -73,6 +73,9 @@
     <Reference Include="BalanceTool">
       <HintPath>$(NINECHRONICLES_MANAGED_DIR)\BalanceTool.dll</HintPath>
     </Reference>
+    <Reference Include="GraphQL.Primitives">
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\GraphQL.Primitives.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
