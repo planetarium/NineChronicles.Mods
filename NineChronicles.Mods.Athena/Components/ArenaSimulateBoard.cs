@@ -1,17 +1,13 @@
-using System.Collections.Generic;
-using Nekoyume.Game;
-using Nekoyume.Model.Item;
-using NineChronicles.Mods.Athena.Extensions;
-using NineChronicles.Mods.Athena.Factories;
-using NineChronicles.Mods.Athena.Manager;
-using NineChronicles.Mods.Athena.Models;
+using System;
 using UnityEngine;
+using NineChronicles.Mods.Athena.Models;
+using System.Collections.Generic;
 
 namespace NineChronicles.Mods.Athena.Components
 {
     public static class ArenaSimulateBoard
     {
-        public static void DrawArenaBoard(List<AvatarInfo> arenaAvatarInfos)
+        public static void DrawArenaBoard(List<AvatarInfo> arenaAvatarInfos, Action<AvatarInfo> onSlotSelected)
         {
             int maxItems = Mathf.Min(arenaAvatarInfos.Count, 20);
 
@@ -26,7 +22,7 @@ namespace NineChronicles.Mods.Athena.Components
                         for(int j = i; j < Mathf.Min(i + itemsPerGroup, maxItems); j++)
                         {
                             var avatarInfo = arenaAvatarInfos[j];
-                            ArenaSimulateSlot.DrawArenaCell(avatarInfo.Name, avatarInfo.Cp);
+                            ArenaSimulateSlot.DrawArenaSlot(avatarInfo, onSlotSelected);
                         }
                     }
                 }

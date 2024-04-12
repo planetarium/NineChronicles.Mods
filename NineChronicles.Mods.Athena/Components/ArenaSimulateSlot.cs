@@ -1,22 +1,25 @@
-using Nekoyume.Game;
-using Nekoyume.Model.Item;
-using NineChronicles.Mods.Athena.Extensions;
-using NineChronicles.Mods.Athena.Factories;
-using NineChronicles.Mods.Athena.Manager;
-using NineChronicles.Mods.Athena.Models;
+using System;
 using UnityEngine;
+using NineChronicles.Mods.Athena.Models;
 
 namespace NineChronicles.Mods.Athena.Components
 {
     public static class ArenaSimulateSlot
     {
-        public static void DrawArenaCell(string avatarName, int cp)
+        public static void DrawArenaSlot(AvatarInfo avatarInfo, Action<AvatarInfo> onSlotSelected)
         {
-            var slotText = $"AvatarName {avatarName}" +
-                $"\nCP: {cp}";
+            var slotText = $"AvatarName {avatarInfo.Name}" +
+                $"\nCP: {avatarInfo.Cp}";
+            if(avatarInfo.WinRate != -1)
+            {
+                slotText += $"\nWinRate: {Math.Round(avatarInfo.WinRate, 1)}";
+            }
             var slotContent = new GUIContent(slotText);
 
-            GUILayout.Box(slotContent, GUILayout.Width(200), GUILayout.Height(80));
+            if (GUILayout.Button(slotContent, GUILayout.Width(200), GUILayout.Height(80)))
+            {
+                onSlotSelected?.Invoke(avatarInfo);
+            }
         }
     }
 }

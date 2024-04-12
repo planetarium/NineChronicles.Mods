@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+using Libplanet.Crypto;
 
 namespace NineChronicles.Mods.Athena.Models
 {
@@ -10,5 +7,9 @@ namespace NineChronicles.Mods.Athena.Models
         public int Cp { get; set; }
 
         public string Name { get; set; }
+
+        public Address Address { get; set; }
+
+        public double WinRate { get; set; } = -1;
     }
 }

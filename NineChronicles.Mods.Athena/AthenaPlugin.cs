@@ -181,7 +181,6 @@ namespace NineChronicles.Mods.Athena
 
                 _tabGUI = new TabGUI(new List<(string Name, Func<IGUI> UI)>
                 {
-                    // ("Simulate", CreateSimulateGUI),
                     ("Simulate", CreateStageSimulateGUI),
                     ("Arena", CreateArenaGUI),
                     ("Create", CreateItemCreationGUI),
