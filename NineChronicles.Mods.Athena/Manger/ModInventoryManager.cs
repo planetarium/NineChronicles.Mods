@@ -29,9 +29,16 @@ namespace NineChronicles.Mods.Athena.Manager
             LoadItemsFromCsv();
         }
 
-        public List<Equipment> GetEquipments()
+        public List<Equipment> GetEquippedEquipments()
         {
-            return new List<Equipment>() { SelectedAura, SelectedWeapon, SelectedArmor, SelectedBelt, SelectedRing1, SelectedRing2 }.FindAll(e => e != null);
+            return new List<Equipment>() {
+                SelectedAura,
+                SelectedWeapon,
+                SelectedArmor,
+                SelectedBelt,
+                SelectedNecklace,
+                SelectedRing1,
+                SelectedRing2 }.FindAll(e => e != null);
         }
 
         public void LoadItemsFromCsv()
