@@ -5,8 +5,10 @@ using Cysharp.Threading.Tasks;
 using Libplanet.Action.State;
 using Libplanet.Crypto;
 using Nekoyume;
+using Nekoyume.Action;
 using Nekoyume.Blockchain;
 using Nekoyume.Model.EnumType;
+using Nekoyume.Model.Item;
 using Nekoyume.Model.State;
 using Nekoyume.TableData;
 
@@ -14,6 +16,45 @@ namespace NineChronicles.Modules.BlockSimulation.Extensions
 {
     public static class AgentExtensions
     {
+        public static async UniTask<Inventory> GetInventoryAsync(this IAgent agent,
+                       Address avatarAddress)
+        {
+            var inventoryAddress = avatarAddress.Derive("inventory");
+            var state = await agent.GetStateAsync(ReservedAddresses.LegacyAccount, inventoryAddress);
+            return state is List list
+                ? new Inventory(list)
+                : new Inventory();
+        }
+
+        public static async UniTask<ItemSlotState> GetItemSlotStateAsync(
+            this IAgent agent,
+            Address avatarAddress,
+            BattleType battleType)
+        {
+            var address = ItemSlotState.DeriveAddress(avatarAddress, battleType);
+            var state = await agent.GetStateAsync(ReservedAddresses.LegacyAccount, address);
+            return state is List list
+                ? new ItemSlotState(list)
+                : new ItemSlotState(battleType);
+        }
+
+        public static async UniTask<(IEnumerable<Equipment> equipments, IEnumerable<Costume> costumes)> GetEquippedItemsAsync(
+            this IAgent agent,
+            Address avatarAddress,
+            BattleType battleType,
+            Inventory inventory)
+        {
+            var itemSlotState = await agent.GetItemSlotStateAsync(avatarAddress, battleType);
+            inventory ??= await agent.GetInventoryAsync(avatarAddress);
+            var equipments = inventory.Equipments.Where(e =>
+                itemSlotState.Equipments.Contains(e.NonFungibleId) &&
+                e.RequiredBlockIndex <= agent.BlockIndex);
+            var costumes = inventory.Costumes.Where(e =>
+                itemSlotState.Costumes.Contains(e.NonFungibleId) &&
+                e.RequiredBlockIndex <= agent.BlockIndex);
+            return (equipments, costumes);
+        }
+
         public static async UniTask<IEnumerable<RuneState>> GetRuneStatesAsync(
             this IAgent agent,
             RuneListSheet runeListSheet,
