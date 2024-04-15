@@ -11,6 +11,7 @@ using Nekoyume.TableData;
 using NineChronicles.Mods.Athena.Extensions;
 using NineChronicles.Mods.Athena.Manager;
 using NineChronicles.Modules.BlockSimulation.ActionSimulators;
+using NineChronicles.Modules.BlockSimulation.Extensions;
 using UnityEngine;
 
 namespace NineChronicles.Mods.Athena.GUIs
@@ -280,9 +281,16 @@ namespace NineChronicles.Mods.Athena.GUIs
                         GUI.enabled = !_isCalculating;
                         if (GUILayout.Button("Simulate"))
                         {
-                            Simulate();
+                            SimulateLocal();
                             AthenaPlugin.Log($"[StageGUI] Simulate button clicked {selectedStageId})");
                         }
+
+                        // NOTE: Use for testing with remote state.
+                        //if (GUILayout.Button("Simulate(Remote)"))
+                        //{
+                        //    SimulateRemote();
+                        //    AthenaPlugin.Log($"[StageGUI] Simulate button clicked {selectedStageId})");
+                        //}
 
                         GUI.enabled = true;
 
@@ -424,7 +432,7 @@ namespace NineChronicles.Mods.Athena.GUIs
             }
         }
 
-        private async void Simulate()
+        private async void SimulateLocal()
         {
             _isCalculating = true;
             _wave0ClearCount = -1;
@@ -432,14 +440,15 @@ namespace NineChronicles.Mods.Athena.GUIs
             _wave2ClearCount = -1;
             _wave3ClearCount = -1;
             simulationStep = 0;
+
             var states = States.Instance;
-            var (_, costumes) = states.GetEquippedItems(BattleType.Adventure);
+            var (_, equippedCostumes) = states.GetEquippedItems(BattleType.Adventure);
             var equippedRuneStates = states.GetEquippedRuneStates(BattleType.Adventure);
             var clearWaveInfo = await UniTask.Run(() => HackAndSlashSimulator.Simulate(
                 TableSheets.Instance,
                 states.CurrentAvatarState,
-                equipments: _modInventoryManager.GetEquipments(),
-                costumes,
+                equipments: _modInventoryManager.GetEquippedEquipments(),
+                costumes: equippedCostumes,
                 consumables: null,
                 runeStates: equippedRuneStates,
                 collectionState: states.CollectionState,
@@ -448,7 +457,56 @@ namespace NineChronicles.Mods.Athena.GUIs
                 selectedStageId,
                 playCount,
                 stageBuffId: null,
-                onProgress: step => simulationStep = step));
+                onProgress: step => simulationStep = step,
+                onLog: AthenaPlugin.Log));
+            _wave0ClearCount = clearWaveInfo.TryGetValue(0, out var w0) ? w0 : 0;
+            _wave1ClearCount = clearWaveInfo.TryGetValue(1, out var w1) ? w1 : 0;
+            _wave2ClearCount = clearWaveInfo.TryGetValue(2, out var w2) ? w2 : 0;
+            _wave3ClearCount = clearWaveInfo.TryGetValue(3, out var w3) ? w3 : 0;
+
+            AthenaPlugin.Log($"[StageGUI] Simulate {playCount}: w0 ({_wave0ClearCount}) w1({_wave1ClearCount}) w2({_wave2ClearCount}) w3({_wave3ClearCount})");
+            _isCalculating = false;
+        }
+
+        private async void SimulateRemote()
+        {
+            _isCalculating = true;
+            _wave0ClearCount = -1;
+            _wave1ClearCount = -1;
+            _wave2ClearCount = -1;
+            _wave3ClearCount = -1;
+            simulationStep = 0;
+
+            var states = States.Instance;
+            var avatarAddress = states.CurrentAvatarState.address;
+            var agent = Game.instance.Agent;
+            var avatarDict = await agent.GetAvatarStatesAsync(new[] { avatarAddress });
+            var avatarState = avatarDict[avatarAddress];
+            var inventory = avatarState.inventory;
+            var (equippedEquipments, equippedCostumes) = await agent.GetEquippedItemsAsync(
+                avatarAddress,
+                BattleType.Adventure,
+                inventory: inventory);
+            var equippedRuneStates = await agent.GetEquippedRuneStatesAsync(
+                TableSheets.Instance.RuneListSheet,
+                avatarAddress,
+                BattleType.Adventure);
+            var collectionState = await agent.GetCollectionStateAsync(avatarAddress);
+            var clearWaveInfo = await UniTask.Run(() => HackAndSlashSimulator.Simulate(
+                TableSheets.Instance,
+                avatarState,
+                equipments: equippedEquipments,
+                costumes: equippedCostumes,
+                consumables: null,
+                runeStates: equippedRuneStates.ToList(),
+                collectionState: collectionState,
+                gameConfigState: states.GameConfigState,
+                worldId: selectedStageId / 50,
+                selectedStageId,
+                playCount,
+                stageBuffId: null,
+                onProgress: step => simulationStep = step,
+                onLog: AthenaPlugin.Log));
             _wave0ClearCount = clearWaveInfo.TryGetValue(0, out var w0) ? w0 : 0;
             _wave1ClearCount = clearWaveInfo.TryGetValue(1, out var w1) ? w1 : 0;
             _wave2ClearCount = clearWaveInfo.TryGetValue(2, out var w2) ? w2 : 0;
