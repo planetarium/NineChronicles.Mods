@@ -41,6 +41,7 @@ namespace NineChronicles.Mods.Athena
         private EventSystem _eventSystem;
 
         // NOTE: Please add your GUIs here as alphabetical order.
+        private ArenaGUI _arenaGUI;
         private EnhancementGUI _enhancementGUI;
         private ItemCreationGUI _itemCreationGUI;
         private InventoryGUI _inventoryGUI;
@@ -112,6 +113,7 @@ namespace NineChronicles.Mods.Athena
 
         private void DisableModeGUI()
         {
+            _arenaGUI = null;
             _enhancementGUI = null;
             _inventoryGUI = null;
             _itemCreationGUI = null;
@@ -179,10 +181,10 @@ namespace NineChronicles.Mods.Athena
 
                 _tabGUI = new TabGUI(new List<(string Name, Func<IGUI> UI)>
                 {
-                    // ("Simulate", CreateSimulateGUI),
+                    ("Simulate", CreateStageSimulateGUI),
+                    ("Arena", CreateArenaGUI),
                     ("Create", CreateItemCreationGUI),
                     ("Enhancement", CreateEnhancementGUI),
-                    ("Simulate", CreateStageSimulateGUI),
                 }, DisableModeGUI);
                 _notificationGUI = new NotificationGUI();
 
@@ -233,6 +235,13 @@ namespace NineChronicles.Mods.Athena
         //     RemoveInventory();
         //     return new StageSimulateGUI(modInventoryManager);
         // }
+
+        private IGUI CreateArenaGUI()
+        {
+            RemoveInventory();
+
+            return new ArenaGUI(_modInventoryManager);
+        }
 
         private IGUI CreateItemCreationGUI()
         {
@@ -337,6 +346,7 @@ namespace NineChronicles.Mods.Athena
 
         private void OnGUI()
         {
+            _arenaGUI?.OnGUI();
             _enhancementGUI?.OnGUI();
             _inventoryGUI?.OnGUI();
             _itemCreationGUI?.OnGUI();
