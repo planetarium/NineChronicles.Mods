@@ -4,6 +4,7 @@ using System.Linq;
 using Nekoyume;
 using Nekoyume.Battle;
 using Nekoyume.Game;
+using Nekoyume.L10n;
 using Nekoyume.Model.Item;
 using Nekoyume.Model.Skill;
 using Nekoyume.Model.State;
@@ -38,12 +39,26 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
             int stageId,
             int playCount,
             int? stageBuffId,
-            int? randomSeed = null,
             Action<int> onProgress = null,
             Action<string> onLog = null)
         {
-            randomSeed ??= new RandomImpl(DateTime.Now.Millisecond).Next();
-            var randomSeedRandom = new RandomImpl(randomSeed.Value);
+            if (onLog is not null)
+            {
+                var log = $"avatar: {avatarState.name}({avatarState.address})" +
+                    $"\nequipments: {(equipments is null ? "null" : string.Join(", ", equipments.Select(e => $"{e.GetLocalizedNonColoredName(false)}(+{e.level})")))}" +
+                    $"\ncostumes: {(costumes is null ? "null" : string.Join(", ", costumes.Select(e => e.GetLocalizedNonColoredName(false))))}" +
+                    $"\nconsumables: {(consumables is null ? "null" : string.Join(", ", consumables.Select(e => e.GetLocalizedNonColoredName(false))))}" +
+                    $"\nruneStates: {(runeStates is null ? "null" : string.Join(", ", runeStates.Select(e => $"{L10nManager.LocalizeRuneName(e.RuneId)}(+{e.Level})")))}" +
+                    $"\ncollectionState: {(collectionState is null ? "null" : string.Join(", ", collectionState.Ids.Select(e => L10nManager.LocalizeCollectionName(e))))}" +
+                    $"\ngameConfigState.ShatterStrikeMaxDamage: {(gameConfigState is null ? "null" : gameConfigState.ShatterStrikeMaxDamage)}" +
+                    $"\nworldId: {worldId}" +
+                    $"\nstageId: {stageId}" +
+                    $"\nplayCount: {playCount}" +
+                    $"\nstageBuffId: {(stageBuffId.HasValue ? stageBuffId : "null")}";
+                onLog.Invoke(log);
+            }
+
+            var randomSeedRandom = new RandomImpl(DateTime.Now.Millisecond);
             var flyweightAvatarState = avatarState.MakeFlyweightAvatarState(
                 equipments,
                 costumes,
