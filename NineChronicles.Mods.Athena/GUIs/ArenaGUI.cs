@@ -43,7 +43,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                         States.Instance,
                         new List<Equipment>(),
                         avatarInfo.Address,
-                        10,
+                        100,
                         (l) => AthenaPlugin.Log(l)
                     ));
                     var index = avatarInfos.FindIndex((a) => a.Address == avatarInfo.Address);
@@ -107,6 +107,18 @@ namespace NineChronicles.Mods.Athena.GUIs
             using (var areaScope = new GUILayout.AreaScope(_arenaLayoutRect))
             {
                 ArenaSimulateBoard.DrawArenaBoard(avatarInfos, OnSlotSelected);
+
+                using (var horizontalScope = new GUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("Prev"))
+                    {
+                        AthenaPlugin.Log($"Prev");
+                    }
+                    if (GUILayout.Button("Next"))
+                    {
+                        AthenaPlugin.Log($"Next");
+                    }
+                }
             }
         }
     }

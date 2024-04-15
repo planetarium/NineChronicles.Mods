@@ -12,7 +12,7 @@ namespace NineChronicles.Mods.Athena.Components
                 $"\nCP: {avatarInfo.Cp}";
             if(avatarInfo.WinRate != -1)
             {
-                slotText += $"\nWinRate: {Math.Round(avatarInfo.WinRate, 1)}";
+                slotText += $"\nWinRate: {Math.Floor(avatarInfo.WinRate * 100)}";
             }
             var slotContent = new GUIContent(slotText);
 
