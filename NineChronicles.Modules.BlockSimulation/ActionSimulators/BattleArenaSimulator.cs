@@ -66,6 +66,7 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
             var myAvatarAddress = states.CurrentAvatarState.address;
             var (myDigest, enemyDigest) = GetArenaPlayerDigest(
                     states,
+                    myEquipments,
                     myAvatarAddress,
                     enemyAvatarAddress,
                     onLog);
@@ -127,6 +128,7 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
 
         private static (ArenaPlayerDigest myDigest, ArenaPlayerDigest enemyDigest) GetArenaPlayerDigest(
             States states,
+            List<Equipment> myEquipments,
             Address myAvatarAddress,
             Address enemyAvatarAddress,
             Action<string> onLog = null)
@@ -156,10 +158,13 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                     myRuneStates.Add(runeState);
                 }
             }
-            var myDigest = new ArenaPlayerDigest(myAvatarState,
-                myItemSlotState.Equipments,
-                myItemSlotState.Costumes,
+
+            var myDigest = new ArenaPlayerDigest(
+                myAvatarState,
+                myAvatarState.GetNonFungibleItems<Costume>(myItemSlotState.Costumes),
+                myEquipments,
                 myRuneStates);
+
             var enemyItemSlotStateAddress = ItemSlotState.DeriveAddress(enemyAvatarAddress, BattleType.Arena);
 
             var rawEnemyItemSlotState = Game.instance.Agent.GetStateAsync(

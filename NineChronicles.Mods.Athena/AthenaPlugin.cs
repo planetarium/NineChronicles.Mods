@@ -240,7 +240,7 @@ namespace NineChronicles.Mods.Athena
         {
             RemoveInventory();
 
-            return new ArenaGUI();
+            return new ArenaGUI(_modInventoryManager);
         }
 
         private IGUI CreateItemCreationGUI()

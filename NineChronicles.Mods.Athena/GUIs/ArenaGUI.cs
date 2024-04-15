@@ -8,8 +8,8 @@ using NineChronicles.Mods.Athena.Models;
 using Nekoyume.UI.Model;
 using Nekoyume.Game;
 using Nekoyume.State;
-using Nekoyume.Model.Item;
 using UnityEngine;
+using NineChronicles.Mods.Athena.Manager;
 
 namespace NineChronicles.Mods.Athena.GUIs
 {
@@ -17,14 +17,20 @@ namespace NineChronicles.Mods.Athena.GUIs
     {
         private readonly Rect _arenaLayoutRect;
 
+        private ModInventoryManager _modInventoryManager;
         public GUIContent SlotContent = new GUIContent();
 
         public List<AvatarInfo> avatarInfos = new List<AvatarInfo>();
+        private int currentPage = 0;
+        private int itemsPerPage = 20;
+        private int totalPages;
 
         public event Action<AvatarInfo> OnSlotSelected;
 
-        public ArenaGUI()
+        public ArenaGUI(ModInventoryManager modInventoryManager)
         {
+            _modInventoryManager = modInventoryManager;
+
             _arenaLayoutRect = new Rect(
                 100,
                 100,
@@ -41,7 +47,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                     var result = await UniTask.Run(() => BattleArenaSimulator.ExecuteBulk(
                         TableSheets.Instance,
                         States.Instance,
-                        new List<Equipment>(),
+                        _modInventoryManager.GetEquipments(),
                         avatarInfo.Address,
                         100,
                         (l) => AthenaPlugin.Log(l)
@@ -69,7 +75,7 @@ namespace NineChronicles.Mods.Athena.GUIs
             {
                 var query =
                     $@"query {{
-                            abilityRanking(limit: 20) {{
+                            abilityRanking(limit: 1000) {{
                                 ranking
                                 avatarAddress
                                 name
@@ -98,6 +104,8 @@ namespace NineChronicles.Mods.Athena.GUIs
                     avatarInfos.Add(avatarInfo);
                 }
             }
+
+            totalPages = (int)Math.Ceiling(avatarInfos.Count / (double)itemsPerPage);
         }
 
         public void OnGUI()
@@ -106,17 +114,23 @@ namespace NineChronicles.Mods.Athena.GUIs
 
             using (var areaScope = new GUILayout.AreaScope(_arenaLayoutRect))
             {
-                ArenaSimulateBoard.DrawArenaBoard(avatarInfos, OnSlotSelected);
+                int startIndex = currentPage * itemsPerPage;
+                int endIndex = Math.Min(startIndex + itemsPerPage, avatarInfos.Count);
+                var currentPageAvatars = avatarInfos.GetRange(startIndex, endIndex - startIndex);
+
+                ArenaSimulateBoard.DrawArenaBoard(currentPageAvatars, OnSlotSelected);
 
                 using (var horizontalScope = new GUILayout.HorizontalScope())
                 {
                     if (GUILayout.Button("Prev"))
                     {
-                        AthenaPlugin.Log($"Prev");
+                        if (currentPage > 0) currentPage--;
+                        AthenaPlugin.Log($"Prev Page: {currentPage}, {startIndex} - {endIndex - startIndex}");
                     }
                     if (GUILayout.Button("Next"))
                     {
-                        AthenaPlugin.Log($"Next");
+                        if (currentPage < totalPages - 1) currentPage++;
+                        AthenaPlugin.Log($"Next Page: {currentPage}, {startIndex} - {endIndex - startIndex}");
                     }
                 }
             }

@@ -9,17 +9,15 @@ namespace NineChronicles.Mods.Athena.Components
     {
         public static void DrawArenaBoard(List<AvatarInfo> arenaAvatarInfos, Action<AvatarInfo> onSlotSelected)
         {
-            int maxItems = Mathf.Min(arenaAvatarInfos.Count, 20);
-
             int itemsPerGroup = 5;
 
             using (var horizontalScope = new GUILayout.HorizontalScope())
             {
-                for(int i = 0; i < maxItems; i += itemsPerGroup)
+                for(int i = 0; i < arenaAvatarInfos.Count; i += itemsPerGroup)
                 {
                     using (var verticalScope = new GUILayout.VerticalScope())
                     {
-                        for(int j = i; j < Mathf.Min(i + itemsPerGroup, maxItems); j++)
+                        for(int j = i; j < Mathf.Min(i + itemsPerGroup, arenaAvatarInfos.Count); j++)
                         {
                             var avatarInfo = arenaAvatarInfos[j];
                             ArenaSimulateSlot.DrawArenaSlot(avatarInfo, onSlotSelected);
