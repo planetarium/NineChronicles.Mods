@@ -3,7 +3,9 @@ using System.Linq;
 using BepInEx.Logging;
 using Cysharp.Threading.Tasks;
 using Nekoyume.Game;
+using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Item;
+using Nekoyume.Model.State;
 using Nekoyume.State;
 using Nekoyume.TableData;
 using NineChronicles.Mods.Athena.Extensions;
@@ -429,23 +431,24 @@ namespace NineChronicles.Mods.Athena.GUIs
             _wave1ClearCount = -1;
             _wave2ClearCount = -1;
             _wave3ClearCount = -1;
-
             simulationStep = 0;
-
             var states = States.Instance;
-            var (_, costumes) = states.GetEquippedItems(Nekoyume.Model.EnumType.BattleType.Adventure);
+            var (_, costumes) = states.GetEquippedItems(BattleType.Adventure);
+            var equippedRuneStates = states.GetEquippedRuneStates(BattleType.Adventure);
             var clearWaveInfo = await UniTask.Run(() => HackAndSlashSimulator.Simulate(
+                TableSheets.Instance,
+                states.CurrentAvatarState,
                 equipments: _modInventoryManager.GetEquipments(),
                 costumes,
                 consumables: null,
+                runeStates: equippedRuneStates,
+                collectionState: states.CollectionState,
+                gameConfigState: states.GameConfigState,
                 worldId: selectedStageId / 50,
                 selectedStageId,
-                stageBuffId: null,
-                TableSheets.Instance,
-                states,
                 playCount,
+                stageBuffId: null,
                 onProgress: step => simulationStep = step));
-
             _wave0ClearCount = clearWaveInfo.TryGetValue(0, out var w0) ? w0 : 0;
             _wave1ClearCount = clearWaveInfo.TryGetValue(1, out var w1) ? w1 : 0;
             _wave2ClearCount = clearWaveInfo.TryGetValue(2, out var w2) ? w2 : 0;
