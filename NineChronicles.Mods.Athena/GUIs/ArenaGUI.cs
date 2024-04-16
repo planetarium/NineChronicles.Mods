@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using Libplanet.Crypto;
+using Nekoyume.Blockchain;
 using Nekoyume.Game;
+using Nekoyume.Model.EnumType;
 using Nekoyume.State;
 using Nekoyume.UI.Model;
 using NineChronicles.Mods.Athena.Components;
@@ -15,6 +18,19 @@ namespace NineChronicles.Mods.Athena.GUIs
 {
     public class ArenaGUI : IGUI
     {
+        public class AvatarInfo
+        {
+            public int Cp { get; set; }
+
+            public string Name { get; set; }
+
+            public Address Address { get; set; }
+
+            public double WinRate { get; set; } = -1;
+
+            public double Progress { get; set; } = 0;
+        }
+
         private readonly Rect _arenaLayoutRect;
 
         private ModInventoryManager _modInventoryManager;
@@ -24,7 +40,7 @@ namespace NineChronicles.Mods.Athena.GUIs
         private int currentPage = 0;
         private int itemsPerPage = 20;
         private int totalPages;
-
+        private int playCount = 100;
         public event Action<AvatarInfo> OnSlotSelected;
 
         public ArenaGUI(ModInventoryManager modInventoryManager)
@@ -43,23 +59,31 @@ namespace NineChronicles.Mods.Athena.GUIs
                 try
                 {
                     AthenaPlugin.Log($"Simulate Start {avatarInfo.Address}");
+                    var index = avatarInfos.FindIndex((a) => a.Address == avatarInfo.Address);
+
+                    if (index == -1)
+                    {
+                        return;
+                    }
+                    avatarInfos[index].WinRate = -1;
+                    avatarInfos[index].Progress = 0;
+
+                    var (_, equippedCostumes) = States.Instance.GetEquippedItems(BattleType.Arena);
 
                     var result = await UniTask.Run(() => BattleArenaSimulator.ExecuteBulk(
                         TableSheets.Instance,
                         States.Instance,
                         _modInventoryManager.GetEquippedEquipments(),
+                        equippedCostumes,
+                        null,
                         avatarInfo.Address,
-                        100,
+                        playCount,
+                        (p) => avatarInfos[index].Progress = p,
                         (l) => AthenaPlugin.Log(l)
                     ));
-                    var index = avatarInfos.FindIndex((a) => a.Address == avatarInfo.Address);
-                    if (index != -1)
-                    {
-                        avatarInfos[index].WinRate = result;
-                        AthenaPlugin.Log($"Simulate Result = {result} updated for {avatarInfos[index].Name}");
-                    }
 
-                    AthenaPlugin.Log($"Simulate Result = {result}");
+                    avatarInfos[index].WinRate = result;
+                    AthenaPlugin.Log($"Simulate Result = {result} updated for {avatarInfos[index].Name}");
                 }
                 catch (Exception e)
                 {
@@ -100,7 +124,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                     {
                         Name = abilityRanking.Name,
                         Cp = abilityRanking.Cp,
-                        Address = new Libplanet.Crypto.Address(abilityRanking.AvatarAddress),
+                        Address = new Address(abilityRanking.AvatarAddress),
                     };
                     avatarInfos.Add(avatarInfo);
                 }
@@ -119,7 +143,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                 int endIndex = Math.Min(startIndex + itemsPerPage, avatarInfos.Count);
                 var currentPageAvatars = avatarInfos.GetRange(startIndex, endIndex - startIndex);
 
-                ArenaSimulateBoard.DrawArenaBoard(currentPageAvatars, OnSlotSelected);
+                ArenaSimulateBoard.DrawArenaBoard(currentPageAvatars, OnSlotSelected, playCount);
 
                 using (var horizontalScope = new GUILayout.HorizontalScope())
                 {

@@ -15,6 +15,7 @@ using Cysharp.Threading.Tasks;
 using Libplanet.Action.State;
 using Nekoyume.Model.BattleStatus.Arena;
 using Nekoyume;
+using NineChronicles.Modules.BlockSimulation.Extensions;
 
 
 namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
@@ -24,15 +25,39 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
         public static double ExecuteBulk(
             TableSheets tableSheets,
             States states,
-            List<Equipment> myEquipments,
+            IEnumerable<Equipment> modEquipments,
+            IEnumerable<Costume> modCostumes,
+            IEnumerable<Consumable> modConsumables,
             Address enemyAvatarAddress,
             int playCount,
+            Action<int> onProgress = null,
             Action<string> onLog = null,
             int? randomSeed = null)
         {
             int winCount = 0;
+            var myAvatarAddress = states.CurrentAvatarState.address;
 
-            var (gameConfigState, myDigest, enemyDigest, myCollectionState, enemyCollectionState) = PrepareStates(states, myEquipments, enemyAvatarAddress, onLog);
+            if (onLog is not null)
+            {
+                var log = $"avatar: {states.CurrentAvatarState.name}({myAvatarAddress})" +
+                    $"\nequipments: {(modEquipments is null ? "null" : string.Join(", ", modEquipments.Select(e => $"{e.GetLocalizedNonColoredName(false)}(+{e.level})")))}" +
+                    $"\ncostumes: {(modCostumes is null ? "null" : string.Join(", ", modCostumes.Select(e => e.GetLocalizedNonColoredName(false))))}" +
+                    $"\nconsumables: {(modConsumables is null ? "null" : string.Join(", ", modConsumables.Select(e => e.GetLocalizedNonColoredName(false))))}" +
+                    $"\nplayCount: {playCount}";
+                onLog.Invoke(log);
+            }
+
+            var (myDigest, enemyDigest) = GetArenaPlayerDigest(
+                    states,
+                    modEquipments,
+                    modCostumes,
+                    modConsumables,
+                    enemyAvatarAddress,
+                    onLog);
+            var myCollectionState = states.CollectionState;
+            var enemyCollectionState = GetCollectionState(enemyAvatarAddress, onLog);
+
+            var gameConfigState = states.GameConfigState;
 
             for (var i = 0; i < playCount; i++)
             {
@@ -50,49 +75,12 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                 {
                     winCount += 1;
                 }
+                onProgress?.Invoke(i);
             }
 
             onLog?.Invoke($"{nameof(BattleArenaSimulator)} Bulk Simulation Done, {winCount}/{playCount}");
 
             return (double)winCount / playCount;
-        }
-
-        public static (GameConfigState, ArenaPlayerDigest myDigest, ArenaPlayerDigest enemyDigest, CollectionState myCollectionState, CollectionState enemyCollectionState) PrepareStates(
-            States states,
-            List<Equipment> myEquipments,
-            Address enemyAvatarAddress,
-            Action<string> onLog = null)
-        {
-            var myAvatarAddress = states.CurrentAvatarState.address;
-            var (myDigest, enemyDigest) = GetArenaPlayerDigest(
-                    states,
-                    myEquipments,
-                    myAvatarAddress,
-                    enemyAvatarAddress,
-                    onLog);
-
-            var rawMyCollectionState = Game.instance.Agent.GetStateAsync(
-                Addresses.Collection,
-                myAvatarAddress).Result;
-            var myCollectionState = rawMyCollectionState is List
-                ? new CollectionState((List)rawMyCollectionState)
-                : new CollectionState();
-
-            var rawEnemyCollectionState = Game.instance.Agent.GetStateAsync(
-                Addresses.Collection,
-                enemyAvatarAddress).Result;
-            var enemyCollectionState = rawEnemyCollectionState is List
-                ? new CollectionState((List)rawEnemyCollectionState)
-                : new CollectionState();
-
-            IValue state = Game.instance.Agent.GetStateAsync(ReservedAddresses.LegacyAccount, GameConfigState.Address).Result;
-            if (state == null || state is Null)
-            {
-                onLog?.Invoke($"No game config state ({GameConfigState.Address.ToHex()})");
-            }
-            var gameConfigState = new GameConfigState((Dictionary)state);
-            
-            return (gameConfigState, myDigest, enemyDigest, myCollectionState, enemyCollectionState);
         }
 
         public static bool Execute(
@@ -126,53 +114,42 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
             return log.Result == ArenaLog.ArenaResult.Win;
         }
 
+        public static CollectionState  GetCollectionState(
+            Address avatarAddress,
+            Action<string> onLog = null)
+        {
+            var rawCollectionState = Game.instance.Agent.GetStateAsync(
+                Addresses.Collection,
+                avatarAddress).Result;
+            var collectionState = rawCollectionState is List
+                ? new CollectionState((List)rawCollectionState)
+                : new CollectionState();
+            
+            return collectionState;
+        }
+
         private static (ArenaPlayerDigest myDigest, ArenaPlayerDigest enemyDigest) GetArenaPlayerDigest(
             States states,
-            List<Equipment> myEquipments,
-            Address myAvatarAddress,
+            IEnumerable<Equipment> modEquipments,
+            IEnumerable<Costume> modCostumes,
+            IEnumerable<Consumable> modConsumables,
             Address enemyAvatarAddress,
             Action<string> onLog = null)
         {
-            var myAvatarState = states.CurrentAvatarState;
+            var myAvatarState = states.CurrentAvatarState.MakeFlyweightAvatarState(
+                modEquipments,
+                modCostumes,
+                modConsumables);
+
+            var equippedRuneStates = states.GetEquippedRuneStates(BattleType.Arena);
+            var myDigest = new ArenaPlayerDigest(
+                myAvatarState,
+                equippedRuneStates);
+
+            // Enemy
             var enemyAvatarState =
                 Game.instance.Agent.GetAvatarStatesAsync(new[] { enemyAvatarAddress }).Result[enemyAvatarAddress];
             onLog.Invoke($"{nameof(GetArenaPlayerDigest)} Enemy avatar state {enemyAvatarState.address}");
-
-            var myItemSlotStateAddress = ItemSlotState.DeriveAddress(myAvatarAddress, BattleType.Arena);
-
-            var rawItemSlotState = Game.instance.Agent.GetStateAsync(
-                ReservedAddresses.LegacyAccount,
-                myItemSlotStateAddress).Result;
-            var myItemSlotState = rawItemSlotState is List
-                ? new ItemSlotState((List)rawItemSlotState)
-                : new ItemSlotState(BattleType.Arena);
-
-            var myRuneSlotState = states.CurrentRuneSlotStates[BattleType.Arena];
-            var myRuneStates = new List<RuneState>();
-            var myRuneSlotInfos = myRuneSlotState.GetEquippedRuneSlotInfos();
-
-            foreach (var runeId in myRuneSlotInfos.Select(r => r.RuneId))
-            {
-                if (states.TryGetRuneState(runeId, out var runeState))
-                {
-                    myRuneStates.Add(runeState);
-                }
-            }
-
-            var myDigest = new ArenaPlayerDigest(
-                myAvatarState,
-                myAvatarState.GetNonFungibleItems<Costume>(myItemSlotState.Costumes),
-                myEquipments,
-                myRuneStates);
-
-            var enemyItemSlotStateAddress = ItemSlotState.DeriveAddress(enemyAvatarAddress, BattleType.Arena);
-
-            var rawEnemyItemSlotState = Game.instance.Agent.GetStateAsync(
-                ReservedAddresses.LegacyAccount,
-                enemyItemSlotStateAddress).Result;
-            var enemyItemSlotState = rawEnemyItemSlotState is List
-                ? new ItemSlotState((List)rawEnemyItemSlotState)
-                : new ItemSlotState(BattleType.Arena);
 
             var enemyRuneSlotStateAddress = RuneSlotState.DeriveAddress(enemyAvatarAddress, BattleType.Arena);
             
@@ -189,7 +166,6 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                 RuneState.DeriveAddress(enemyAvatarAddress, info.RuneId));
             foreach (var address in runeAddresses)
             {
-
                 var rawRuneState = Game.instance.Agent.GetStateAsync(
                     ReservedAddresses.LegacyAccount,
                     address).Result;
@@ -200,8 +176,6 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                 }
             }
             var enemyDigest = new ArenaPlayerDigest(enemyAvatarState,
-                enemyItemSlotState.Equipments,
-                enemyItemSlotState.Costumes,
                 enemyRuneStates);
 
             return (myDigest, enemyDigest);
