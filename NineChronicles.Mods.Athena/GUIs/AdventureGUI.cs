@@ -67,6 +67,7 @@ namespace NineChronicles.Mods.Athena.GUIs
             }
 
             GUI.matrix = GUIToolbox.GetGUIMatrix();
+            _inventoryGUI.OnGUI();
 
             if (selectedStageId == 0)
             {

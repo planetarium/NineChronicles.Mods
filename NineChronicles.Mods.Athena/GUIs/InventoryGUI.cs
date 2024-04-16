@@ -193,8 +193,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                 : $"Tab {index}";
             if (GUI.Button(rect, tabName))
             {
-                _viewModel.SelectTab(index);
-                AthenaPlugin.Log($"{tabName} Tab({index}) selected.");
+                SelectTab(index);
             }
 
             GUI.backgroundColor = Color.white;
@@ -356,6 +355,12 @@ namespace NineChronicles.Mods.Athena.GUIs
         public void Sort()
         {
             _viewModel.Sort();
+        }
+
+        public void SelectTab(int index)
+        {
+            _viewModel.SelectTab(index);
+            AthenaPlugin.Log($"Tab({index}) selected.");
         }
 
         public bool TryGetSelectedSlot(out InventoryViewModel.Slot slot)

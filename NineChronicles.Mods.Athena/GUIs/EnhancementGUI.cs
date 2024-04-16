@@ -75,6 +75,7 @@ namespace NineChronicles.Mods.Athena.GUIs
         public void OnGUI()
         {
             GUI.matrix = GUIToolbox.GetGUIMatrix();
+            _inventoryGUI.OnGUI();
 
             GUIStyle centeredStyle = new GUIStyle(GUI.skin.box)
             {

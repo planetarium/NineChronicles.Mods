@@ -281,15 +281,11 @@ namespace NineChronicles.Mods.Athena
 
         private IGUI CreateArenaGUI()
         {
-            RemoveInventory();
-
             return new ArenaGUI(_modInventoryManager, _abilityRankingResponse);
         }
 
         private IGUI CreateItemCreationGUI()
         {
-            RemoveInventory();
-
             var tableSheets = TableSheets.Instance;
             var ui = new ItemCreationGUI(_modInventoryManager);
             ui.SetItemRecipes(
@@ -303,37 +299,35 @@ namespace NineChronicles.Mods.Athena
 
         private IGUI CreateEnhancementGUI()
         {
-            CreateInventoryGUI();
-            return new EnhancementGUI(_modInventoryManager, _inventoryGUI);
+            var inventoryGUI = GetOrCreateInventoryGUI();
+            return new EnhancementGUI(_modInventoryManager, inventoryGUI);
         }
 
         private IGUI CreateAdventureGUI()
         {
-            RemoveInventory();
             return new AdventureGUI(_modInventoryManager);
         }
 
-        private void CreateInventoryGUI()
+        private InventoryGUI GetOrCreateInventoryGUI()
         {
-            if (_inventoryGUI == null)
+            if (_inventoryGUI != null)
             {
-                _inventoryGUI = new InventoryGUI(
+                _inventoryGUI.SelectTab(0);
+                return _inventoryGUI;
+            }
+
+            _inventoryGUI = new InventoryGUI(
                     positionX: 100,
                     positionY: 80,
                     slotCountPerPage: 15,
                     slotCountPerRow: 5);
-                _inventoryGUI.OnSlotRemoveClicked += item =>
-                {
-                    if (item is Equipment equipment)
-                    {
-                        _modInventoryManager.DeleteItem(equipment.NonFungibleId);
-                    }
-                };
-            }
-            else
+            _inventoryGUI.OnSlotRemoveClicked += item =>
             {
-                _inventoryGUI.Clear();
-            }
+                if (item is Equipment equipment)
+                {
+                    _modInventoryManager.DeleteItem(equipment.NonFungibleId);
+                }
+            };
 
             var inventory = States.Instance.CurrentAvatarState?.inventory;
             if (inventory != null)
@@ -380,11 +374,7 @@ namespace NineChronicles.Mods.Athena
             }
 
             _inventoryGUI.Sort();
-        }
-
-        private void RemoveInventory()
-        {
-            _inventoryGUI = null;
+            return _inventoryGUI;
         }
 
         private void OnGUI()
@@ -392,7 +382,6 @@ namespace NineChronicles.Mods.Athena
             _adventureGUI?.OnGUI();
             _arenaGUI?.OnGUI();
             _enhancementGUI?.OnGUI();
-            _inventoryGUI?.OnGUI();
             _itemCreationGUI?.OnGUI();
             _tabGUI?.OnGUI();
             _notificationGUI?.OnGUI();
