@@ -185,7 +185,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                 500);
             _simulateLayoutRect = new Rect(
                 GUIToolbox.ScreenWidthReference - 350,
-                GUIToolbox.ScreenHeightReference - 210,
+                GUIToolbox.ScreenHeightReference - 220,
                 200,
                 400);
         }
@@ -377,9 +377,20 @@ namespace NineChronicles.Mods.Athena.GUIs
                     GUILayout.Label($"★★: {_wave2ClearCount}");
                     GUILayout.Label($"★★★: {_wave3ClearCount}");
                 }
+
+                using (var horizontalScope = new GUILayout.HorizontalScope())
+                {
+                    var totalStars = _wave1ClearCount + _wave2ClearCount * 2 + _wave3ClearCount * 3;
+                    GUILayout.Label($"Total Stars: {totalStars}");
+                }
+
+                using (var horizontalScope = new GUILayout.HorizontalScope())
+                {
+                    var winRate = (float)_wave3ClearCount / playCount;
+                    GUILayout.Label($"Win Rate: {winRate:P2}");
+                }
             }
         }
-
         private void DrawPlayCountController()
         {
             using (var verticalScope = new GUILayout.HorizontalScope())
