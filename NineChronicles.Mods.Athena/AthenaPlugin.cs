@@ -41,12 +41,12 @@ namespace NineChronicles.Mods.Athena
         private EventSystem _eventSystem;
 
         // NOTE: Please add your GUIs here as alphabetical order.
+        private AdventureGUI _adventureGUI;
         private ArenaGUI _arenaGUI;
         private EnhancementGUI _enhancementGUI;
         private ItemCreationGUI _itemCreationGUI;
         private InventoryGUI _inventoryGUI;
         private NotificationGUI _notificationGUI;
-        private StageSimulateGUI _stageSimulateGUI;
         private IGUI _tabGUI;
 
         public static void Log(LogLevel logLevel, object data)
@@ -113,13 +113,13 @@ namespace NineChronicles.Mods.Athena
 
         private void DisableModeGUI()
         {
+            _adventureGUI = null;
             _arenaGUI = null;
             _enhancementGUI = null;
             _inventoryGUI = null;
             _itemCreationGUI = null;
             _notificationGUI = null;
             _tabGUI = null;
-            _stageSimulateGUI = null;
             EnableEventSystem();
         }
 
@@ -181,7 +181,7 @@ namespace NineChronicles.Mods.Athena
 
                 _tabGUI = new TabGUI(new List<(string Name, Func<IGUI> UI)>
                 {
-                    ("Simulate", CreateStageSimulateGUI),
+                    ("Adventure", CreateAdventureGUI),
                     ("Arena", CreateArenaGUI),
                     ("Create", CreateItemCreationGUI),
                     ("Enhancement", CreateEnhancementGUI),
@@ -230,12 +230,6 @@ namespace NineChronicles.Mods.Athena
             }
         }
 
-        // private IGUI CreateSimulateGUI()
-        // {
-        //     RemoveInventory();
-        //     return new StageSimulateGUI(modInventoryManager);
-        // }
-
         private IGUI CreateArenaGUI()
         {
             RemoveInventory();
@@ -264,10 +258,10 @@ namespace NineChronicles.Mods.Athena
             return new EnhancementGUI(_modInventoryManager, _inventoryGUI);
         }
 
-        private IGUI CreateStageSimulateGUI()
+        private IGUI CreateAdventureGUI()
         {
             CreateInventoryGUI();
-            return new StageSimulateGUI(_modInventoryManager, _inventoryGUI);
+            return new AdventureGUI(_modInventoryManager, _inventoryGUI);
         }
 
         private void CreateInventoryGUI()
@@ -346,12 +340,12 @@ namespace NineChronicles.Mods.Athena
 
         private void OnGUI()
         {
+            _adventureGUI?.OnGUI();
             _arenaGUI?.OnGUI();
             _enhancementGUI?.OnGUI();
             _inventoryGUI?.OnGUI();
             _itemCreationGUI?.OnGUI();
             _tabGUI?.OnGUI();
-            _stageSimulateGUI?.OnGUI();
             _notificationGUI?.OnGUI();
         }
     }

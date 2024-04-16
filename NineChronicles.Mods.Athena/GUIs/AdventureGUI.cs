@@ -16,7 +16,7 @@ using UnityEngine;
 
 namespace NineChronicles.Mods.Athena.GUIs
 {
-    public class StageSimulateGUI : IGUI
+    public class AdventureGUI : IGUI
     {
         private bool _isCalculating;
         private int selectedStageId = 0;
@@ -52,7 +52,7 @@ namespace NineChronicles.Mods.Athena.GUIs
         private int _wave3ClearCount = 0;
         private int playCount = 100;
 
-        public StageSimulateGUI(ModInventoryManager modInventoryManager, InventoryGUI inventoryGUI)
+        public AdventureGUI(ModInventoryManager modInventoryManager, InventoryGUI inventoryGUI)
         {
             _modInventoryManager = modInventoryManager;
             _inventoryGUI = inventoryGUI;
@@ -70,25 +70,25 @@ namespace NineChronicles.Mods.Athena.GUIs
                             _modInventoryManager.SelectedWeapon = equipment;
                             SelectedWeapon = equipment;
                             SelectedWeaponContent = CreateSlotText(equipment);
-                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected weapon {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected weapon {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                         case ItemSubType.Armor:
                             _modInventoryManager.SelectedArmor = equipment;
                             SelectedArmor = equipment;
                             SelectedArmorContent = CreateSlotText(equipment);
-                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected armor {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected armor {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                         case ItemSubType.Belt:
                             _modInventoryManager.SelectedBelt = equipment;
                             SelectedBelt = equipment;
                             SelectedBeltContent = CreateSlotText(equipment);
-                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected belt {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected belt {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                         case ItemSubType.Necklace:
                             _modInventoryManager.SelectedNecklace = equipment;
                             SelectedNecklace = equipment;
                             SelectedNecklaceContent = CreateSlotText(equipment);
-                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected necklace {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected necklace {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                         case ItemSubType.Ring:
                             if (SelectedRing1 == null)
@@ -96,21 +96,21 @@ namespace NineChronicles.Mods.Athena.GUIs
                                 _modInventoryManager.SelectedRing1 = equipment;
                                 SelectedRing1 = equipment;
                                 SelectedRing1Content = CreateSlotText(equipment);
-                                AthenaPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected ring1 {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                                AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected ring1 {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             }
                             else
                             {
                                 _modInventoryManager.SelectedRing2 = equipment;
                                 SelectedRing2 = equipment;
                                 SelectedRing2Content = CreateSlotText(equipment);
-                                AthenaPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected ring2 {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                                AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected ring2 {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             }
                             break;
                         case ItemSubType.Aura:
                             _modInventoryManager.SelectedAura = equipment;
                             SelectedAura = equipment;
                             SelectedAuraContent = CreateSlotText(equipment);
-                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Selected aura {equipment.GetName()} {equipment.ItemId} {equipment.level}");
+                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected aura {equipment.GetName()} {equipment.ItemId} {equipment.level}");
                             break;
                     }
                 }
@@ -352,7 +352,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                     if (GUILayout.Button("x", GUILayout.Width(20), GUILayout.Height(20)))
                     {
                         onRemove.Invoke();
-                        AthenaPlugin.Log(LogLevel.Info, $"({nameof(StageSimulateGUI)}) Removed {content.text.ToLower()}");
+                        AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Removed {content.text.ToLower()}");
                     }
                 }
                 else
