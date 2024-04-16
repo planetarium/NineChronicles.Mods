@@ -9,7 +9,7 @@ using Nekoyume.Model.State;
 using Nekoyume.State;
 using Nekoyume.TableData;
 using NineChronicles.Mods.Athena.Extensions;
-using NineChronicles.Mods.Athena.Manager;
+using NineChronicles.Mods.Athena.Managers;
 using NineChronicles.Modules.BlockSimulation.ActionSimulators;
 using NineChronicles.Modules.BlockSimulation.Extensions;
 using UnityEngine;

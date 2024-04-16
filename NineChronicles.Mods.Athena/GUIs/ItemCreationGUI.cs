@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Nekoyume.TableData;
 using NineChronicles.Mods.Athena.Extensions;
-using NineChronicles.Mods.Athena.Manager;
+using NineChronicles.Mods.Athena.Managers;
 using NineChronicles.Mods.Athena.ViewModels;
 using UnityEngine;
 
