@@ -260,8 +260,8 @@ namespace NineChronicles.Mods.Athena
 
         private IGUI CreateAdventureGUI()
         {
-            CreateInventoryGUI();
-            return new AdventureGUI(_modInventoryManager, _inventoryGUI);
+            RemoveInventory();
+            return new AdventureGUI(_modInventoryManager);
         }
 
         private void CreateInventoryGUI()
