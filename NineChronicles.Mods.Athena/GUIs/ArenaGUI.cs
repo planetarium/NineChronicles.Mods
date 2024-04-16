@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using NineChronicles.Mods.Athena.Components;
-using NineChronicles.Modules.BlockSimulation.ActionSimulators;
-using NineChronicles.Mods.Athena.Models;
-using Nekoyume.UI.Model;
 using Nekoyume.Game;
 using Nekoyume.State;
-using UnityEngine;
+using Nekoyume.UI.Model;
+using NineChronicles.Mods.Athena.Components;
 using NineChronicles.Mods.Athena.Manager;
+using NineChronicles.Mods.Athena.Models;
+using NineChronicles.Modules.BlockSimulation.ActionSimulators;
+using UnityEngine;
 
 namespace NineChronicles.Mods.Athena.GUIs
 {
@@ -47,7 +47,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                     var result = await UniTask.Run(() => BattleArenaSimulator.ExecuteBulk(
                         TableSheets.Instance,
                         States.Instance,
-                        _modInventoryManager.GetEquipments(),
+                        _modInventoryManager.GetEquippedEquipments(),
                         avatarInfo.Address,
                         100,
                         (l) => AthenaPlugin.Log(l)
@@ -55,12 +55,13 @@ namespace NineChronicles.Mods.Athena.GUIs
                     var index = avatarInfos.FindIndex((a) => a.Address == avatarInfo.Address);
                     if (index != -1)
                     {
-                        avatarInfos[index].WinRate = result; 
+                        avatarInfos[index].WinRate = result;
                         AthenaPlugin.Log($"Simulate Result = {result} updated for {avatarInfos[index].Name}");
                     }
-    
+
                     AthenaPlugin.Log($"Simulate Result = {result}");
-                } catch (Exception e)
+                }
+                catch (Exception e)
                 {
                     AthenaPlugin.Log($"err {e}");
                 }
