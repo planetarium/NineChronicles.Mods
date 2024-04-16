@@ -7,7 +7,7 @@ using Nekoyume.Model.Item;
 using NineChronicles.Mods.Athena.Models;
 using NineChronicles.Mods.Athena.Utils;
 
-namespace NineChronicles.Mods.Athena.Manager
+namespace NineChronicles.Mods.Athena.Managers
 {
     public class ModInventoryManager
     {

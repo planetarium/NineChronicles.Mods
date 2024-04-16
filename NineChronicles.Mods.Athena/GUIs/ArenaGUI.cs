@@ -6,7 +6,7 @@ using Nekoyume.Game;
 using Nekoyume.State;
 using Nekoyume.UI.Model;
 using NineChronicles.Mods.Athena.Components;
-using NineChronicles.Mods.Athena.Manager;
+using NineChronicles.Mods.Athena.Managers;
 using NineChronicles.Mods.Athena.Models;
 using NineChronicles.Modules.BlockSimulation.ActionSimulators;
 using UnityEngine;

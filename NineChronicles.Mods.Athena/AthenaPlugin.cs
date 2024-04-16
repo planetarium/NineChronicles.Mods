@@ -11,7 +11,7 @@ using Nekoyume.Model.Item;
 using Nekoyume.State;
 using NineChronicles.Mods.Athena.Factories;
 using NineChronicles.Mods.Athena.GUIs;
-using NineChronicles.Mods.Athena.Manager;
+using NineChronicles.Mods.Athena.Managers;
 using NineChronicles.Mods.Athena.Patches;
 using UnityEngine;
 using UnityEngine.EventSystems;

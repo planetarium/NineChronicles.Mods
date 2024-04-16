@@ -2,7 +2,7 @@ using Nekoyume.Game;
 using Nekoyume.Model.Item;
 using NineChronicles.Mods.Athena.Extensions;
 using NineChronicles.Mods.Athena.Factories;
-using NineChronicles.Mods.Athena.Manager;
+using NineChronicles.Mods.Athena.Managers;
 using NineChronicles.Mods.Athena.Models;
 using UnityEngine;
 
