@@ -22,29 +22,9 @@ namespace NineChronicles.Mods.Athena.GUIs
         private int selectedStageId = 0;
         private int simulationStep = 0;
         private (WorldSheet WorldSheet, StageSheet StageSheet, int clearedStageId)? StateData { get; set; } = null;
-        private DateTimeOffset? LastSheetsUpdated { get; set; } = null;
-        private readonly Rect _selectLayoutRect;
         private readonly Rect _simulateLayoutRect;
 
         private ModInventoryManager _modInventoryManager;
-
-        private InventoryGUI _inventoryGUI;
-
-        public Equipment SelectedAura { get; set; }
-        public Equipment SelectedWeapon { get; set; }
-        public Equipment SelectedArmor { get; set; }
-        public Equipment SelectedBelt { get; set; }
-        public Equipment SelectedNecklace { get; set; }
-        public Equipment SelectedRing1 { get; set; }
-        public Equipment SelectedRing2 { get; set; }
-
-        public GUIContent SelectedAuraContent = new GUIContent("Aura");
-        public GUIContent SelectedWeaponContent = new GUIContent("Weapon");
-        public GUIContent SelectedArmorContent = new GUIContent("Armor");
-        public GUIContent SelectedBeltContent = new GUIContent("Belt");
-        public GUIContent SelectedNecklaceContent = new GUIContent("Necklace");
-        public GUIContent SelectedRing1Content = new GUIContent("Ring1");
-        public GUIContent SelectedRing2Content = new GUIContent("Ring2");
 
         private int _wave0ClearCount = 0;
         private int _wave1ClearCount = 0;
@@ -52,137 +32,12 @@ namespace NineChronicles.Mods.Athena.GUIs
         private int _wave3ClearCount = 0;
         private int playCount = 100;
 
-        public AdventureGUI(ModInventoryManager modInventoryManager, InventoryGUI inventoryGUI)
+        public AdventureGUI(ModInventoryManager modInventoryManager)
         {
             _modInventoryManager = modInventoryManager;
-            _inventoryGUI = inventoryGUI;
 
             InitStateData();
-            InitEquipments();
 
-            _inventoryGUI.OnSlotSelected += tuple =>
-            {
-                if (tuple.item is Equipment equipment)
-                {
-                    switch (equipment.ItemSubType)
-                    {
-                        case ItemSubType.Weapon:
-                            _modInventoryManager.SelectedWeapon = equipment;
-                            SelectedWeapon = equipment;
-                            SelectedWeaponContent = CreateSlotText(equipment);
-                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected weapon {equipment.GetName()} {equipment.ItemId} {equipment.level}");
-                            break;
-                        case ItemSubType.Armor:
-                            _modInventoryManager.SelectedArmor = equipment;
-                            SelectedArmor = equipment;
-                            SelectedArmorContent = CreateSlotText(equipment);
-                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected armor {equipment.GetName()} {equipment.ItemId} {equipment.level}");
-                            break;
-                        case ItemSubType.Belt:
-                            _modInventoryManager.SelectedBelt = equipment;
-                            SelectedBelt = equipment;
-                            SelectedBeltContent = CreateSlotText(equipment);
-                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected belt {equipment.GetName()} {equipment.ItemId} {equipment.level}");
-                            break;
-                        case ItemSubType.Necklace:
-                            _modInventoryManager.SelectedNecklace = equipment;
-                            SelectedNecklace = equipment;
-                            SelectedNecklaceContent = CreateSlotText(equipment);
-                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected necklace {equipment.GetName()} {equipment.ItemId} {equipment.level}");
-                            break;
-                        case ItemSubType.Ring:
-                            if (SelectedRing1 == null)
-                            {
-                                _modInventoryManager.SelectedRing1 = equipment;
-                                SelectedRing1 = equipment;
-                                SelectedRing1Content = CreateSlotText(equipment);
-                                AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected ring1 {equipment.GetName()} {equipment.ItemId} {equipment.level}");
-                            }
-                            else
-                            {
-                                _modInventoryManager.SelectedRing2 = equipment;
-                                SelectedRing2 = equipment;
-                                SelectedRing2Content = CreateSlotText(equipment);
-                                AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected ring2 {equipment.GetName()} {equipment.ItemId} {equipment.level}");
-                            }
-                            break;
-                        case ItemSubType.Aura:
-                            _modInventoryManager.SelectedAura = equipment;
-                            SelectedAura = equipment;
-                            SelectedAuraContent = CreateSlotText(equipment);
-                            AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Selected aura {equipment.GetName()} {equipment.ItemId} {equipment.level}");
-                            break;
-                    }
-                }
-            };
-            _inventoryGUI.OnSlotRemoveClicked += item =>
-            {
-                if (item is not Equipment equipment)
-                {
-                    return;
-                }
-
-                switch (equipment.ItemSubType)
-                {
-                    case ItemSubType.Weapon:
-                        if (equipment.NonFungibleId.Equals(SelectedWeapon.Id))
-                        {
-                            _modInventoryManager.SelectedWeapon = null;
-                            SelectedWeapon = null;
-                            SelectedWeaponContent = new GUIContent("Weapon");
-                        }
-
-                        break;
-                    case ItemSubType.Armor:
-                        if (equipment.NonFungibleId.Equals(SelectedArmor.Id))
-                        {
-                            _modInventoryManager.SelectedArmor = null;
-                            SelectedArmor = null;
-                            SelectedArmorContent = new GUIContent("Armor");
-                        }
-
-                        break;
-                    case ItemSubType.Belt:
-                        if (equipment.NonFungibleId.Equals(SelectedBelt.Id))
-                        {
-                            _modInventoryManager.SelectedBelt = null;
-                            SelectedBelt = null;
-                            SelectedBeltContent = new GUIContent("Belt");
-                        }
-
-                        break;
-                    case ItemSubType.Necklace:
-                        if (equipment.NonFungibleId.Equals(SelectedNecklace.Id))
-                        {
-                            _modInventoryManager.SelectedNecklace = null;
-                            SelectedNecklace = null;
-                            SelectedNecklaceContent = new GUIContent("Necklace");
-                        }
-
-                        break;
-                    case ItemSubType.Ring:
-                        if (equipment.NonFungibleId.Equals(SelectedRing1.Id))
-                        {
-                            _modInventoryManager.SelectedRing1 = null;
-                            SelectedRing1 = null;
-                            SelectedRing1Content = new GUIContent("Ring1");
-                        }
-                        else if (equipment.NonFungibleId.Equals(SelectedRing2.Id))
-                        {
-                            _modInventoryManager.SelectedRing2 = null;
-                            SelectedRing2 = null;
-                            SelectedRing2Content = new GUIContent("Ring2");
-                        }
-
-                        break;
-                }
-            };
-
-            _selectLayoutRect = new Rect(
-                GUIToolbox.ScreenWidthReference - 450,
-                GUIToolbox.ScreenHeightReference / 2 - 230,
-                400,
-                500);
             _simulateLayoutRect = new Rect(
                 GUIToolbox.ScreenWidthReference - 350,
                 GUIToolbox.ScreenHeightReference - 220,
@@ -201,66 +56,6 @@ namespace NineChronicles.Mods.Athena.GUIs
             if (selectedStageId == 0)
             {
                 selectedStageId = stateData.clearedStageId + 1;
-            }
-
-            using (var areaScope = new GUILayout.AreaScope(_selectLayoutRect))
-            {
-                using (var verticalScope = new GUILayout.VerticalScope())
-                {
-                    using (var horizontalScope = new GUILayout.HorizontalScope())
-                    {
-                        DrawEquipmentSlot(SelectedAuraContent, SelectedAura, () =>
-                        {
-                            _modInventoryManager.SelectedAura = null;
-                            SelectedAura = null;
-                            SelectedAuraContent = new GUIContent("Aura");
-                        });
-                        DrawEquipmentSlot(SelectedWeaponContent, SelectedWeapon, () =>
-                        {
-                            _modInventoryManager.SelectedWeapon = null;
-                            SelectedWeapon = null;
-                            SelectedWeaponContent = new GUIContent("Weapon");
-                        });
-                        DrawEquipmentSlot(SelectedArmorContent, SelectedArmor, () =>
-                        {
-                            _modInventoryManager.SelectedArmor = null;
-                            SelectedArmor = null;
-                            SelectedArmorContent = new GUIContent("Armor");
-                        });
-                    }
-                    using (var horizontalScope = new GUILayout.HorizontalScope())
-                    {
-                        GUILayout.Space(136);
-                        DrawEquipmentSlot(SelectedBeltContent, SelectedBelt, () =>
-                        {
-                            _modInventoryManager.SelectedBelt = null;
-                            SelectedBelt = null;
-                            SelectedBeltContent = new GUIContent("Belt");
-                        });
-                        DrawEquipmentSlot(SelectedNecklaceContent, SelectedNecklace, () =>
-                        {
-                            _modInventoryManager.SelectedNecklace = null;
-                            SelectedNecklace = null;
-                            SelectedNecklaceContent = new GUIContent("Necklace");
-                        });
-                    }
-                    using (var horizontalScope = new GUILayout.HorizontalScope())
-                    {
-                        GUILayout.Space(136);
-                        DrawEquipmentSlot(SelectedRing1Content, SelectedRing1, () =>
-                        {
-                            _modInventoryManager.SelectedRing1 = null;
-                            SelectedRing1 = null;
-                            SelectedRing1Content = new GUIContent("Ring1");
-                        });
-                        DrawEquipmentSlot(SelectedRing2Content, SelectedRing2, () =>
-                        {
-                            _modInventoryManager.SelectedRing2 = null;
-                            SelectedRing2 = null;
-                            SelectedRing2Content = new GUIContent("Ring2");
-                        });
-                    }
-                }
             }
 
             using (var areaScope = new GUILayout.AreaScope(_simulateLayoutRect))
@@ -309,25 +104,6 @@ namespace NineChronicles.Mods.Athena.GUIs
             StateData = (tableSheets.WorldSheet, tableSheets.StageSheet, stid);
         }
 
-        private void InitEquipments()
-        {
-            SelectedAura = _modInventoryManager.SelectedAura;
-            SelectedWeapon = _modInventoryManager.SelectedWeapon;
-            SelectedArmor = _modInventoryManager.SelectedArmor;
-            SelectedBelt = _modInventoryManager.SelectedBelt;
-            SelectedNecklace = _modInventoryManager.SelectedNecklace;
-            SelectedRing1 = _modInventoryManager.SelectedRing1;
-            SelectedRing2 = _modInventoryManager.SelectedRing2;
-
-            SelectedAuraContent = CreateSlotText(SelectedAura);
-            SelectedWeaponContent = CreateSlotText(SelectedWeapon);
-            SelectedArmorContent = CreateSlotText(SelectedArmor);
-            SelectedBeltContent = CreateSlotText(SelectedBelt);
-            SelectedNecklaceContent = CreateSlotText(SelectedNecklace);
-            SelectedRing1Content = CreateSlotText(SelectedRing1);
-            SelectedRing2Content = CreateSlotText(SelectedRing2);
-        }
-
         private GUIContent CreateSlotText(Equipment equipment)
         {
             var slotText = $"Grade {equipment.Grade}" +
@@ -335,31 +111,6 @@ namespace NineChronicles.Mods.Athena.GUIs
                 $"\n{equipment.GetName()}\n" +
                 $"+{equipment.level}";
             return new GUIContent(slotText);
-        }
-
-        private void DrawEquipmentSlot(GUIContent content, Equipment? equipment, Action onRemove)
-        {
-            GUIStyle centeredStyle = new GUIStyle(GUI.skin.box)
-            {
-                alignment = TextAnchor.MiddleCenter
-            };
-
-            using (var horizontalScope = new GUILayout.HorizontalScope())
-            {
-                GUILayout.Box(content, centeredStyle, GUILayout.Width(100), GUILayout.Height(100));
-                if (equipment != null)
-                {
-                    if (GUILayout.Button("x", GUILayout.Width(20), GUILayout.Height(20)))
-                    {
-                        onRemove.Invoke();
-                        AthenaPlugin.Log(LogLevel.Info, $"({nameof(AdventureGUI)}) Removed {content.text.ToLower()}");
-                    }
-                }
-                else
-                {
-                    GUILayout.Space(20);
-                }
-            }
         }
 
         private void DrawSimulationResultTextArea()
