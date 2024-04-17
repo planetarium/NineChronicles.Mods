@@ -15,6 +15,22 @@ using NineChronicles.Mods.Athena.Managers;
 using NineChronicles.Mods.Athena.Patches;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using Libplanet.Crypto;
+using Nekoyume.Blockchain;
+using Nekoyume.Game;
+using Nekoyume.Model.EnumType;
+using Nekoyume.State;
+using Nekoyume.UI.Model;
+using NineChronicles.Mods.Athena.Components;
+using NineChronicles.Mods.Athena.Managers;
+using NineChronicles.Mods.Athena.Models;
+using NineChronicles.Modules.BlockSimulation.ActionSimulators;
+using UnityEngine;
+
 
 namespace NineChronicles.Mods.Athena
 {
@@ -34,6 +50,8 @@ namespace NineChronicles.Mods.Athena
         private Harmony _harmony;
 
         private ModInventoryManager _modInventoryManager;
+
+        private AbilityRankingResponse _abilityRankingResponse = null;
 
         private Camera _mainCamera;
         private Color _mainCameraBackgroundColor;
@@ -80,6 +98,36 @@ namespace NineChronicles.Mods.Athena
         {
             TrackInstallation();
             _eventSystem = FindObjectOfType<EventSystem>();
+        }
+
+        private async void LoadAbilityRanking()
+        {
+            var apiClient = Game.instance.ApiClient;
+
+            if (apiClient.IsInitialized && _abilityRankingResponse == null)
+            {
+                var query =
+                    $@"query {{
+                            abilityRanking(limit: 1000) {{
+                                ranking
+                                avatarAddress
+                                name
+                                avatarLevel
+                                armorId
+                                titleId
+                                cp
+                            }}
+                        }}";
+
+                var response = await apiClient.GetObjectAsync<AbilityRankingResponse>(query);
+                if (response is null)
+                {
+                    Log($"Failed getting response : {nameof(AbilityRankingResponse)}");
+                }
+
+                _abilityRankingResponse = response;
+                Log($"AbilityRankingRequest Success {response.AbilityRanking.Count}");
+            }
         }
 
         private async void TrackInstallation()
@@ -190,6 +238,7 @@ namespace NineChronicles.Mods.Athena
 
                 TrackDailyOpen();
                 DisableEventSystem();
+                LoadAbilityRanking();
             }
         }
 
@@ -234,7 +283,7 @@ namespace NineChronicles.Mods.Athena
         {
             RemoveInventory();
 
-            return new ArenaGUI(_modInventoryManager);
+            return new ArenaGUI(_modInventoryManager, _abilityRankingResponse);
         }
 
         private IGUI CreateItemCreationGUI()

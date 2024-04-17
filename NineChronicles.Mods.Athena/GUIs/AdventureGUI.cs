@@ -32,6 +32,21 @@ namespace NineChronicles.Mods.Athena.GUIs
         private int _wave3ClearCount = 0;
         private int playCount = 100;
 
+        private GUIStyle FS16 = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = 16,
+        };
+
+        private GUIStyle FS16Center = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = 16,
+            alignment = TextAnchor.MiddleCenter
+        };
+        private GUIStyle LeftMargin = new GUIStyle(GUI.skin.button)
+        {
+            margin = new RectOffset(50,2,30,2)
+        };
+    
         public AdventureGUI(ModInventoryManager modInventoryManager)
         {
             _modInventoryManager = modInventoryManager;
@@ -39,10 +54,10 @@ namespace NineChronicles.Mods.Athena.GUIs
             InitStateData();
 
             _simulateLayoutRect = new Rect(
-                GUIToolbox.ScreenWidthReference - 350,
-                GUIToolbox.ScreenHeightReference - 220,
-                200,
-                400);
+                100,
+                100,
+                GUIToolbox.ScreenWidthReference - 200,
+                GUIToolbox.ScreenHeightReference - 100);
         }
         public void OnGUI()
         {
@@ -62,22 +77,28 @@ namespace NineChronicles.Mods.Athena.GUIs
             {
                 using (var horizontalScope = new GUILayout.HorizontalScope())
                 {
-                    using (var verticalScope = new GUILayout.VerticalScope())
+                    using (var verticalScope = new GUILayout.VerticalScope(GUILayout.Width(400)))
                     {
-                        GUILayout.Label("Choose stage to simulate");
-                        ControllablePicker(
-                            stateData.StageSheet.Keys.Select(x => x.ToString()).ToArray(),
-                            (_, index) => selectedStageId = index + 1,
-                            selectedStageId - 1);
-
-                        GUILayout.Label("Play Count");
-                        DrawPlayCountController();
-
-                        GUI.enabled = !_isCalculating;
-                        if (GUILayout.Button("Simulate"))
+                        using (new GUILayout.HorizontalScope())
                         {
-                            SimulateLocal();
-                            AthenaPlugin.Log($"[StageGUI] Simulate button clicked {selectedStageId})");
+                                using (new GUILayout.VerticalScope())
+                            {
+                                GUILayout.Label("Choose stage to simulate", FS16);
+                                ControllablePicker(
+                                    stateData.StageSheet.Keys.Select(x => x.ToString()).ToArray(),
+                                    (_, index) => selectedStageId = index + 1,
+                                    selectedStageId - 1);
+
+                                GUILayout.Label("Play Count", FS16);
+                                DrawPlayCountController();
+                            }
+
+                            GUI.enabled = !_isCalculating;
+                            if (GUILayout.Button("Simulate", LeftMargin, GUILayout.Width(80), GUILayout.Height(80)))
+                            {
+                                SimulateLocal();
+                                AthenaPlugin.Log($"[StageGUI] Simulate button clicked {selectedStageId})");
+                            }
                         }
 
                         // NOTE: Use for testing with remote state.
@@ -104,41 +125,32 @@ namespace NineChronicles.Mods.Athena.GUIs
             StateData = (tableSheets.WorldSheet, tableSheets.StageSheet, stid);
         }
 
-        private GUIContent CreateSlotText(Equipment equipment)
-        {
-            var slotText = $"Grade {equipment.Grade}" +
-                $"\n{equipment.ElementalType}" +
-                $"\n{equipment.GetName()}\n" +
-                $"+{equipment.level}";
-            return new GUIContent(slotText);
-        }
-
         private void DrawSimulationResultTextArea()
         {
             if (_isCalculating)
             {
-                GUILayout.Label($"Simulating... {simulationStep}/{playCount}");
+                GUILayout.Label($"Simulating... {simulationStep}/{playCount}", FS16);
             }
             else
             {
                 using (var horizontalScope = new GUILayout.HorizontalScope())
                 {
-                    GUILayout.Label($"Fail: {_wave0ClearCount}");
-                    GUILayout.Label($"★: {_wave1ClearCount}");
-                    GUILayout.Label($"★★: {_wave2ClearCount}");
-                    GUILayout.Label($"★★★: {_wave3ClearCount}");
+                    GUILayout.Label($"Fail: {_wave0ClearCount}", FS16, GUILayout.Width(60));
+                    GUILayout.Label($"★: {_wave1ClearCount}", FS16, GUILayout.Width(60));
+                    GUILayout.Label($"★★: {_wave2ClearCount}", FS16, GUILayout.Width(60));
+                    GUILayout.Label($"★★★: {_wave3ClearCount}", FS16, GUILayout.Width(60));
                 }
 
                 using (var horizontalScope = new GUILayout.HorizontalScope())
                 {
                     var totalStars = _wave1ClearCount + _wave2ClearCount * 2 + _wave3ClearCount * 3;
-                    GUILayout.Label($"Total Stars: {totalStars}");
+                    GUILayout.Label($"Total Stars: {totalStars}", FS16);
                 }
 
                 using (var horizontalScope = new GUILayout.HorizontalScope())
                 {
                     var winRate = (float)_wave3ClearCount / playCount;
-                    GUILayout.Label($"Win Rate: {winRate:P2}");
+                    GUILayout.Label($"Win Rate: {winRate:P2}", FS16);
                 }
             }
         }
@@ -147,16 +159,16 @@ namespace NineChronicles.Mods.Athena.GUIs
             using (var verticalScope = new GUILayout.HorizontalScope())
             {
                 GUI.enabled = !_isCalculating;
-                if (GUILayout.Button("+", GUILayout.Width(30), GUILayout.Height(20)))
+                if (GUILayout.Button("+", GUILayout.Width(35), GUILayout.Height(35)))
                 {
                     playCount += 100;
                 }
 
                 GUI.enabled = true;
-                GUILayout.Label(playCount + "", GUILayout.Width(30));
+                GUILayout.Label(playCount + "", FS16Center, GUILayout.Height(35));
 
                 GUI.enabled = !_isCalculating;
-                if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.Height(20)))
+                if (GUILayout.Button("-", GUILayout.Width(35), GUILayout.Height(35)))
                 {
                     if (playCount >= 0)
                     {
@@ -173,7 +185,7 @@ namespace NineChronicles.Mods.Athena.GUIs
             void Btn(string text, int change)
             {
                 GUI.enabled = !_isCalculating;
-                if (GUILayout.Button(text))
+                if (GUILayout.Button(text, GUILayout.Width(35), GUILayout.Height(35)))
                 {
                     if (index + change > 0 && index + change < list.Length)
                     {
@@ -188,7 +200,7 @@ namespace NineChronicles.Mods.Athena.GUIs
             {
                 Btn("<<", -5);
                 Btn("<", -1);
-                GUILayout.Label(list[index]);
+                GUILayout.Label(list[index], FS16Center, GUILayout.Height(35));
                 Btn(">", 1);
                 Btn(">>", 5);
             }

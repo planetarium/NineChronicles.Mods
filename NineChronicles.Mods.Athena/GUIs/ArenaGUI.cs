@@ -38,12 +38,12 @@ namespace NineChronicles.Mods.Athena.GUIs
 
         public List<AvatarInfo> avatarInfos = new List<AvatarInfo>();
         private int currentPage = 0;
-        private int itemsPerPage = 20;
+        private int itemsPerPage = 28;
         private int totalPages;
         private int playCount = 100;
         public event Action<AvatarInfo> OnSlotSelected;
 
-        public ArenaGUI(ModInventoryManager modInventoryManager)
+        public ArenaGUI(ModInventoryManager modInventoryManager, AbilityRankingResponse apiResponse)
         {
             _modInventoryManager = modInventoryManager;
 
@@ -52,7 +52,21 @@ namespace NineChronicles.Mods.Athena.GUIs
                 100,
                 GUIToolbox.ScreenWidthReference - 200,
                 GUIToolbox.ScreenHeightReference - 100);
-            LoadRank();
+
+            if (apiResponse != null)
+            {
+                foreach (var abilityRanking in apiResponse.AbilityRanking)
+                {
+                    var avatarInfo = new AvatarInfo
+                    {
+                        Name = abilityRanking.Name,
+                        Cp = abilityRanking.Cp,
+                        Address = new Address(abilityRanking.AvatarAddress),
+                    };
+                    avatarInfos.Add(avatarInfo);
+                }
+            }
+            totalPages = (int)Math.Ceiling(avatarInfos.Count / (double)itemsPerPage);
 
             OnSlotSelected += async avatarInfo =>
             {
@@ -90,47 +104,6 @@ namespace NineChronicles.Mods.Athena.GUIs
                     AthenaPlugin.Log($"err {e}");
                 }
             };
-        }
-
-        private async Task LoadRank()
-        {
-            var apiClient = Game.instance.ApiClient;
-
-            if (apiClient.IsInitialized)
-            {
-                var query =
-                    $@"query {{
-                            abilityRanking(limit: 1000) {{
-                                ranking
-                                avatarAddress
-                                name
-                                avatarLevel
-                                armorId
-                                titleId
-                                cp
-                            }}
-                        }}";
-
-                var response = await apiClient.GetObjectAsync<AbilityRankingResponse>(query);
-                if (response is null)
-                {
-                    AthenaPlugin.Log($"Failed getting response : {nameof(AbilityRankingResponse)}");
-                    return;
-                }
-
-                foreach (var abilityRanking in response.AbilityRanking)
-                {
-                    var avatarInfo = new AvatarInfo
-                    {
-                        Name = abilityRanking.Name,
-                        Cp = abilityRanking.Cp,
-                        Address = new Address(abilityRanking.AvatarAddress),
-                    };
-                    avatarInfos.Add(avatarInfo);
-                }
-            }
-
-            totalPages = (int)Math.Ceiling(avatarInfos.Count / (double)itemsPerPage);
         }
 
         public void OnGUI()

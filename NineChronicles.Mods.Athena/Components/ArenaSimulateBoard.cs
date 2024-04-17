@@ -11,7 +11,7 @@ namespace NineChronicles.Mods.Athena.Components
     {
         public static void DrawArenaBoard(List<ArenaGUI.AvatarInfo> arenaAvatarInfos, Action<ArenaGUI.AvatarInfo> onSlotSelected, int totalPlayCount)
         {
-            int itemsPerGroup = 5;
+            int itemsPerGroup = 7;
 
             using (var horizontalScope = new GUILayout.HorizontalScope())
             {

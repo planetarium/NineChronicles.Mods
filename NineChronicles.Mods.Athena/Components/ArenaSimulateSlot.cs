@@ -21,7 +21,12 @@ namespace NineChronicles.Mods.Athena.Components
             }
             var slotContent = new GUIContent(slotText);
 
-            if (GUILayout.Button(slotContent))
+            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button)
+            {
+                padding = new RectOffset(2,2,8,8)
+            };
+
+            if (GUILayout.Button(slotContent, buttonStyle))
             {
                 onSlotSelected?.Invoke(avatarInfo);
             }
