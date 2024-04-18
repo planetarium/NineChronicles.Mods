@@ -9,27 +9,14 @@ using Nekoyume.Game;
 using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Item;
 using Nekoyume.State;
+using Nekoyume.UI.Model;
 using NineChronicles.Mods.Athena.Factories;
 using NineChronicles.Mods.Athena.GUIs;
 using NineChronicles.Mods.Athena.Managers;
+using NineChronicles.Mods.Athena.Mangers;
 using NineChronicles.Mods.Athena.Patches;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
-using Libplanet.Crypto;
-using Nekoyume.Blockchain;
-using Nekoyume.Game;
-using Nekoyume.Model.EnumType;
-using Nekoyume.State;
-using Nekoyume.UI.Model;
-using NineChronicles.Mods.Athena.Components;
-using NineChronicles.Mods.Athena.Managers;
-using NineChronicles.Mods.Athena.Models;
-using NineChronicles.Modules.BlockSimulation.ActionSimulators;
-using UnityEngine;
 
 
 namespace NineChronicles.Mods.Athena
@@ -59,11 +46,6 @@ namespace NineChronicles.Mods.Athena
         private EventSystem _eventSystem;
 
         // NOTE: Please add your GUIs here as alphabetical order.
-        private AdventureGUI _adventureGUI;
-        private ArenaGUI _arenaGUI;
-        private EnhancementGUI _enhancementGUI;
-        private ItemCreationGUI _itemCreationGUI;
-        private InventoryGUI _inventoryGUI;
         private NotificationGUI _notificationGUI;
         private IGUI _tabGUI;
 
@@ -161,11 +143,6 @@ namespace NineChronicles.Mods.Athena
 
         private void DisableModeGUI()
         {
-            _adventureGUI = null;
-            _arenaGUI = null;
-            _enhancementGUI = null;
-            _inventoryGUI = null;
-            _itemCreationGUI = null;
             _notificationGUI = null;
             _tabGUI = null;
             EnableEventSystem();
@@ -310,22 +287,36 @@ namespace NineChronicles.Mods.Athena
 
         private InventoryGUI GetOrCreateInventoryGUI()
         {
-            if (_inventoryGUI != null)
-            {
-                _inventoryGUI.SelectTab(0);
-                return _inventoryGUI;
-            }
-
-            _inventoryGUI = new InventoryGUI(
+            var inventoryGUI = new InventoryGUI(
                     positionX: 100,
                     positionY: 80,
                     slotCountPerPage: 15,
                     slotCountPerRow: 5);
-            _inventoryGUI.OnSlotRemoveClicked += item =>
+            inventoryGUI.OnSlotReimportClicked += item =>
             {
-                if (item is Equipment equipment)
+                if (item is INonFungibleItem nonFungibleItem)
                 {
-                    _modInventoryManager.DeleteItem(equipment.NonFungibleId);
+                    var nonFungibleId = nonFungibleItem.NonFungibleId;
+                    _modInventoryManager.DeleteItem(nonFungibleId);
+                    var inventory = States.Instance.CurrentAvatarState?.inventory;
+                    if (inventory != null &&
+                        inventory.TryGetNonFungibleItem(nonFungibleId, out var inventoryItem) &&
+                        inventoryItem.item is Equipment equipment)
+                    {
+                        inventoryGUI.AddOrReplaceItem(
+                            equipment,
+                            isExistsInBlockchain: true,
+                            isModded: false,
+                            sort: true);
+                    }
+                }
+            };
+            inventoryGUI.OnSlotRemoveClicked += item =>
+            {
+                if (item is INonFungibleItem nonFungibleItem)
+                {
+                    var nonFungibleId = nonFungibleItem.NonFungibleId;
+                    _modInventoryManager.DeleteItem(nonFungibleId);
                 }
             };
 
@@ -334,7 +325,11 @@ namespace NineChronicles.Mods.Athena
             {
                 foreach (var equipment in inventory.Equipments)
                 {
-                    _inventoryGUI.AddOrReplaceItem(equipment, isExistsInBlockchain: true, isModded: false);
+                    inventoryGUI.AddOrReplaceItem(
+                        equipment,
+                        isExistsInBlockchain: true,
+                        isModded: false,
+                        sort: false);
                 }
             }
 
@@ -350,7 +345,11 @@ namespace NineChronicles.Mods.Athena
                             TableSheets.Instance,
                             equipment,
                             modItem);
-                        _inventoryGUI.AddOrReplaceItem(equipment, isExistsInBlockchain: modItem.ExistsItem, isModded: true);
+                        inventoryGUI.AddOrReplaceItem(
+                            equipment,
+                            isExistsInBlockchain: modItem.ExistsItem,
+                            isModded: true,
+                            sort: false);
                         continue;
                     }
 
@@ -365,7 +364,11 @@ namespace NineChronicles.Mods.Athena
                     continue;
                 }
 
-                _inventoryGUI.AddOrReplaceItem(equipment, isExistsInBlockchain: modItem.ExistsItem, isModded: true);
+                inventoryGUI.AddOrReplaceItem(
+                    equipment,
+                    isExistsInBlockchain: modItem.ExistsItem,
+                    isModded: true,
+                    sort: false);
             }
 
             foreach (var id in removeList)
@@ -373,8 +376,8 @@ namespace NineChronicles.Mods.Athena
                 _modInventoryManager.DeleteItem(id);
             }
 
-            _inventoryGUI.Sort();
-            return _inventoryGUI;
+            inventoryGUI.SortAllTabs();
+            return inventoryGUI;
         }
 
         private void OnGUI()

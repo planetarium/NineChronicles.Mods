@@ -256,7 +256,12 @@ namespace NineChronicles.Mods.Athena.ViewModels
             }
         }
 
-        public void AddItem(IItem item, int count, bool isExistsInBlockchain, bool isModded)
+        public void AddOrReplaceItem(
+            IItem item,
+            int count,
+            bool isExistsInBlockchain,
+            bool isModded,
+            bool sort = true)
         {
             if (item is null)
             {
@@ -265,46 +270,27 @@ namespace NineChronicles.Mods.Athena.ViewModels
             }
 
             var tab = GetTab(item);
-            AddItem(tab, item, count, isExistsInBlockchain, isModded);
+            AddOrReplaceItem(tab, item, count, isExistsInBlockchain, isModded, sort);
         }
 
-        private void AddItem(Tab tab, IItem item, int count, bool isExistsInBlockchain, bool isModded)
+        private void AddOrReplaceItem(
+            Tab tab,
+            IItem item,
+            int count,
+            bool isExistsInBlockchain,
+            bool isModded,
+            bool sort)
         {
-            var slot = GetSlotToAdd(tab, item);
+            var slot = GetSlotToAddOrReplace(tab, item, out var isEmptySlot);
             if (slot.item is INonFungibleItem { })
             {
-                return;
-            }
-
-            var addableCount = int.MaxValue - slot.count;
-            if (addableCount >= count)
-            {
-                slot.Set(item, slot.count + count, isExistsInBlockchain, isModded);
-                return;
-            }
-
-            slot.Set(item, int.MaxValue, isExistsInBlockchain, isModded);
-            AddItem(tab, item, count - addableCount, isExistsInBlockchain, isModded);
-        }
-
-        public void AddOrReplaceItem(IItem item, int count, bool isExistsInBlockchain, bool isModded)
-        {
-            if (item is null)
-            {
-                AthenaPlugin.Log("[InventoryViewModel] AddItem item is null");
-                return;
-            }
-
-            var tab = GetTab(item);
-            AddOrReplaceItem(tab, item, count, isExistsInBlockchain, isModded);
-        }
-
-        private void AddOrReplaceItem(Tab tab, IItem item, int count, bool isExistsInBlockchain, bool isModded)
-        {
-            var slot = GetSlotToAdd(tab, item);
-            if (slot.item is INonFungibleItem { })
-            {
+                // NOTE: Replace non-fungible item.
                 slot.Set(item, count, isExistsInBlockchain, isModded);
+                if (sort && isEmptySlot)
+                {
+                    Sort(tab);
+                }
+
                 return;
             }
 
@@ -312,16 +298,23 @@ namespace NineChronicles.Mods.Athena.ViewModels
             if (addableCount >= count)
             {
                 slot.Set(item, slot.count + count, isExistsInBlockchain, isModded);
+                if (sort && isEmptySlot)
+                {
+                    Sort(tab);
+                }
+
                 return;
             }
 
             slot.Set(item, int.MaxValue, isExistsInBlockchain, isModded);
-            AddItem(tab, item, count - addableCount, isExistsInBlockchain, isModded);
+            AddOrReplaceItem(tab, item, count - addableCount, isExistsInBlockchain, isModded, sort);
         }
 
-        private Tab GetTab(IItem item)
+        private Tab GetTab(IItem item) => GetTab(item.ItemSubType);
+
+        private Tab GetTab(ItemSubType itemSubType)
         {
-            var tabIndex = item.ItemSubType switch
+            var tabIndex = itemSubType switch
             {
                 ItemSubType.Weapon => 0,
                 ItemSubType.Armor => 1,
@@ -364,17 +357,17 @@ namespace NineChronicles.Mods.Athena.ViewModels
             return page.slots.First(slot => slot.item is null);
         }
 
-        private Slot GetSlotToAdd(Tab tab, IItem item)
+        private Slot GetSlotToAddOrReplace(Tab tab, IItem item, out bool isEmptySlot)
         {
             return item switch
             {
-                IFungibleItem fungibleItem => GetSlotToAdd(tab, fungibleItem),
-                INonFungibleItem nonFungibleItem => GetSlotToAdd(tab, nonFungibleItem),
+                IFungibleItem fungibleItem => GetSlotToAddOrReplace(tab, fungibleItem, out isEmptySlot),
+                INonFungibleItem nonFungibleItem => GetSlotToAddOrReplace(tab, nonFungibleItem, out isEmptySlot),
                 _ => throw new System.ArgumentOutOfRangeException(nameof(item)),
             };
         }
 
-        private Slot GetSlotToAdd(Tab tab, IFungibleItem item)
+        private Slot GetSlotToAddOrReplace(Tab tab, IFungibleItem item, out bool isEmptySlot)
         {
             foreach (var page in tab.pages)
             {
@@ -384,16 +377,18 @@ namespace NineChronicles.Mods.Athena.ViewModels
                         fungibleItem.FungibleId.Equals(item.FungibleId) &&
                         slot.count < int.MaxValue)
                     {
+                        isEmptySlot = false;
                         return slot;
                     }
                 }
             }
 
             var pageHasEmptySlot = GetOrCreatePageHasEmptySlot(tab);
+            isEmptySlot = true;
             return GetEmptySlot(pageHasEmptySlot);
         }
 
-        private Slot GetSlotToAdd(Tab tab, INonFungibleItem item)
+        private Slot GetSlotToAddOrReplace(Tab tab, INonFungibleItem item, out bool isEmptySlot)
         {
             foreach (var page in tab.pages)
             {
@@ -403,16 +398,18 @@ namespace NineChronicles.Mods.Athena.ViewModels
                         nonFungibleItem.NonFungibleId.Equals(item.NonFungibleId) &&
                         slot.count < int.MaxValue)
                     {
+                        isEmptySlot = false;
                         return slot;
                     }
                 }
             }
 
             var pageHasEmptySlot = GetOrCreatePageHasEmptySlot(tab);
+            isEmptySlot = true;
             return GetEmptySlot(pageHasEmptySlot);
         }
 
-        public void RemoveItem(IItem item, int count)
+        public void RemoveItem(IItem item, int count, bool sort = true)
         {
             if (item is null)
             {
@@ -421,10 +418,10 @@ namespace NineChronicles.Mods.Athena.ViewModels
             }
 
             var tab = GetTab(item);
-            RemoveItem(tab, item, count);
+            RemoveItem(tab, item, count, sort);
         }
 
-        private void RemoveItem(Tab tab, IItem item, int count)
+        private void RemoveItem(Tab tab, IItem item, int count, bool sort)
         {
             if (!TryGetSlotToRemove(tab, item, out var slot))
             {
@@ -441,11 +438,15 @@ namespace NineChronicles.Mods.Athena.ViewModels
             else if (removeableCount == count)
             {
                 slot.Clear();
+                if (sort)
+                {
+                    Sort(tab);
+                }
                 return;
             }
 
             slot.Clear();
-            RemoveItem(tab, item, count - removeableCount);
+            RemoveItem(tab, item, count - removeableCount, sort);
         }
 
         private bool TryGetSlotToRemove(Tab tab, IItem item, out Slot slot)
@@ -509,7 +510,7 @@ namespace NineChronicles.Mods.Athena.ViewModels
             return slot is not null;
         }
 
-        public void Sort()
+        public void SortAllTabs()
         {
             foreach (var tab in _tabs)
             {
@@ -541,8 +542,35 @@ namespace NineChronicles.Mods.Athena.ViewModels
             tab.Clear();
             foreach (var (item, count, isExistsInBlockchain, isModded) in slotSources)
             {
-                AddItem(item, count, isExistsInBlockchain, isModded);
+                AddOrReplaceItem(item, count, isExistsInBlockchain, isModded, sort: false);
             }
+        }
+
+        public bool TryGetItem<T>(Guid nonFungibleId, out T item) where T : INonFungibleItem
+        {
+            if (typeof(T) != typeof(Equipment))
+            {
+                item = default;
+                return false;
+            }
+
+            foreach (var tab in _tabs)
+            {
+                foreach (var page in tab.pages)
+                {
+                    foreach (var slot in page.slots)
+                    {
+                        if (slot.item is T t && t.NonFungibleId.Equals(nonFungibleId))
+                        {
+                            item = t;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            item = default;
+            return false;
         }
     }
 }
