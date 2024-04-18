@@ -206,10 +206,11 @@ namespace NineChronicles.Mods.Athena
 
                 _tabGUI = new TabGUI(new List<(string Name, Func<IGUI> UI)>
                 {
-                    ("Adventure", CreateAdventureGUI),
+                    ("ItemSlots", () => new ItemSlotsGUI(GetOrCreateInventoryGUI())),
+                    ("Adventure", () => new AdventureGUI(UserDataManager.GetItemSlotsCache(BattleType.Adventure))),
                     ("Arena", CreateArenaGUI),
                     ("Create", CreateItemCreationGUI),
-                    ("Enhancement", CreateEnhancementGUI),
+                    ("Enhancement", () => new EnhancementGUI(_modInventoryManager, GetOrCreateInventoryGUI())),
                 }, DisableModeGUI);
                 _notificationGUI = new NotificationGUI();
 
@@ -258,31 +259,23 @@ namespace NineChronicles.Mods.Athena
 
         private IGUI CreateArenaGUI()
         {
-            return new ArenaGUI(_modInventoryManager, _abilityRankingResponse);
+            return new ArenaGUI(
+                UserDataManager.GetItemSlotsCache(BattleType.Arena),
+                _abilityRankingResponse);
         }
 
         private IGUI CreateItemCreationGUI()
         {
+            var gui = new ItemCreationGUI();
             var tableSheets = TableSheets.Instance;
-            var ui = new ItemCreationGUI(_modInventoryManager);
-            ui.SetItemRecipes(
+            gui.SetItemRecipes(
                 tableSheets.EquipmentItemSheet,
                 tableSheets.EquipmentItemRecipeSheet,
                 tableSheets.EquipmentItemSubRecipeSheetV2,
                 tableSheets.EquipmentItemOptionSheet);
+            gui.OnItemCreateClicked += _modInventoryManager.AddItem;
 
-            return ui;
-        }
-
-        private IGUI CreateEnhancementGUI()
-        {
-            var inventoryGUI = GetOrCreateInventoryGUI();
-            return new EnhancementGUI(_modInventoryManager, inventoryGUI);
-        }
-
-        private IGUI CreateAdventureGUI()
-        {
-            return new AdventureGUI(_modInventoryManager);
+            return gui;
         }
 
         private InventoryGUI GetOrCreateInventoryGUI()
