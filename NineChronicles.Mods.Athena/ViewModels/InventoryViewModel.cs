@@ -78,16 +78,16 @@ namespace NineChronicles.Mods.Athena.ViewModels
         public class Slot
         {
             public static readonly GUIContent existsInBlockchainGUIContent =
-                new GUIContent(string.Empty, "Exists in blockchain");
-            public static readonly GUIStyle existsInBlockchainStyle = new GUIStyle(GUI.skin.box)
+                new(string.Empty, "Exists in blockchain");
+            public static readonly GUIStyle existsInBlockchainStyle = new(GUI.skin.box)
             {
                 normal = { background = ColorTexturePool.Blue },
                 hover = { background = ColorTexturePool.Blue },
                 active = { background = ColorTexturePool.Blue },
             };
             public static readonly GUIContent moddedGUIContent =
-                new GUIContent(string.Empty, "Modded");
-            public static readonly GUIStyle moddedStyle = new GUIStyle(GUI.skin.box)
+                new(string.Empty, "Modded");
+            public static readonly GUIStyle moddedStyle = new(GUI.skin.box)
             {
                 normal = { background = ColorTexturePool.Green },
                 hover = { background = ColorTexturePool.Green },
@@ -102,6 +102,8 @@ namespace NineChronicles.Mods.Athena.ViewModels
             public string slotText;
             public string tooltip;
             public GUIContent slotGUIContent;
+
+            public bool IsEmpty => item is null;
 
             public Slot(IItem item, int count, bool isExistsInBlockchain, bool isModded)
             {
@@ -282,7 +284,7 @@ namespace NineChronicles.Mods.Athena.ViewModels
             bool sort)
         {
             var slot = GetSlotToAddOrReplace(tab, item, out var isEmptySlot);
-            if (slot.item is INonFungibleItem { })
+            if (item is INonFungibleItem)
             {
                 // NOTE: Replace non-fungible item.
                 slot.Set(item, count, isExistsInBlockchain, isModded);
@@ -390,18 +392,15 @@ namespace NineChronicles.Mods.Athena.ViewModels
 
         private Slot GetSlotToAddOrReplace(Tab tab, INonFungibleItem item, out bool isEmptySlot)
         {
-            foreach (var page in tab.pages)
+            var alreadyExistsSlot = tab.pages
+                .SelectMany(page => page.slots)
+                .FirstOrDefault(slot =>
+                    slot.item is INonFungibleItem nonFungibleItem &&
+                    nonFungibleItem.NonFungibleId.Equals(item.NonFungibleId));
+            if (alreadyExistsSlot is not null)
             {
-                foreach (var slot in page.slots)
-                {
-                    if (slot.item is INonFungibleItem nonFungibleItem &&
-                        nonFungibleItem.NonFungibleId.Equals(item.NonFungibleId) &&
-                        slot.count < int.MaxValue)
-                    {
-                        isEmptySlot = false;
-                        return slot;
-                    }
-                }
+                isEmptySlot = false;
+                return alreadyExistsSlot;
             }
 
             var pageHasEmptySlot = GetOrCreatePageHasEmptySlot(tab);

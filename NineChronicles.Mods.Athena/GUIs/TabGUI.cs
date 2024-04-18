@@ -8,7 +8,7 @@ namespace NineChronicles.Mods.Athena.GUIs
     {
         private readonly List<(string Name, Func<IGUI> UIGenerator)> _uis;
 
-        private int tabIndex;
+        private int tabIndex = -1;
         private IGUI currentUI;
 
         private readonly Action _onClose;
@@ -19,8 +19,6 @@ namespace NineChronicles.Mods.Athena.GUIs
         {
             _uis = uis;
             _onClose = onClose;
-
-            SetTabIndex(0);
         }
 
         private void SetTabIndex(int index)
@@ -34,6 +32,12 @@ namespace NineChronicles.Mods.Athena.GUIs
 
         public void OnGUI()
         {
+            // NOTE: Set tab index in OnGUI to avoid UnityEngine.GUI error.
+            if (tabIndex < 0)
+            {
+                SetTabIndex(0);
+            }
+
             GUI.matrix = GUIToolbox.GetGUIMatrix();
 
             using var scope = new GUILayout.AreaScope(new Rect(
