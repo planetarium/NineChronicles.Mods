@@ -4,17 +4,11 @@ namespace NineChronicles.Mods.Athena.GUIs
 {
     internal static class GUIToolbox
     {
-        public static int ScreenWidthReference { get; private set; } = 1136;
-        public static int ScreenHeightReference { get; private set; } = 640;
+        public const int ScreenWidthReference = 1136;
+        public const int ScreenHeightReference = 640;
         private static int _screenWidthCache;
         private static int _screenHeightCache;
         private static Matrix4x4 _guiMatrixCache;
-
-        public static void SetReferenceSize(int width, int height)
-        {
-            ScreenWidthReference = width;
-            ScreenHeightReference = height;
-        }
 
         public static Matrix4x4 GetGUIMatrix()
         {
