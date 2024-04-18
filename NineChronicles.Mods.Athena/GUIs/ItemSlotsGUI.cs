@@ -24,9 +24,22 @@ namespace NineChronicles.Mods.Athena.GUIs
                 400,
                 500);
             _inventoryGUI = inventoryGUI;
-            _inventoryGUI.OnSlotSelected += OnSlotSelected;
-            _inventoryGUI.OnSlotReimportClicked += OnSlotRemoveClicked;
-            _inventoryGUI.OnSlotRemoveClicked += OnSlotRemoveClicked;
+        }
+
+        public void SetEnabled(bool enabled)
+        {
+            if (enabled)
+            {
+                _inventoryGUI.OnSlotSelected += OnSlotSelected;
+                _inventoryGUI.OnSlotReimportClicked += OnSlotRemoveClicked;
+                _inventoryGUI.OnSlotRemoveClicked += OnSlotRemoveClicked;
+            }
+            else
+            {
+                _inventoryGUI.OnSlotSelected -= OnSlotSelected;
+                _inventoryGUI.OnSlotReimportClicked -= OnSlotRemoveClicked;
+                _inventoryGUI.OnSlotRemoveClicked -= OnSlotRemoveClicked;
+            }
         }
 
         private void InitViewModel(InventoryGUI inventoryGUI)

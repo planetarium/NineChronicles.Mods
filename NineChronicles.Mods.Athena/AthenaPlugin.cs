@@ -46,8 +46,9 @@ namespace NineChronicles.Mods.Athena
         private EventSystem _eventSystem;
 
         // NOTE: Please add your GUIs here as alphabetical order.
+        private ItemSlotsGUI _itemSlotsGUI;
         private NotificationGUI _notificationGUI;
-        private IGUI _tabGUI;
+        private TabGUI _tabGUI;
 
         public static void Log(LogLevel logLevel, object data)
         {
@@ -143,6 +144,7 @@ namespace NineChronicles.Mods.Athena
 
         private void DisableModeGUI()
         {
+            _itemSlotsGUI = null;
             _notificationGUI = null;
             _tabGUI = null;
             EnableEventSystem();
@@ -150,14 +152,14 @@ namespace NineChronicles.Mods.Athena
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                Log("Escape key pressed.");
-                DisableModeGUI();
-            }
-
             if (_tabGUI is not null)
             {
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    Log("Escape key pressed.");
+                    DisableModeGUI();
+                }
+
                 return;
             }
 
@@ -206,12 +208,20 @@ namespace NineChronicles.Mods.Athena
 
                 _tabGUI = new TabGUI(new List<(string Name, Func<IGUI> UI)>
                 {
-                    ("ItemSlots", () => new ItemSlotsGUI(GetOrCreateInventoryGUI())),
+                    ("ItemSlots", CreateItemSlotsGUI),
                     ("Adventure", () => new AdventureGUI(UserDataManager.GetItemSlotsCache(BattleType.Adventure))),
                     ("Arena", CreateArenaGUI),
                     ("Create", CreateItemCreationGUI),
                     ("Enhancement", () => new EnhancementGUI(_modInventoryManager, GetOrCreateInventoryGUI())),
                 }, DisableModeGUI);
+                _tabGUI.OnTabChanged += tuple =>
+                {
+                    var (from, to) = tuple;
+                    if (from is ItemSlotsGUI itemSlotsGUI)
+                    {
+                        itemSlotsGUI.SetEnabled(false);
+                    }
+                };
                 _notificationGUI = new NotificationGUI();
 
                 TrackDailyOpen();
@@ -255,6 +265,17 @@ namespace NineChronicles.Mods.Athena
             {
                 _eventSystem.enabled = true;
             }
+        }
+
+        private IGUI CreateItemSlotsGUI()
+        {
+            if (_itemSlotsGUI is null)
+            {
+                _itemSlotsGUI = new ItemSlotsGUI(GetOrCreateInventoryGUI());
+            }
+
+            _itemSlotsGUI.SetEnabled(true);
+            return _itemSlotsGUI;
         }
 
         private IGUI CreateArenaGUI()
