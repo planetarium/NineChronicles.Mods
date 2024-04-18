@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BepInEx.Logging;
 using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Item;
@@ -10,20 +11,61 @@ namespace NineChronicles.Mods.Athena.GUIs
 {
     public class ItemSlotsGUI : IGUI
     {
+        // Root
+        private const int _rootX = 610;
+        private const int _rootY = 80;
+        private const int _rootWidth = 400;
+        private const int _rootHeight = 480;
+        // ~Root
+
+        // Slots TabGUI
+        private const int _tabWidth = 100;
+        private const int _tabHeight = 40;
+        private const int _tabCount = 2;
+
+        private static readonly Rect _tabRectPrefab = new(0f, 0f, _tabWidth, _tabHeight);
+        private static readonly string[] _tabNames = new[]
+        {
+            BattleType.Adventure.ToString(),
+            BattleType.Arena.ToString(),
+        };
+        // ~Slots TabGUI
+
+        // Slots parts
+        private static readonly Rect _itemSlotsRect = new(
+                _rootX,
+                _rootY + _tabHeight + 10,
+                _rootWidth,
+                _rootHeight - _tabHeight - 10);
+        // ~Slots parts
+
         private readonly ItemSlotsViewModel _viewModel;
-        private readonly Rect _itemSlotsRect;
+
+        // groups
+        private static readonly Rect _rootGroupRect = new(_rootX, _rootY, _rootWidth, _rootHeight);
+        private static readonly Rect _tabGroupRect = new(0f, 0f, _tabWidth * _tabCount, _tabHeight);
+
+        // pools
+        private static readonly Rect _rootBoxRect = new(0f, 0f, _rootWidth, _rootHeight);
+        private readonly List<Rect> _tabRectPool = new();
+
         private readonly InventoryGUI _inventoryGUI;
 
         public ItemSlotsGUI(InventoryGUI inventoryGUI)
         {
+            _inventoryGUI = inventoryGUI;
             _viewModel = new ItemSlotsViewModel();
             InitViewModel(inventoryGUI);
-            _itemSlotsRect = new Rect(
-                GUIToolbox.ScreenWidthReference - 450,
-                GUIToolbox.ScreenHeightReference / 2 - 230,
-                400,
-                500);
-            _inventoryGUI = inventoryGUI;
+
+            for (int i = 0; i < _tabCount; i++)
+            {
+                var rect = new Rect(_tabRectPrefab)
+                {
+                    x = i * _tabWidth,
+                    y = 0f,
+                };
+                _tabRectPool.Add(rect);
+            }
         }
 
         public void SetEnabled(bool enabled)
@@ -92,7 +134,43 @@ namespace NineChronicles.Mods.Athena.GUIs
         {
             GUI.matrix = GUIToolbox.GetGUIMatrix();
             _inventoryGUI.OnGUI();
+            GUI.BeginGroup(_rootGroupRect);
+            GUI.Box(_rootBoxRect, string.Empty);
+            DrawTabs();
+            GUI.EndGroup();
+
+            // NOTE: DrawItemSlots should be called after GUI.EndGroup().
+            //       Move this to front of GUI.EndGroup() when the drawing API is changed.
             DrawItemSlots();
+        }
+
+        public void DrawTabs()
+        {
+            GUI.BeginGroup(_tabGroupRect);
+            for (var i = 0; i < _tabCount; i++)
+            {
+                DrawTab(i);
+            }
+
+            GUI.EndGroup();
+        }
+
+        private void DrawTab(int index)
+        {
+            if (index < 0 || index >= _tabCount) return;
+
+            var rect = _tabRectPool[index];
+            var tabName = _tabNames[index];
+            var isSelected = _viewModel.CurrentTabIndex == index;
+            GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
+            GUI.skin.button.fontStyle = isSelected ? FontStyle.Bold : FontStyle.Normal;
+            if (GUI.Button(rect, tabName))
+            {
+                _viewModel.SelectTab(index);
+                AthenaPlugin.Log($"{tabName} Tab({index}) selected.");
+            }
+
+            GUI.backgroundColor = Color.white;
         }
 
         private void DrawItemSlots()

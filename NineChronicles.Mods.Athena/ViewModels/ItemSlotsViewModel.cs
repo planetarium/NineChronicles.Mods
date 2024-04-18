@@ -205,11 +205,11 @@ namespace NineChronicles.Mods.Athena.ViewModels
         }
 
         private readonly List<Tab> _tabs = new List<Tab>();
-        private int _currentTabIndex;
 
         public IEnumerable<BattleType> SupportedBattleTypes => _tabs.Select(e => e.battleType);
-        public BattleType CurrentBattleType => _tabs[_currentTabIndex].battleType;
-        public IEnumerable<Equipment> CurrentEquipments => _tabs[_currentTabIndex].content.Equipments;
+        public int CurrentTabIndex { get; private set; }
+        public BattleType CurrentBattleType => _tabs[CurrentTabIndex].battleType;
+        public IEnumerable<Equipment> CurrentEquipments => _tabs[CurrentTabIndex].content.Equipments;
 
         public void AddTab(BattleType battleType)
         {
@@ -222,6 +222,11 @@ namespace NineChronicles.Mods.Athena.ViewModels
             {
                 tab.Clear();
             }
+        }
+
+        public void SelectTab(int index)
+        {
+            CurrentTabIndex = index;
         }
 
         public void Register(BattleType battleType, IItem item)
