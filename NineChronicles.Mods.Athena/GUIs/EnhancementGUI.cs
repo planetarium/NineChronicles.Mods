@@ -54,11 +54,21 @@ namespace NineChronicles.Mods.Athena.GUIs
                 SelectedEquipment = null;
                 SlotContent = new GUIContent();
             };
+            _inventoryGUI.OnSlotReimportClicked += item =>
+            {
+                if (SelectedEquipment is not null &&
+                    item is INonFungibleItem nonFungibleItem &&
+                    nonFungibleItem.NonFungibleId.Equals(SelectedEquipment.Id))
+                {
+                    SelectedEquipment = null;
+                    SlotContent = new GUIContent();
+                }
+            };
             _inventoryGUI.OnSlotRemoveClicked += item =>
             {
                 if (SelectedEquipment is not null &&
-                    item is Equipment equipment &&
-                    equipment.NonFungibleId.Equals(SelectedEquipment.Id))
+                    item is INonFungibleItem nonFungibleItem &&
+                    nonFungibleItem.NonFungibleId.Equals(SelectedEquipment.Id))
                 {
                     SelectedEquipment = null;
                     SlotContent = new GUIContent();
@@ -75,6 +85,7 @@ namespace NineChronicles.Mods.Athena.GUIs
         public void OnGUI()
         {
             GUI.matrix = GUIToolbox.GetGUIMatrix();
+            _inventoryGUI.OnGUI();
 
             GUIStyle centeredStyle = new GUIStyle(GUI.skin.box)
             {

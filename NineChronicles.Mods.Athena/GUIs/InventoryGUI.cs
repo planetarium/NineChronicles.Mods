@@ -77,6 +77,7 @@ namespace NineChronicles.Mods.Athena.GUIs
 
         public event Action<(IItem item, int count)> OnSlotSelected;
         public event Action OnSlotDeselected;
+        public event Action<IItem> OnSlotReimportClicked;
         public event Action<IItem> OnSlotRemoveClicked;
 
         public InventoryGUI(
@@ -159,6 +160,11 @@ namespace NineChronicles.Mods.Athena.GUIs
             }
         }
 
+        public bool TryGetItem<T>(Guid nonFungibleId, out T item) where T : INonFungibleItem
+        {
+            return _viewModel.TryGetItem(nonFungibleId, out item);
+        }
+
         public void OnGUI()
         {
             GUI.matrix = GUIToolbox.GetGUIMatrix();
@@ -193,8 +199,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                 : $"Tab {index}";
             if (GUI.Button(rect, tabName))
             {
-                _viewModel.SelectTab(index);
-                AthenaPlugin.Log($"{tabName} Tab({index}) selected.");
+                SelectTab(index);
             }
 
             GUI.backgroundColor = Color.white;
@@ -267,11 +272,23 @@ namespace NineChronicles.Mods.Athena.GUIs
                     moddedRect,
                     InventoryViewModel.Slot.moddedGUIContent,
                     InventoryViewModel.Slot.moddedStyle);
-                if (GUI.Button(nameRect, "Remove"))
+                if (slot.isExistsInBlockchain &&
+                    item is INonFungibleItem nonFungibleItem)
                 {
-                    AthenaPlugin.Log($"Remove button clicked.");
-                    RemoveItem(item, count);
-                    OnSlotRemoveClicked?.Invoke(item);
+                    if (GUI.Button(nameRect, "Re-import"))
+                    {
+                        AthenaPlugin.Log($"Re-import button clicked.");
+                        OnSlotReimportClicked?.Invoke(item);
+                    }
+                }
+                else
+                {
+                    if (GUI.Button(nameRect, "Remove"))
+                    {
+                        AthenaPlugin.Log($"Remove button clicked.");
+                        RemoveItem(item, count);
+                        OnSlotRemoveClicked?.Invoke(item);
+                    }
                 }
             }
         }
@@ -338,24 +355,37 @@ namespace NineChronicles.Mods.Athena.GUIs
             _viewModel.Clear();
         }
 
-        public void AddItem(IItem item, int count, bool isExistsInBlockchain, bool isModded)
+        public void AddOrReplaceItem(
+            INonFungibleItem item,
+            int count,
+            bool isExistsInBlockchain,
+            bool isModded,
+            bool sort = true)
         {
-            _viewModel.AddItem(item, count, isExistsInBlockchain, isModded);
+            _viewModel.AddOrReplaceItem(item, count, isExistsInBlockchain, isModded, sort);
         }
 
-        public void AddOrReplaceItem(INonFungibleItem item, bool isExistsInBlockchain, bool isModded)
+        public void AddOrReplaceItem(
+            INonFungibleItem item,
+            bool isExistsInBlockchain,
+            bool isModded,
+            bool sort = true) =>
+            AddOrReplaceItem(item, 1, isExistsInBlockchain, isModded, sort);
+
+        public void RemoveItem(IItem item, int count, bool sort = true)
         {
-            _viewModel.AddOrReplaceItem(item, 1, isExistsInBlockchain, isModded);
+            _viewModel.RemoveItem(item, count, sort);
         }
 
-        public void RemoveItem(IItem item, int count)
+        public void SortAllTabs()
         {
-            _viewModel.RemoveItem(item, count);
+            _viewModel.SortAllTabs();
         }
 
-        public void Sort()
+        public void SelectTab(int index)
         {
-            _viewModel.Sort();
+            _viewModel.SelectTab(index);
+            AthenaPlugin.Log($"Tab({index}) selected.");
         }
 
         public bool TryGetSelectedSlot(out InventoryViewModel.Slot slot)

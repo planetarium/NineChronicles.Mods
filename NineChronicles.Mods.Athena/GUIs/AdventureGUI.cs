@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using BepInEx.Logging;
 using Cysharp.Threading.Tasks;
 using Nekoyume.Game;
 using Nekoyume.Model.EnumType;
@@ -8,8 +8,6 @@ using Nekoyume.Model.Item;
 using Nekoyume.Model.State;
 using Nekoyume.State;
 using Nekoyume.TableData;
-using NineChronicles.Mods.Athena.Extensions;
-using NineChronicles.Mods.Athena.Managers;
 using NineChronicles.Modules.BlockSimulation.ActionSimulators;
 using NineChronicles.Modules.BlockSimulation.Extensions;
 using UnityEngine;
@@ -23,8 +21,6 @@ namespace NineChronicles.Mods.Athena.GUIs
         private int simulationStep = 0;
         private (WorldSheet WorldSheet, StageSheet StageSheet, int clearedStageId)? StateData { get; set; } = null;
         private readonly Rect _simulateLayoutRect;
-
-        private ModInventoryManager _modInventoryManager;
 
         private int _wave0ClearCount = 0;
         private int _wave1ClearCount = 0;
@@ -44,13 +40,15 @@ namespace NineChronicles.Mods.Athena.GUIs
         };
         private GUIStyle LeftMargin = new GUIStyle(GUI.skin.button)
         {
-            margin = new RectOffset(50,2,30,2)
+            margin = new RectOffset(50, 2, 30, 2)
         };
-    
-        public AdventureGUI(ModInventoryManager modInventoryManager)
-        {
-            _modInventoryManager = modInventoryManager;
 
+
+        private readonly IEnumerable<Equipment> _equippedEquipments;
+
+        public AdventureGUI(IEnumerable<Equipment> equippedEquipments)
+        {
+            _equippedEquipments = equippedEquipments;
             InitStateData();
 
             _simulateLayoutRect = new Rect(
@@ -81,7 +79,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                     {
                         using (new GUILayout.HorizontalScope())
                         {
-                                using (new GUILayout.VerticalScope())
+                            using (new GUILayout.VerticalScope())
                             {
                                 GUILayout.Label("Choose stage to simulate", FS16);
                                 ControllablePicker(
@@ -221,7 +219,7 @@ namespace NineChronicles.Mods.Athena.GUIs
             var clearWaveInfo = await UniTask.Run(() => HackAndSlashSimulator.Simulate(
                 TableSheets.Instance,
                 states.CurrentAvatarState,
-                equipments: _modInventoryManager.GetEquippedEquipments(),
+                equipments: _equippedEquipments,
                 costumes: equippedCostumes,
                 consumables: null,
                 runeStates: equippedRuneStates,

@@ -1,16 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Libplanet.Crypto;
-using Nekoyume.Blockchain;
 using Nekoyume.Game;
 using Nekoyume.Model.EnumType;
+using Nekoyume.Model.Item;
 using Nekoyume.State;
 using Nekoyume.UI.Model;
 using NineChronicles.Mods.Athena.Components;
-using NineChronicles.Mods.Athena.Managers;
-using NineChronicles.Mods.Athena.Models;
 using NineChronicles.Modules.BlockSimulation.ActionSimulators;
 using UnityEngine;
 
@@ -33,7 +30,6 @@ namespace NineChronicles.Mods.Athena.GUIs
 
         private readonly Rect _arenaLayoutRect;
 
-        private ModInventoryManager _modInventoryManager;
         public GUIContent SlotContent = new GUIContent();
 
         public List<AvatarInfo> avatarInfos = new List<AvatarInfo>();
@@ -43,10 +39,12 @@ namespace NineChronicles.Mods.Athena.GUIs
         private int playCount = 100;
         public event Action<AvatarInfo> OnSlotSelected;
 
-        public ArenaGUI(ModInventoryManager modInventoryManager, AbilityRankingResponse apiResponse)
-        {
-            _modInventoryManager = modInventoryManager;
+        private readonly IEnumerable<Equipment> _equippedEquipments;
 
+
+        public ArenaGUI(IEnumerable<Equipment> equippedEquipments, AbilityRankingResponse apiResponse)
+        {
+            _equippedEquipments = equippedEquipments;
             _arenaLayoutRect = new Rect(
                 100,
                 100,
@@ -87,7 +85,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                     var result = await UniTask.Run(() => BattleArenaSimulator.ExecuteBulk(
                         TableSheets.Instance,
                         States.Instance,
-                        _modInventoryManager.GetEquippedEquipments(),
+                        _equippedEquipments,
                         equippedCostumes,
                         null,
                         avatarInfo.Address,

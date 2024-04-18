@@ -8,21 +8,37 @@ namespace NineChronicles.Mods.Athena.GUIs
     {
         private readonly List<(string Name, Func<IGUI> UIGenerator)> _uis;
 
-        private int tabIndex;
+        private int tabIndex = -1;
         private IGUI currentUI;
 
         private readonly Action _onClose;
 
+        public event Action<(IGUI from, IGUI to)> OnTabChanged;
+
         public TabGUI(List<(string Name, Func<IGUI> UIGenerator)> uis, Action onClose)
         {
             _uis = uis;
-            tabIndex = 0;
             _onClose = onClose;
+        }
+
+        private void SetTabIndex(int index)
+        {
+            var previousUI = currentUI;
+            tabIndex = index;
+            currentUI = _uis[tabIndex].UIGenerator();
+            OnTabChanged?.Invoke((previousUI, currentUI));
+            AthenaPlugin.Log($"Tab Changed {tabIndex} -> {index}");
         }
 
         public void OnGUI()
         {
-            UnityEngine.GUI.matrix = GUIToolbox.GetGUIMatrix();
+            // NOTE: Set tab index in OnGUI to avoid UnityEngine.GUI error.
+            if (tabIndex < 0)
+            {
+                SetTabIndex(0);
+            }
+
+            GUI.matrix = GUIToolbox.GetGUIMatrix();
 
             using var scope = new GUILayout.AreaScope(new Rect(
                 0,
@@ -34,28 +50,21 @@ namespace NineChronicles.Mods.Athena.GUIs
 
             for (int i = 0; i < _uis.Count; ++i)
             {
-                var (name, uiGenerator) = _uis[i];
+                var (name, _) = _uis[i];
                 if (GUI.Button(new Rect(100 * i, 0, 100, 50), name))
                 {
-                    AthenaPlugin.Log($"Tab Changed {tabIndex} -> {i}");
-                    tabIndex = i;
-                    currentUI = null;
-                }
-
-                if (currentUI is null && tabIndex == i)
-                {
-                    currentUI = uiGenerator();
+                    SetTabIndex(i);
                 }
             }
-            
+
             CloseButton();
 
             GUILayout.EndHorizontal();
-            
+
             currentUI?.OnGUI();
             GUILayout.EndVertical();
         }
-        
+
         private void CloseButton()
         {
             var style = new GUIStyle

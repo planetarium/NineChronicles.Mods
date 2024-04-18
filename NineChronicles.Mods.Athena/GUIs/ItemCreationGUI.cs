@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Nekoyume.TableData;
 using NineChronicles.Mods.Athena.Extensions;
-using NineChronicles.Mods.Athena.Managers;
+using NineChronicles.Mods.Athena.Models;
 using NineChronicles.Mods.Athena.ViewModels;
 using UnityEngine;
 
@@ -11,13 +12,13 @@ namespace NineChronicles.Mods.Athena.GUIs
 {
     public class ItemCreationGUI : IGUI
     {
-        private readonly ModInventoryManager _modInventoryManager;
         private readonly ItemRecipesGUI _itemRecipesGUI;
         private readonly UseItemRecipeGUI _useItemRecipeGUI;
 
-        public ItemCreationGUI(ModInventoryManager modInventoryManager)
+        public event Action<ModItem> OnItemCreateClicked;
+
+        public ItemCreationGUI()
         {
-            _modInventoryManager = modInventoryManager;
             _itemRecipesGUI = new ItemRecipesGUI(
                 positionX: 100,
                 positionY: 80,
@@ -89,9 +90,9 @@ namespace NineChronicles.Mods.Athena.GUIs
 
         private void OnClickCreate(UseItemRecipeViewModel.Content content)
         {
-            var item = new Models.ModItem
+            var item = new ModItem
             {
-                Id = System.Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 EquipmentId = content.equipmentId,
                 Level = 0,
                 ExistsItem = false,
@@ -107,8 +108,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                     .Concat(content.itemSkillOptions.Select(e => e.ratioOfValueRange))
                     .ToImmutableList()
             };
-
-            _modInventoryManager.AddItem(item);
+            OnItemCreateClicked?.Invoke(item);
             var itemName = _itemRecipesGUI.TryGetSelectedSlot(out var selectedSlot)
                 ? selectedSlot.itemRecipe.equipmentRow.GetName()
                 : content.equipmentId.ToString();
