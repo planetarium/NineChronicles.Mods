@@ -13,11 +13,23 @@ namespace NineChronicles.Mods.Athena.GUIs
 
         private readonly Action _onClose;
 
+        public event Action<(IGUI from, IGUI to)> OnTabChanged;
+
         public TabGUI(List<(string Name, Func<IGUI> UIGenerator)> uis, Action onClose)
         {
             _uis = uis;
-            tabIndex = 0;
             _onClose = onClose;
+
+            SetTabIndex(0);
+        }
+
+        private void SetTabIndex(int index)
+        {
+            var previousUI = currentUI;
+            tabIndex = index;
+            currentUI = _uis[tabIndex].UIGenerator();
+            OnTabChanged?.Invoke((previousUI, currentUI));
+            AthenaPlugin.Log($"Tab Changed {tabIndex} -> {index}");
         }
 
         public void OnGUI()
@@ -34,17 +46,10 @@ namespace NineChronicles.Mods.Athena.GUIs
 
             for (int i = 0; i < _uis.Count; ++i)
             {
-                var (name, uiGenerator) = _uis[i];
+                var (name, _) = _uis[i];
                 if (GUI.Button(new Rect(100 * i, 0, 100, 50), name))
                 {
-                    AthenaPlugin.Log($"Tab Changed {tabIndex} -> {i}");
-                    tabIndex = i;
-                    currentUI = null;
-                }
-
-                if (currentUI is null && tabIndex == i)
-                {
-                    currentUI = uiGenerator();
+                    SetTabIndex(i);
                 }
             }
 
