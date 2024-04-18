@@ -375,10 +375,6 @@ namespace NineChronicles.Mods.Athena
 
         private void OnGUI()
         {
-            _adventureGUI?.OnGUI();
-            _arenaGUI?.OnGUI();
-            _enhancementGUI?.OnGUI();
-            _itemCreationGUI?.OnGUI();
             _tabGUI?.OnGUI();
             _notificationGUI?.OnGUI();
         }
