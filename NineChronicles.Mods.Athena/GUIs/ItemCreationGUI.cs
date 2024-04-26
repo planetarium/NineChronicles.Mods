@@ -100,14 +100,15 @@ namespace NineChronicles.Mods.Athena.GUIs
                 OptionIdList = content.itemStatOptions
                     .Where(e => e.enable)
                     .Select(e => e.itemOptionId)
-                    .Concat(content.itemSkillOptions.Select(e => e.itemOptionId))
+                    .Concat(content.itemSkillOptions.Where(e => e.enable).Select(e => e.itemOptionId))
                     .ToImmutableList(),
                 RatioOfOptionValueRangeList = content.itemStatOptions
                     .Where(e => e.enable)
                     .Select(e => e.ratioOfValueRange)
-                    .Concat(content.itemSkillOptions.Select(e => e.ratioOfValueRange))
+                    .Concat(content.itemSkillOptions.Where(e => e.enable).Select(e => e.ratioOfValueRange))
                     .ToImmutableList()
             };
+
             OnItemCreateClicked?.Invoke(item);
             var itemName = _itemRecipesGUI.TryGetSelectedSlot(out var selectedSlot)
                 ? selectedSlot.itemRecipe.equipmentRow.GetName()
