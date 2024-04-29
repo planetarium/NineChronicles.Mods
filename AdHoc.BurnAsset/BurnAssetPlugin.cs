@@ -6,6 +6,8 @@ using Lib9c;
 using Libplanet.Crypto;
 using Libplanet.Types.Assets;
 using Libplanet.Types.Tx;
+using Nekoyume.Multiplanetary;
+using Nekoyume.Multiplanetary.Extensions;
 using NineChronicles.Mods.Athena.GUIs;
 using UniRx;
 using UnityEngine;
@@ -20,25 +22,34 @@ namespace AdHoc.BurnAsset
         private const string PluginName = "BurnAsset";
         private const string PluginVersion = "0.0.1";
 
+        // NOTE: Fill the planet ID you want to burn assets.
+        //       e.g. PlanetId.Odin, PlanetId.Heimdall
+        private static readonly PlanetId _planetId = PlanetId.Heimdall;
+
         // NOTE: Fill the owner address you want to burn assets.
-        private static readonly string _ownerAddressString = string.Empty;
-        private static readonly Address _ownerAddress = new Address(_ownerAddressString);
+        private const string _ownerAddressString = "0x";
+        private static readonly Address _ownerAddress = new(_ownerAddressString);
 
         // NOTE: Fill the amount you want to burn.
-        private static readonly FungibleAssetValue _amount = 1 * Currencies.Crystal;
-        private static readonly string _memo = "Fill the memo you want to.";
+        private static readonly FungibleAssetValue _amount = 9_999L * Currencies.Crystal;
+
+        // NOTE: Fill the memo you want to burn.
+        private const string _memo = "";
 
         // NOTE: Fill the URL prefix of the explorer.
-        // e.g. "https://9cscan.com/tx/", "https://heimdall.9cscan.com/tx/"
-        private static readonly string _urlPrefix = string.Empty;
+        //       e.g. "https://9cscan.com/tx/", "https://heimdall.9cscan.com/tx/"
+        private const string _urlPrefix = "https://heimdall.9cscan.com/tx/";
 
         private Harmony _harmony;
+
 
         private bool _drawGUI = false;
         private bool _agentSubscribed = false;
         private bool _hasSubmitted = false;
         private TxId? _txId = null;
-        private string _txHash => _txId?.ToHex() ?? string.Empty;
+
+        private bool IsPlanetIdMatched => Nekoyume.Game.Game.instance?.CurrentPlanetId.Equals(_planetId) ?? false;
+        private string TxHash => _txId?.ToHex() ?? string.Empty;
 
         private Camera _mainCamera;
         private Color _mainCameraBackgroundColor;
@@ -95,20 +106,21 @@ namespace AdHoc.BurnAsset
 
             GUI.matrix = GUIToolbox.GetGUIMatrix();
 
-            GUI.BeginGroup(new Rect(10f, 10f, 300f, 300f));
-            GUI.Box(new Rect(0f, 0f, 300f, 300f), string.Empty);
-            GUI.Label(new Rect(5f, 5f, 290f, 50f), _ownerAddressString);
-            GUI.Label(new Rect(5f, 60f, 290f, 50f), _amount.ToString());
-            GUI.Label(new Rect(5f, 115f, 290f, 50f), _txHash);
-            GUI.enabled = !string.IsNullOrEmpty(_txHash);
-            if (GUI.Button(new Rect(5f, 170f, 290f, 50f), "Open Tx"))
+            GUI.BeginGroup(new Rect(10f, 10f, 300f, 355f));
+            GUI.Box(new Rect(0f, 0f, 300f, 355f), string.Empty);
+            GUI.Label(new Rect(5f, 5f, 290f, 50f), _planetId.ToLocalizedPlanetName(containsPlanetId: false));
+            GUI.Label(new Rect(5f, 60f, 290f, 50f), _ownerAddressString);
+            GUI.Label(new Rect(5f, 115f, 290f, 50f), _amount.ToString());
+            GUI.Label(new Rect(5f, 170f, 290f, 50f), TxHash);
+            GUI.enabled = !string.IsNullOrEmpty(TxHash);
+            if (GUI.Button(new Rect(5f, 225f, 290f, 50f), "Open Tx"))
             {
-                var url = $"{_urlPrefix}{_txHash}";
+                var url = $"{_urlPrefix}{TxHash}";
                 Application.OpenURL(url);
             }
 
-            GUI.enabled = _agentSubscribed && !_hasSubmitted;
-            if (GUI.Button(new Rect(5f, 225f, 290f, 70f), "Sign & Submit"))
+            GUI.enabled = IsPlanetIdMatched && _agentSubscribed && !_hasSubmitted;
+            if (GUI.Button(new Rect(5f, 280f, 290f, 70f), "Sign & Submit"))
             {
                 SignAndSubmit();
             }
