@@ -1,9 +1,9 @@
 #!/bin/bash
 
 dotenvPath="./.env.xml"
-projectName="NineChronicles.Mods.Athena"
 solutionDirectory=$(pwd)
 publishConfiguration="Release"
+projects=("NineChronicles.Mods.Athena" "NineChronicles.Modules.BlockSimulation")
 
 function get_ninechronicles_dir_from_env() {
     nineChroniclesDir=$(xmllint --xpath 'string(//Project/PropertyGroup/NINECHRONICLES_DIR)' "$dotenvPath")
@@ -56,6 +56,9 @@ function copy_dll_to_plugin_dir() {
 }
 
 nineChroniclesDir=$(get_ninechronicles_dir_from_env)
-publishOutputPath=$(publish_project "$projectName" "$solutionDirectory" "$publishConfiguration")
-copy_dll_to_plugin_dir "$projectName/bin/$publishConfiguration/netstandard2.1" "NineChronicles.Modules.BlockSimulation.dll" "$nineChroniclesDir"
-copy_dll_to_plugin_dir "$projectName/bin/$publishConfiguration/netstandard2.1" "NineChronicles.Mods.Athena.dll" "$nineChroniclesDir"
+
+for projectName in "${projects[@]}"; do
+    echo "Processing project: $projectName"
+    publishOutputPath=$(publish_project "$projectName" "$solutionDirectory" "$publishConfiguration")
+    copy_dll_to_plugin_dir "$projectName/bin/$publishConfiguration/netstandard2.1" "${projectName}.dll" "$nineChroniclesDir"
+done

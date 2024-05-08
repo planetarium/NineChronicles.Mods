@@ -4,6 +4,7 @@ using System.Linq;
 using Bencodex.Types;
 using Libplanet.Action.State;
 using Libplanet.Crypto;
+using Libplanet.Mocks;
 using Libplanet.Types.Assets;
 using Nekoyume;
 using Nekoyume.Action;
@@ -18,7 +19,7 @@ namespace NineChronicles.Modules.BlockSimulation
 {
     public static class WorldFactory
     {
-        public static IWorld CreateWorld() => new World(new MockWorldState());
+        public static IWorld CreateWorld() => new World(MockWorldState.CreateModern());
 
         public static IWorld CreateWorld(TableSheets tableSheets, States states)
         {

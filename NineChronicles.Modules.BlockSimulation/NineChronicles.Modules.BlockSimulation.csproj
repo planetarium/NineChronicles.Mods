@@ -48,6 +48,9 @@
     <Reference Include="Libplanet.Crypto">
       <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Libplanet.Crypto.dll</HintPath>
     </Reference>
+    <Reference Include="Libplanet.Mocks">
+      <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Libplanet.Mocks.dll</HintPath>
+    </Reference>
     <Reference Include="Libplanet.Store">
       <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Libplanet.Store.dll</HintPath>
     </Reference>
