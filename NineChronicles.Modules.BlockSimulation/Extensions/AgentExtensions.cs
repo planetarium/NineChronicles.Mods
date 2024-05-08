@@ -7,17 +7,18 @@ using Libplanet.Crypto;
 using Nekoyume;
 using Nekoyume.Action;
 using Nekoyume.Blockchain;
+using Nekoyume.Model;
 using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Item;
 using Nekoyume.Model.State;
-using Nekoyume.TableData;
+using Nekoyume.TableData.Rune;
 
 namespace NineChronicles.Modules.BlockSimulation.Extensions
 {
     public static class AgentExtensions
     {
         public static async UniTask<Inventory> GetInventoryAsync(this IAgent agent,
-                       Address avatarAddress)
+            Address avatarAddress)
         {
             var inventoryAddress = avatarAddress.Derive("inventory");
             var state = await agent.GetStateAsync(ReservedAddresses.LegacyAccount, inventoryAddress);
@@ -38,11 +39,12 @@ namespace NineChronicles.Modules.BlockSimulation.Extensions
                 : new ItemSlotState(battleType);
         }
 
-        public static async UniTask<(IEnumerable<Equipment> equipments, IEnumerable<Costume> costumes)> GetEquippedItemsAsync(
-            this IAgent agent,
-            Address avatarAddress,
-            BattleType battleType,
-            Inventory inventory)
+        public static async UniTask<(IEnumerable<Equipment> equipments, IEnumerable<Costume> costumes)>
+            GetEquippedItemsAsync(
+                this IAgent agent,
+                Address avatarAddress,
+                BattleType battleType,
+                Inventory inventory)
         {
             var itemSlotState = await agent.GetItemSlotStateAsync(avatarAddress, battleType);
             inventory ??= await agent.GetInventoryAsync(avatarAddress);
@@ -100,6 +102,36 @@ namespace NineChronicles.Modules.BlockSimulation.Extensions
             return state is List list
                 ? new CollectionState(list)
                 : new CollectionState();
+        }
+
+        public static async UniTask<ArenaPlayerDigest> GetArenaPlayerDigestAsync(
+            this IAgent agent,
+            Address avatarAddress)
+        {
+            var avatarState = agent
+                .GetAvatarStatesAsync(new[] { avatarAddress })
+                .Result[avatarAddress];
+            var itemSlotStateAddress = ItemSlotState.DeriveAddress(avatarAddress, BattleType.Arena);
+            var itemSlotState = await agent.GetStateAsync(
+                ReservedAddresses.LegacyAccount,
+                itemSlotStateAddress) is List itemSlotStateList
+                ? new ItemSlotState(itemSlotStateList)
+                : new ItemSlotState(BattleType.Arena);
+            var enemyAllRuneState = await agent.GetAllRuneStateAsync(avatarAddress);
+            var enemyRuneSlotStateAddress = RuneSlotState.DeriveAddress(
+                avatarAddress,
+                BattleType.Arena);
+            var enemyRuneSlotState = await agent.GetStateAsync(
+                ReservedAddresses.LegacyAccount,
+                enemyRuneSlotStateAddress) is List enemyRuneSlotStateList
+                ? new RuneSlotState(enemyRuneSlotStateList)
+                : new RuneSlotState(BattleType.Arena);
+            return new ArenaPlayerDigest(
+                avatarState,
+                itemSlotState.Equipments,
+                itemSlotState.Costumes,
+                enemyAllRuneState,
+                enemyRuneSlotState);
         }
     }
 }

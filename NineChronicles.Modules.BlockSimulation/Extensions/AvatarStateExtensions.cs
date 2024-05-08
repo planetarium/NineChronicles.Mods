@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Bencodex.Types;
 using Nekoyume.Model.Item;
 using Nekoyume.Model.State;
 
@@ -16,8 +17,10 @@ namespace NineChronicles.Modules.BlockSimulation.Extensions
             IEnumerable<Costume> costumes,
             IEnumerable<Consumable> consumables)
         {
-            var cloned = (AvatarState)avatarState.Clone();
-            cloned.inventory = new Inventory();
+            var cloned = new AvatarState((List)avatarState.SerializeList())
+            {
+                inventory = new Inventory(),
+            };
             if (equipments is not null)
             {
                 foreach (var equipment in equipments)

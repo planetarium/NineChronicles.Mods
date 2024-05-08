@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Bencodex.Types;
 using Cysharp.Threading.Tasks;
-using Libplanet.Action.State;
 using Libplanet.Crypto;
 using Nekoyume;
 using Nekoyume.Action;
@@ -19,9 +18,15 @@ using NineChronicles.Modules.BlockSimulation.Extensions;
 
 namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
 {
+    /// <summary>
+    /// <seealso cref="Nekoyume.Action.BattleArena"/>
+    /// <seealso cref="Nekoyume.Blockchain.ActionManager.BattleArena"/>
+    /// <seealso cref="Nekoyume.Blockchain.ActionRenderHandler.ResponseBattleArenaAsync"/>
+    /// <seealso cref="Nekoyume.Blockchain.ActionRenderHandler.GetArenaPlayerDigest"/>
+    /// </summary>
     public static class BattleArenaSimulator
     {
-        public static double ExecuteBulk(
+        public static async UniTask<double> ExecuteBulkAsync(
             TableSheets tableSheets,
             States states,
             IEnumerable<Equipment> modEquipments,
@@ -31,13 +36,11 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
             int playCount,
             Action<int> onProgress = null,
             Action<string> onLog = null,
-            int? randomSeed = null
-        )
+            int? randomSeed = null)
         {
-            int winCount = 0;
+            var winCount = 0;
             var myAvatarAddress = states.CurrentAvatarState.address;
-
-            var (myDigest, enemyDigest) = GetArenaPlayerDigest(
+            var (myDigest, enemyDigest) = await GetArenaPlayerDigestTuple(
                 states,
                 modEquipments,
                 modCostumes,
@@ -46,10 +49,8 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                 onLog
             );
             var myCollectionState = states.CollectionState;
-            var enemyCollectionState = GetCollectionState(enemyAvatarAddress, onLog);
-
+            var enemyCollectionState = await GetCollectionState(enemyAvatarAddress, onLog);
             var gameConfigState = states.GameConfigState;
-
             if (onLog is not null)
             {
                 var log =
@@ -57,14 +58,16 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                     + $"\nmyLevel: {myDigest.Level}"
                     + $"\nmyEquipments: {(myDigest.Equipments is null ? "null" : string.Join(", ", myDigest.Equipments.Select(e => $"{e.GetLocalizedNonColoredName(false)}(+{e.level})")))}"
                     + $"\nmyCostumes: {(myDigest.Costumes is null ? "null" : string.Join(", ", myDigest.Costumes.Select(e => e.GetLocalizedNonColoredName(false))))}"
-                    + $"\nmyRunes: {(myDigest.Runes is null ? "null" : string.Join(", ", myDigest.Runes.Select(e => $"{e.RuneId}(+{e.Level})")))}"
+                    + $"\nmyRunes: {(myDigest.Runes is null ? "null" : string.Join(", ", myDigest.Runes.Runes.Values.Select(e => $"{e.RuneId}(+{e.Level})")))}"
+                    + $"\nmyRuneSlots: {(myDigest.RuneSlotState is null ? "null" : string.Join(", ", myDigest.RuneSlotState.GetEquippedRuneSlotInfos().Select(e => $"slot #{e.SlotIndex}: {e.RuneId}")))}"
                     + $"\nenemyLevel: {enemyDigest.Level}"
                     + $"\nenemyEquipments: {(enemyDigest.Equipments is null ? "null" : string.Join(", ", enemyDigest.Equipments.Select(e => $"{e.GetLocalizedNonColoredName(false)}(+{e.level})")))}"
                     + $"\nenemyCostumes: {(enemyDigest.Costumes is null ? "null" : string.Join(", ", enemyDigest.Costumes.Select(e => e.GetLocalizedNonColoredName(false))))}"
-                    + $"\nenemyRunes: {(enemyDigest.Runes is null ? "null" : string.Join(", ", enemyDigest.Runes.Select(e => $"{e.RuneId}(+{e.Level})")))}";
-
+                    + $"\nenemyRunes: {(enemyDigest.Runes is null ? "null" : string.Join(", ", enemyDigest.Runes.Runes.Values.Select(e => $"{e.RuneId}(+{e.Level})")))}"
+                    + $"\nenemyRuneSlots: {(enemyDigest.RuneSlotState is null ? "null" : string.Join(", ", enemyDigest.RuneSlotState.GetEquippedRuneSlotInfos().Select(e => $"slot #{e.SlotIndex}: {e.RuneId}")))}";
                 onLog.Invoke(log);
             }
+
             for (var i = 0; i < playCount; i++)
             {
                 var simulateResult = Execute(
@@ -82,13 +85,11 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                 {
                     winCount += 1;
                 }
+
                 onProgress?.Invoke(i);
             }
 
-            onLog?.Invoke(
-                $"{nameof(BattleArenaSimulator)} Bulk Simulation Done, {winCount}/{playCount}"
-            );
-
+            onLog?.Invoke($"{nameof(BattleArenaSimulator)} Bulk Simulation Done, {winCount}/{playCount}");
             return (double)winCount / playCount;
         }
 
@@ -100,134 +101,55 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
             CollectionState myCollectionState,
             CollectionState enemyCollectionState,
             Action<string> onLog = null,
-            int? randomSeed = null
-        )
+            int? randomSeed = null)
         {
             randomSeed ??= new RandomImpl(DateTime.Now.Millisecond).Next();
-
-            var arenaSimulatorSheets = tableSheets.GetArenaSimulatorSheets();
-
             var simulator = new ArenaSimulator(
                 new RandomImpl(randomSeed.Value),
                 BattleArena.HpIncreasingModifier,
-                gameConfigState.ShatterStrikeMaxDamage
-            );
+                gameConfigState.ShatterStrikeMaxDamage);
             var log = simulator.Simulate(
                 myDigest,
                 enemyDigest,
-                arenaSimulatorSheets,
+                tableSheets.GetArenaSimulatorSheets(),
                 myCollectionState.GetEffects(tableSheets.CollectionSheet),
                 enemyCollectionState.GetEffects(tableSheets.CollectionSheet),
                 tableSheets.DeBuffLimitSheet,
-                true
+                setExtraValueBuffBeforeGetBuffs: true
             );
-            onLog?.Invoke(
-                $"{nameof(BattleArenaSimulator)} Done, result: {log.Result == ArenaLog.ArenaResult.Win}"
-            );
-
+            onLog?.Invoke($"{nameof(BattleArenaSimulator)} Done, result: {log.Result == ArenaLog.ArenaResult.Win}");
             return log.Result == ArenaLog.ArenaResult.Win;
         }
 
-        public static CollectionState GetCollectionState(
+        public static async UniTask<CollectionState> GetCollectionState(
             Address avatarAddress,
-            Action<string> onLog = null
-        )
+            Action<string> onLog = null)
         {
-            var rawCollectionState = Game
-                .instance.Agent.GetStateAsync(Addresses.Collection, avatarAddress)
-                .Result;
-            var collectionState =
-                rawCollectionState is List
-                    ? new CollectionState((List)rawCollectionState)
-                    : new CollectionState();
-
-            return collectionState;
+            return await Game.instance.Agent.GetStateAsync(Addresses.Collection, avatarAddress)
+                is List list
+                ? new CollectionState(list)
+                : new CollectionState();
         }
 
-        private static (
-            ArenaPlayerDigest myDigest,
-            ArenaPlayerDigest enemyDigest
-        ) GetArenaPlayerDigest(
+        private static async UniTask<(ArenaPlayerDigest myDigest, ArenaPlayerDigest enemyDigest)> GetArenaPlayerDigestTuple(
             States states,
             IEnumerable<Equipment> modEquipments,
             IEnumerable<Costume> modCostumes,
             IEnumerable<Consumable> modConsumables,
             Address enemyAvatarAddress,
-            Action<string> onLog = null
-        )
+            Action<string> onLog = null)
         {
             var myAvatarState = states.CurrentAvatarState.MakeFlyweightAvatarState(
                 modEquipments,
                 modCostumes,
-                modConsumables
-            );
+                modConsumables);
+            var myDigest = new ArenaPlayerDigest(
+                myAvatarState,
+                states.AllRuneState,
+                states.CurrentRuneSlotStates[BattleType.Arena]);
 
-            var equippedRuneStates = states.GetEquippedRuneStates(BattleType.Arena);
-            var myDigest = new ArenaPlayerDigest(myAvatarState, equippedRuneStates);
-
-            // Enemy
-            var enemyAvatarState = Game
-                .instance.Agent.GetAvatarStatesAsync(new[] { enemyAvatarAddress })
-                .Result[enemyAvatarAddress];
-            onLog.Invoke(
-                $"{nameof(GetArenaPlayerDigest)} Enemy avatar state {enemyAvatarState.address}"
-            );
-
-            var enemyItemSlotStateAddress = ItemSlotState.DeriveAddress(
-                enemyAvatarAddress,
-                BattleType.Arena
-            );
-
-            var rawEnemyItemSlotState = Game
-                .instance.Agent.GetStateAsync(
-                    ReservedAddresses.LegacyAccount,
-                    enemyItemSlotStateAddress
-                )
-                .Result;
-            var enemyItemSlotState =
-                rawEnemyItemSlotState is List
-                    ? new ItemSlotState((List)rawEnemyItemSlotState)
-                    : new ItemSlotState(BattleType.Arena);
-
-            var enemyRuneSlotStateAddress = RuneSlotState.DeriveAddress(
-                enemyAvatarAddress,
-                BattleType.Arena
-            );
-
-            var rawEnemyRuneSlotState = Game
-                .instance.Agent.GetStateAsync(
-                    ReservedAddresses.LegacyAccount,
-                    enemyRuneSlotStateAddress
-                )
-                .Result;
-            var enemyRuneSlotState =
-                rawEnemyRuneSlotState is List
-                    ? new RuneSlotState((List)rawEnemyRuneSlotState)
-                    : new RuneSlotState(BattleType.Arena);
-
-            var enemyRuneStates = new List<RuneState>();
-            var enemyRuneSlotInfos = enemyRuneSlotState.GetEquippedRuneSlotInfos();
-            var runeAddresses = enemyRuneSlotInfos.Select(info =>
-                RuneState.DeriveAddress(enemyAvatarAddress, info.RuneId)
-            );
-            foreach (var address in runeAddresses)
-            {
-                var rawRuneState = Game
-                    .instance.Agent.GetStateAsync(ReservedAddresses.LegacyAccount, address)
-                    .Result;
-
-                if (rawRuneState is List)
-                {
-                    enemyRuneStates.Add(new RuneState((List)rawRuneState));
-                }
-            }
-            var enemyDigest = new ArenaPlayerDigest(
-                enemyAvatarState,
-                enemyItemSlotState.Equipments,
-                enemyItemSlotState.Costumes,
-                enemyRuneStates
-            );
-
+            onLog?.Invoke($"{nameof(GetArenaPlayerDigestTuple)} Enemy avatar state {enemyAvatarAddress}");
+            var enemyDigest = await Game.instance.Agent.GetArenaPlayerDigestAsync(enemyAvatarAddress);
             return (myDigest, enemyDigest);
         }
     }

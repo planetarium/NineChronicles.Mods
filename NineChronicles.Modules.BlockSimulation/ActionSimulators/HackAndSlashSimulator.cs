@@ -14,6 +14,12 @@ using NineChronicles.Modules.BlockSimulation.Extensions;
 
 namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
 {
+    /// <summary>
+    /// <seealso cref="Nekoyume.Action.HackAndSlash"/>
+    /// <seealso cref="Nekoyume.Blockchain.ActionManager.HackAndSlash"/>
+    /// <seealso cref="Nekoyume.Blockchain.ActionRenderHandler.ResponseHackAndSlashAsync"/>
+    /// <seealso cref="Nekoyume.ActionEvalToViewModelExtensions.GetHackAndSlashReward"/>/
+    /// </summary>
     public static class HackAndSlashSimulator
     {
         /// <summary>
@@ -32,7 +38,8 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
             IEnumerable<Equipment> equipments,
             IEnumerable<Costume> costumes,
             IEnumerable<Consumable> consumables,
-            List<RuneState> runeStates,
+            AllRuneState allRuneState,
+            RuneSlotState runeSlotState,
             CollectionState collectionState,
             GameConfigState gameConfigState,
             int worldId,
@@ -48,8 +55,9 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                     $"\nequipments: {(equipments is null ? "null" : string.Join(", ", equipments.Select(e => $"{e.GetLocalizedNonColoredName(false)}(+{e.level})")))}" +
                     $"\ncostumes: {(costumes is null ? "null" : string.Join(", ", costumes.Select(e => e.GetLocalizedNonColoredName(false))))}" +
                     $"\nconsumables: {(consumables is null ? "null" : string.Join(", ", consumables.Select(e => e.GetLocalizedNonColoredName(false))))}" +
-                    $"\nruneStates: {(runeStates is null ? "null" : string.Join(", ", runeStates.Select(e => $"{L10nManager.LocalizeRuneName(e.RuneId)}(+{e.Level})")))}" +
-                    $"\ncollectionState: {(collectionState is null ? "null" : string.Join(", ", collectionState.Ids.Select(e => L10nManager.LocalizeCollectionName(e))))}" +
+                    $"\nallRuneStates: {(allRuneState is null ? "null" : string.Join(", ", allRuneState.Runes.Values.Select(e => $"{L10nManager.LocalizeRuneName(e.RuneId)}(+{e.Level})")))}" +
+                    $"\nruneSlotState: {(runeSlotState is null ? "null" : string.Join(", ", runeSlotState.GetEquippedRuneSlotInfos().Select(e => e is null ? "null" : $"slot #{e.SlotIndex}: {L10nManager.LocalizeRuneName(e.RuneId)}")))}" +
+                    $"\ncollectionState: {(collectionState is null ? "null" : string.Join(", ", collectionState.Ids.Select(L10nManager.LocalizeCollectionName)))}" +
                     $"\ngameConfigState.ShatterStrikeMaxDamage: {(gameConfigState is null ? "null" : gameConfigState.ShatterStrikeMaxDamage)}" +
                     $"\nworldId: {worldId}" +
                     $"\nstageId: {stageId}" +
@@ -96,7 +104,8 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                     random,
                     flyweightAvatarState,
                     consumableIds,
-                    runeStates,
+                    allRuneState,
+                    runeSlotState,
                     skillsOnWaveStart,
                     worldId,
                     stageId,
