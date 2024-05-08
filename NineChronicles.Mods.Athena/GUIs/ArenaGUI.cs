@@ -30,21 +30,15 @@ namespace NineChronicles.Mods.Athena.GUIs
 
         private readonly Rect _arenaLayoutRect;
 
-        public GUIContent SlotContent = new GUIContent();
-
-        public List<AvatarInfo> avatarInfos = new List<AvatarInfo>();
-        private int currentPage = 0;
-        private int itemsPerPage = 28;
-        private int totalPages;
-        private int playCount = 100;
+        private readonly List<AvatarInfo> _avatarInfos = new();
+        private int _currentPage = 0;
+        private int _itemsPerPage = 28;
+        private int _totalPages;
+        private int _playCount = 100;
         public event Action<AvatarInfo> OnSlotSelected;
-
-        private readonly IEnumerable<Equipment> _equippedEquipments;
-
 
         public ArenaGUI(IEnumerable<Equipment> equippedEquipments, AbilityRankingResponse apiResponse)
         {
-            _equippedEquipments = equippedEquipments;
             _arenaLayoutRect = new Rect(
                 100,
                 100,
@@ -61,41 +55,40 @@ namespace NineChronicles.Mods.Athena.GUIs
                         Cp = abilityRanking.Cp,
                         Address = new Address(abilityRanking.AvatarAddress),
                     };
-                    avatarInfos.Add(avatarInfo);
+                    _avatarInfos.Add(avatarInfo);
                 }
             }
-            totalPages = (int)Math.Ceiling(avatarInfos.Count / (double)itemsPerPage);
+
+            _totalPages = (int)Math.Ceiling(_avatarInfos.Count / (double)_itemsPerPage);
 
             OnSlotSelected += async avatarInfo =>
             {
                 try
                 {
                     AthenaPlugin.Log($"Simulate Start {avatarInfo.Address}");
-                    var index = avatarInfos.FindIndex((a) => a.Address == avatarInfo.Address);
+                    var index = _avatarInfos.FindIndex((a) => a.Address == avatarInfo.Address);
 
                     if (index == -1)
                     {
                         return;
                     }
-                    avatarInfos[index].WinRate = -1;
-                    avatarInfos[index].Progress = 0;
+
+                    _avatarInfos[index].WinRate = -1;
+                    _avatarInfos[index].Progress = 0;
 
                     var (_, equippedCostumes) = States.Instance.GetEquippedItems(BattleType.Arena);
-
-                    var result = await UniTask.Run(() => BattleArenaSimulator.ExecuteBulk(
+                    var result = await UniTask.RunOnThreadPool(() => BattleArenaSimulator.ExecuteBulkAsync(
                         TableSheets.Instance,
                         States.Instance,
-                        _equippedEquipments,
+                        equippedEquipments,
                         equippedCostumes,
                         null,
                         avatarInfo.Address,
-                        playCount,
-                        (p) => avatarInfos[index].Progress = p,
-                        (l) => AthenaPlugin.Log(l)
-                    ));
-
-                    avatarInfos[index].WinRate = result;
-                    AthenaPlugin.Log($"Simulate Result = {result} updated for {avatarInfos[index].Name}");
+                        _playCount,
+                        p => _avatarInfos[index].Progress = p,
+                        AthenaPlugin.Log));
+                    _avatarInfos[index].WinRate = result;
+                    AthenaPlugin.Log($"Simulate Result = {result} updated for {_avatarInfos[index].Name}");
                 }
                 catch (Exception e)
                 {
@@ -108,27 +101,23 @@ namespace NineChronicles.Mods.Athena.GUIs
         {
             GUI.matrix = GUIToolbox.GetGUIMatrix();
 
-            using (var areaScope = new GUILayout.AreaScope(_arenaLayoutRect))
+            using var areaScope = new GUILayout.AreaScope(_arenaLayoutRect);
+            var startIndex = _currentPage * _itemsPerPage;
+            var endIndex = Math.Min(startIndex + _itemsPerPage, _avatarInfos.Count);
+            var currentPageAvatars = _avatarInfos.GetRange(startIndex, endIndex - startIndex);
+            ArenaSimulateBoard.DrawArenaBoard(currentPageAvatars, OnSlotSelected, _playCount);
+
+            using var horizontalScope = new GUILayout.HorizontalScope();
+            if (GUILayout.Button("Prev"))
             {
-                int startIndex = currentPage * itemsPerPage;
-                int endIndex = Math.Min(startIndex + itemsPerPage, avatarInfos.Count);
-                var currentPageAvatars = avatarInfos.GetRange(startIndex, endIndex - startIndex);
+                if (_currentPage > 0) _currentPage--;
+                AthenaPlugin.Log($"Prev Page: {_currentPage}, {startIndex} - {endIndex - startIndex}");
+            }
 
-                ArenaSimulateBoard.DrawArenaBoard(currentPageAvatars, OnSlotSelected, playCount);
-
-                using (var horizontalScope = new GUILayout.HorizontalScope())
-                {
-                    if (GUILayout.Button("Prev"))
-                    {
-                        if (currentPage > 0) currentPage--;
-                        AthenaPlugin.Log($"Prev Page: {currentPage}, {startIndex} - {endIndex - startIndex}");
-                    }
-                    if (GUILayout.Button("Next"))
-                    {
-                        if (currentPage < totalPages - 1) currentPage++;
-                        AthenaPlugin.Log($"Next Page: {currentPage}, {startIndex} - {endIndex - startIndex}");
-                    }
-                }
+            if (GUILayout.Button("Next"))
+            {
+                if (_currentPage < _totalPages - 1) _currentPage++;
+                AthenaPlugin.Log($"Next Page: {_currentPage}, {startIndex} - {endIndex - startIndex}");
             }
         }
     }
