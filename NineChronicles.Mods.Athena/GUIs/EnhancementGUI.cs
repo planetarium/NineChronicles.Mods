@@ -105,7 +105,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                             if (SelectedEquipment != null)
                             {
                                 AthenaPlugin.Log($"[EnhancementGUI] Upgrade button clicked, Selected equipment: {SelectedEquipment.Id}");
-                                SelectedEquipment.Enhancement();
+                                SelectedEquipment.Enhancement(TableSheets.Instance);
                                 SlotContent = new GUIContent(SlotContent.text.Replace($"+{SelectedEquipment.Level - 1}", $"+{SelectedEquipment.Level}"));
 
                                 if (_modInventoryManager.GetItem(SelectedEquipment.Id) == null)
