@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Nekoyume.Game;
+using Nekoyume.Model.Item;
 
 namespace NineChronicles.Mods.Athena.Models
 {
@@ -42,9 +44,14 @@ namespace NineChronicles.Mods.Athena.Models
             return _optionTuples;
         }
 
-        public void Enhancement()
+        public void Enhancement(TableSheets sheets)
         {
-            if (Level < 21)
+            var enhancementSheet = sheets.EnhancementCostSheetV3;
+            var equipmentItemSheet = sheets.EquipmentItemSheet;
+            var equipment = equipmentItemSheet[EquipmentId];
+
+            var maxLevel = enhancementSheet.OrderedList.Where(x => x.Grade == equipment.Grade).Max(x => x.Level);
+            if (Level < maxLevel)
             {
                 Level += 1;
             }
