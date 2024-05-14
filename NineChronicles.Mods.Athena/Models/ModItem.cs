@@ -51,7 +51,7 @@ namespace NineChronicles.Mods.Athena.Models
             var equipment = equipmentItemSheet[EquipmentId];
 
             var maxLevel = enhancementSheet.OrderedList.Where(x => x.Grade == equipment.Grade).Max(x => x.Level);
-            if (Level <= maxLevel)
+            if (Level < maxLevel)
             {
                 Level += 1;
             }
