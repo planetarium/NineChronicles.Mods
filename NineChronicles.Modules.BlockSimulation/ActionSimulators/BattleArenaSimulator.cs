@@ -115,6 +115,7 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                 myCollectionState.GetEffects(tableSheets.CollectionSheet),
                 enemyCollectionState.GetEffects(tableSheets.CollectionSheet),
                 tableSheets.DeBuffLimitSheet,
+                tableSheets.BuffLinkSheet,
                 setExtraValueBuffBeforeGetBuffs: true
             );
             onLog?.Invoke($"{nameof(BattleArenaSimulator)} Done, result: {log.Result == ArenaLog.ArenaResult.Win}");
