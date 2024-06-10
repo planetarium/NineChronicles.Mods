@@ -88,6 +88,7 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
             var rewards = new List<ItemBase>();
             var collectionEffects = collectionState.GetEffects(tableSheets.CollectionSheet);
             var debuffLimitSheet = tableSheets.DeBuffLimitSheet;
+            var buffLinkSheet = tableSheets.BuffLinkSheet;
             var logEvent = false;
             var shatterStrikeMaxDamage = gameConfigState.ShatterStrikeMaxDamage;
             var result = new Dictionary<int, int>
@@ -119,6 +120,7 @@ namespace NineChronicles.Modules.BlockSimulation.ActionSimulators
                     rewards,
                     collectionEffects,
                     debuffLimitSheet,
+                    buffLinkSheet,
                     logEvent,
                     shatterStrikeMaxDamage);
                 stageSimulator.Simulate();

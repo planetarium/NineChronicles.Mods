@@ -79,22 +79,6 @@ namespace NineChronicles.Modules.BlockSimulation
                 ? FungibleAssetValue.FromRawValue(currency, rawValue)
                 : currency * 0;
 
-        public FungibleAssetValue GetTotalSupply(Currency currency)
-        {
-            if (!currency.TotalSupplyTrackable)
-            {
-                var msg =
-                    $"The total supply value of the currency {currency} is not trackable " +
-                    "because it is a legacy untracked currency which might have been" +
-                    "established before the introduction of total supply tracking support.";
-                throw new TotalSupplyNotTrackableException(msg, currency);
-            }
-
-            return Trie.Get(MockKeyConverters.ToTotalSupplyKey(currency)) is Integer rawValue
-                ? FungibleAssetValue.FromRawValue(currency, rawValue)
-                : currency * 0;
-        }
-
         public ValidatorSet GetValidatorSet() =>
              Trie.Get(MockKeyConverters.ValidatorSetKey) is List list
                 ? new ValidatorSet(list)
