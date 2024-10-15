@@ -5,6 +5,7 @@ using BepInEx.Logging;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Nekoyume;
+using Nekoyume.ApiClient;
 using Nekoyume.Game;
 using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Item;
@@ -85,7 +86,7 @@ namespace NineChronicles.Mods.Athena
 
         private async void LoadAbilityRanking()
         {
-            var apiClient = Game.instance.ApiClient;
+            var apiClient = ApiClients.Instance.WorldBossClient;
 
             if (apiClient.IsInitialized && _abilityRankingResponse == null)
             {
