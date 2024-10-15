@@ -15,7 +15,7 @@ using Nekoyume.Module;
 using Nekoyume.State;
 using Nekoyume.TableData;
 
-namespace NineChronicles.Modules.BlockSimulation
+namespace NineChronicles.Modules.BlockSimulation.Factories
 {
     public static class WorldFactory
     {
@@ -45,7 +45,7 @@ namespace NineChronicles.Modules.BlockSimulation
 
         public static IWorld WithGoldCurrency(this IWorld world, Address[] minters, long amount)
         {
-            var context = new ActionContext();
+            var context = ActionContextFactory.CreateDefault();
             var ncg = Currency.Legacy("NCG", 2, minters?.ToImmutableHashSet());
             var state = new GoldCurrencyState(ncg);
             return world
