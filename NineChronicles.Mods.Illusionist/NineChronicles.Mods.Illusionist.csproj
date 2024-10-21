@@ -29,9 +29,6 @@
         <Reference Include="Nekoyume">
             <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Nekoyume.dll</HintPath>
         </Reference>
-<!--        <Reference Include="UniTask">-->
-<!--            <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UniTask.dll</HintPath>-->
-<!--        </Reference>-->
     </ItemGroup>
 
     <ItemGroup>
