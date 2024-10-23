@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>9.0</LangVersion>
+        <RootNamespace>NineChronicles.Mods.Illusionist</RootNamespace>
+    </PropertyGroup>
+
+    <Import Project="..\.env.xml"/>
+
+    <ItemGroup>
+        <ProjectReference Include="..\NineChronicles.Modules.BlockSimulation\NineChronicles.Modules.BlockSimulation.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="UnityEngine">
+            <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.ImageConversionModule">
+            <HintPath>$(NINECHRONICLES_MANAGED_DIR)\UnityEngine.ImageConversionModule.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Nekoyume">
+            <HintPath>$(NINECHRONICLES_MANAGED_DIR)\Nekoyume.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="0Harmony">
+            <HintPath>$(NINECHRONICLES_DIR)\BepInEx\core\0Harmony.dll</HintPath>
+        </Reference>
+        <Reference Include="BepInEx">
+            <HintPath>$(NINECHRONICLES_DIR)\BepInEx\core\BepInEx.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+</Project>
