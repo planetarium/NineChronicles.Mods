@@ -1,4 +1,4 @@
-First of all, thank you for your contributions in any form. In this article, we will briefly explain how Athena Mod (hereafter Athena) is used and developed.
+First of all, thank you for your contributions in any form. In this article, we will briefly explain how to use and develop mods using the Athena mod (hereafter Athena) as an example.
 
 # Before development
 
