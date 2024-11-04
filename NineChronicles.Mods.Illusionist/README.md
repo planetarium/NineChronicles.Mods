@@ -36,7 +36,8 @@ For example, an avatar at the address `0xe56d432da2032f6C851943b76C4a41815baaBB5
 - `https://9c-board.nine-chronicles.dev/odin/avatar/0xe56d432da2032f6C851943b76C4a41815baaBB54`
 
 Hover over the desired weapon image to see the weapon's sheet ID.
-![img.png](img.png)
+![image](https://github.com/user-attachments/assets/48f471a2-4b24-43f7-baac-91ee21781da2)
+
 
 ### Change weapon image
 
@@ -47,8 +48,8 @@ For this example, we will use `10100000`, which is the sheet ID of the wooden st
 - `%USERPROFILE%\AppData\Roaming\Nine Chronicles\player\main\BepInEx\plugins\Illusionist\CharacterTextures\Weapons\10100000.png`
 
 This is the weapon image I used.
-![img_1.png](img_1.png)
+![image](https://github.com/user-attachments/assets/66a2ff15-ca9c-4e91-98ca-c285058f1499)
 
 Now run the game, unequip the weapon, and you will see the new image instead of the default weapon, a wooden stick.
-![img_2.png](img_2.png)
-![img_3.png](img_3.png)
+![image](https://github.com/user-attachments/assets/a4d59bb3-357f-44b3-9d59-0b6808676f16)
+![image](https://github.com/user-attachments/assets/3043a72a-ad38-4aa5-9f92-0a0a812a5b61)
