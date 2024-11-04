@@ -36,7 +36,7 @@
 - `https://9c-board.nine-chronicles.dev/odin/avatar/0xe56d432da2032f6C851943b76C4a41815baaBB54`
 
 원하는 무기 이미지에 마우스를 올려 무기의 시트 ID를 확인하세요.
-![img.png](img.png)
+![image](https://github.com/user-attachments/assets/48f471a2-4b24-43f7-baac-91ee21781da2)
 
 ### 무기 이미지 변경
 
@@ -47,8 +47,8 @@
 - `%USERPROFILE%\AppData\Roaming\Nine Chronicles\player\main\BepInEx\plugins\Illusionist\CharacterTextures\Weapons\10100000.png`
 
 제가 사용한 무기 이미지입니다.
-![img_1.png](img_1.png)
+![image](https://github.com/user-attachments/assets/66a2ff15-ca9c-4e91-98ca-c285058f1499)
 
 이제 게임을 실행하고, 무기를 벗으면 기본 무기인 나무 막대기 대신 새로운 이미지로 변경된 외형을 확인할 수 있습니다.
-![img_2.png](img_2.png)
-![img_3.png](img_3.png)
+![image](https://github.com/user-attachments/assets/a4d59bb3-357f-44b3-9d59-0b6808676f16)
+![image](https://github.com/user-attachments/assets/3043a72a-ad38-4aa5-9f92-0a0a812a5b61)
