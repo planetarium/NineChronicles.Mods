@@ -60,5 +60,6 @@ function Copy-DllToPluginDir {
 
 $nineChroniclesDir = Get-NineChroniclesDirFromEnv
 $publishOutputPath = Publish-Project -projectName $projectName -solutionDirectory $solutionDirectory -publishConfiguration $publishConfiguration
-Copy-DllToPluginDir -sourcePath "$projectName\bin\$publishConfiguration\netstandard2.1" -dllFile "NineChronicles.Modules.BlockSimulation.dll" -nineChroniclesDir $nineChroniclesDir
 Copy-DllToPluginDir -sourcePath "$projectName\bin\$publishConfiguration\netstandard2.1" -dllFile "NineChronicles.Mods.Athena.dll" -nineChroniclesDir $nineChroniclesDir
+Copy-DllToPluginDir -sourcePath "$projectName\bin\$publishConfiguration\netstandard2.1" -dllFile "NineChronicles.Mods.Illusionist.dll" -nineChroniclesDir $nineChroniclesDir
+Copy-DllToPluginDir -sourcePath "$projectName\bin\$publishConfiguration\netstandard2.1" -dllFile "NineChronicles.Modules.BlockSimulation.dll" -nineChroniclesDir $nineChroniclesDir
