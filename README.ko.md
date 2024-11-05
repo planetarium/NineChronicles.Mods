@@ -4,7 +4,7 @@
 
 ## BepInEx
 
-이 프로젝트는 Unity 게임 모드를 위한 프레임워크인 [BepInEx](https://github.com/BepInEx/BepInEx)를 사용해서 모드를 개발합니다. BepInEx를 사용하는 방법은 [BepInEx 튜토리얼](./BEPINEX_TUTORIAL.md) 문서를 참조하세요.
+이 프로젝트는 Unity 게임 모드를 위한 프레임워크인 [BepInEx](https://github.com/BepInEx/BepInEx)를 사용해서 모드를 개발합니다. BepInEx를 사용하는 방법은 [BepInEx 튜토리얼](./BEPINEX_TUTORIAL.ko.md) 문서를 참조하세요.
 
 ## 태깅과 배포
 
