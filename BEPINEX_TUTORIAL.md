@@ -13,6 +13,7 @@
 
 ### Installing BepInEx 5 LTS
 
+- Official document: https://docs.bepinex.dev/articles/user_guide/installation/index.html
 - Download the BepInEx 5 LTS version for your OS and CPU architecture.
   - https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.2
 - Unzip the downloaded BepInEx archive to the folder where the Nine Chronicles client is installed.
