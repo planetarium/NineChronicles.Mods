@@ -53,6 +53,7 @@ This is the weapon image I used.
 
 Now run the game, unequip the weapon, and you will see the new image instead of the default weapon, a wooden stick.
 
-<img width="273" alt="image" src="https://github.com/user-attachments/assets/a635b79b-296f-4c2d-8b99-6d5a39861564">
+![NineChronicles Mods Illusionist-PoC-01](https://github.com/user-attachments/assets/30cebbdd-7168-4d20-a916-432300f5dd57)
+
 <img width="670" alt="image" src="https://github.com/user-attachments/assets/fa5bb6a9-b6cd-46bd-a9b2-b97a5ac0e220">
 
