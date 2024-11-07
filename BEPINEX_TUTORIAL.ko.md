@@ -14,6 +14,7 @@
 
 ### BepInEx 5 LTS 설치하기
 
+- 공식 문서: https://docs.bepinex.dev/articles/user_guide/installation/index.html
 - OS와 CPU 아키텍쳐에 맞는 BepInEx 5 LTS 버전을 다운로드 합니다.
   - https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.2
 - 다운로드한 BepInEx 압축 파일을 나인 크로니클 클라이언트가 설치되어 있는 폴더에 해제합니다.
