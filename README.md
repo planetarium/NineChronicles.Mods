@@ -1,5 +1,7 @@
 # Nine Chronicles Mods
 
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/planetarium/NineChronicles.Mods/total)
+
 Welcome to the [Nine Chronicles](https://github.com/planetarium/NineChronicles) repository for mod development and distribution.
 
 ## BepInEx
