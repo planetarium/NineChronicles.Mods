@@ -51,6 +51,9 @@ This is the weapon image I used.
 
 ![image](https://github.com/user-attachments/assets/66a2ff15-ca9c-4e91-98ca-c285058f1499)
 
+- size: 323x120
+- file extension: png
+
 Now run the game, unequip the weapon, and you will see the new image instead of the default weapon, a wooden stick.
 
 ![NineChronicles Mods Illusionist-PoC-01](https://github.com/user-attachments/assets/30cebbdd-7168-4d20-a916-432300f5dd57)
