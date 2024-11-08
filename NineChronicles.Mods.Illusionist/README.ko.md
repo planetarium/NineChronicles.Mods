@@ -51,6 +51,9 @@
 
 ![image](https://github.com/user-attachments/assets/66a2ff15-ca9c-4e91-98ca-c285058f1499)
 
+- 사이즈: 323x120
+- 파일 형식: png
+
 이제 게임을 실행하고, 무기를 벗으면 기본 무기인 나무 막대기 대신 새로운 이미지로 변경된 외형을 확인할 수 있습니다.
 
 <img width="273" alt="image" src="https://github.com/user-attachments/assets/a635b79b-296f-4c2d-8b99-6d5a39861564">
