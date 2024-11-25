@@ -1,15 +1,23 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Libplanet.Crypto;
 using Nekoyume.Game;
 using Nekoyume.Model.EnumType;
 using Nekoyume.Model.Item;
 using Nekoyume.State;
+using Nekoyume.UI;
 using Nekoyume.UI.Model;
 using NineChronicles.Mods.Athena.Components;
 using NineChronicles.Modules.BlockSimulation.ActionSimulators;
 using UnityEngine;
+using System.Text.Json;
+using System.Net;
 
 namespace NineChronicles.Mods.Athena.GUIs
 {
@@ -28,6 +36,18 @@ namespace NineChronicles.Mods.Athena.GUIs
             public double Progress { get; set; } = 0;
         }
 
+        public class BattleModel
+        {
+            public string avatarAddress { get; set; }
+
+            public string enemyAddress { get; set; }
+        }
+
+        public class PercentageModel
+        {
+            public float winPercentage { get; set; }
+        }
+
         private readonly Rect _arenaLayoutRect;
 
         private readonly List<AvatarInfo> _avatarInfos = new();
@@ -37,7 +57,7 @@ namespace NineChronicles.Mods.Athena.GUIs
         private int _playCount = 100;
         public event Action<AvatarInfo> OnSlotSelected;
 
-        public ArenaGUI(IEnumerable<Equipment> equippedEquipments, AbilityRankingResponse apiResponse)
+        public ArenaGUI(IEnumerable<Equipment> equippedEquipments, AbilityRankingResponse apiResponse, bool LocalSimulation = true)
         {
             _arenaLayoutRect = new Rect(
                 100,
@@ -61,6 +81,8 @@ namespace NineChronicles.Mods.Athena.GUIs
 
             _totalPages = (int)Math.Ceiling(_avatarInfos.Count / (double)_itemsPerPage);
 
+            if (LocalSimulation)
+            {
             OnSlotSelected += async avatarInfo =>
             {
                 try
@@ -96,6 +118,35 @@ namespace NineChronicles.Mods.Athena.GUIs
                 }
             };
         }
+            else
+            {
+                OnSlotSelected += async avatarInfo =>
+                {
+                    try
+                    {
+                        AthenaPlugin.Log($"Simulate Start {avatarInfo.Address}");
+                        var index = _avatarInfos.FindIndex((a) => a.Address == avatarInfo.Address);
+
+                        if (index == -1)
+                        {
+                            return;
+                        }
+
+                        _avatarInfos[index].WinRate = -1;
+                        _avatarInfos[index].Progress = 0;
+
+                        var result = await Simulate(avatarInfo.Address.ToString(), _avatarInfos[index].Address.ToString(), 0);
+                        _avatarInfos[index].WinRate = result / 100;
+                        _playCount = 100;
+                        AthenaPlugin.Log($"9CAPI - Simulate Result = {result} updated for {_avatarInfos[index].Name}");
+                    }
+                    catch (Exception e)
+                    {
+                        AthenaPlugin.Log($"err {e}");
+                    }
+                };
+            }
+        }
 
         public void OnGUI()
         {
@@ -118,6 +169,31 @@ namespace NineChronicles.Mods.Athena.GUIs
             {
                 if (_currentPage < _totalPages - 1) _currentPage++;
                 AthenaPlugin.Log($"Next Page: {_currentPage}, {startIndex} - {endIndex - startIndex}");
+            }
+        }
+
+        private static async Task<double> Simulate(string avatar, string enemy, int chain)
+        {
+            var client = new HttpClient();
+            var battleModel = new BattleModel();
+            battleModel.avatarAddress = avatar;
+            battleModel.enemyAddress = enemy;
+            string jsonString = JsonSerializer.Serialize(battleModel);
+            var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("https://api.9capi.com/arenaSimOdin", content);
+
+            try
+            {
+                var result = JsonSerializer.Deserialize<PercentageModel>(await response.Content.ReadAsStringAsync());
+                return (double)Math.Round(result.winPercentage, 2);
+            }
+            catch (Exception ex)
+            {
+                NotificationSystem.Push(
+                    Nekoyume.Model.Mail.MailType.System,
+                    "9CAPI Simulator is currently unavailable",
+                    Nekoyume.UI.Scroller.NotificationCell.NotificationType.Notification);
+                return 0;
             }
         }
     }
