@@ -60,10 +60,10 @@ namespace NineChronicles.Mods.Athena.GUIs
         public ArenaGUI(IEnumerable<Equipment> equippedEquipments, AbilityRankingResponse apiResponse, bool LocalSimulation = true)
         {
             _arenaLayoutRect = new Rect(
-            100,
-            100,
-            GUIToolbox.ScreenWidthReference - 200,
-            GUIToolbox.ScreenHeightReference - 100);
+                100,
+                100,
+                GUIToolbox.ScreenWidthReference - 200,
+                GUIToolbox.ScreenHeightReference - 100);
 
             if (apiResponse != null)
             {
