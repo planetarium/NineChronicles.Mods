@@ -123,7 +123,7 @@ namespace NineChronicles.Mods.Athena.GUIs
                 OnSlotSelected += async avatarInfo =>
                 {
                     bool heimdall = false;
-                    if(Game.instance.CurrentPlanetId.Value.ToString() == "0x000000000001")
+                    if(Game.instance.CurrentPlanetId.ToString() == Nekoyume.Multiplanetary.PlanetId.Heimdall.ToString())
                         heimdall = true;
 
                     try
