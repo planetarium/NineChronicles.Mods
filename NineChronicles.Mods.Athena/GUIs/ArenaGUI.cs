@@ -17,7 +17,7 @@ using NineChronicles.Mods.Athena.Components;
 using NineChronicles.Modules.BlockSimulation.ActionSimulators;
 using UnityEngine;
 using System.Text.Json;
-using System.Net;
+using static System.Net.WebRequestMethods;
 
 namespace NineChronicles.Mods.Athena.GUIs
 {
@@ -60,10 +60,10 @@ namespace NineChronicles.Mods.Athena.GUIs
         public ArenaGUI(IEnumerable<Equipment> equippedEquipments, AbilityRankingResponse apiResponse, bool LocalSimulation = true)
         {
             _arenaLayoutRect = new Rect(
-                100,
-                100,
-                GUIToolbox.ScreenWidthReference - 200,
-                GUIToolbox.ScreenHeightReference - 100);
+            100,
+            100,
+            GUIToolbox.ScreenWidthReference - 200,
+            GUIToolbox.ScreenHeightReference - 100);
 
             if (apiResponse != null)
             {
@@ -83,43 +83,6 @@ namespace NineChronicles.Mods.Athena.GUIs
 
             if (LocalSimulation)
             {
-            OnSlotSelected += async avatarInfo =>
-            {
-                try
-                {
-                    AthenaPlugin.Log($"Simulate Start {avatarInfo.Address}");
-                    var index = _avatarInfos.FindIndex((a) => a.Address == avatarInfo.Address);
-
-                    if (index == -1)
-                    {
-                        return;
-                    }
-
-                    _avatarInfos[index].WinRate = -1;
-                    _avatarInfos[index].Progress = 0;
-
-                    var (_, equippedCostumes) = States.Instance.GetEquippedItems(BattleType.Arena);
-                    var result = await UniTask.RunOnThreadPool(() => BattleArenaSimulator.ExecuteBulkAsync(
-                        TableSheets.Instance,
-                        States.Instance,
-                        equippedEquipments,
-                        equippedCostumes,
-                        null,
-                        avatarInfo.Address,
-                        _playCount,
-                        p => _avatarInfos[index].Progress = p,
-                        AthenaPlugin.Log));
-                    _avatarInfos[index].WinRate = result;
-                    AthenaPlugin.Log($"Simulate Result = {result} updated for {_avatarInfos[index].Name}");
-                }
-                catch (Exception e)
-                {
-                    AthenaPlugin.Log($"err {e}");
-                }
-            };
-        }
-            else
-            {
                 OnSlotSelected += async avatarInfo =>
                 {
                     try
@@ -135,8 +98,49 @@ namespace NineChronicles.Mods.Athena.GUIs
                         _avatarInfos[index].WinRate = -1;
                         _avatarInfos[index].Progress = 0;
 
-                        var result = await Simulate(avatarInfo.Address.ToString(), _avatarInfos[index].Address.ToString(), 0);
-                        _avatarInfos[index].WinRate = result / 100;
+                        var (_, equippedCostumes) = States.Instance.GetEquippedItems(BattleType.Arena);
+                        var result = await UniTask.RunOnThreadPool(() => BattleArenaSimulator.ExecuteBulkAsync(
+                            TableSheets.Instance,
+                            States.Instance,
+                            equippedEquipments,
+                            equippedCostumes,
+                            null,
+                            avatarInfo.Address,
+                            _playCount,
+                            p => _avatarInfos[index].Progress = p,
+                            AthenaPlugin.Log));
+                        _avatarInfos[index].WinRate = result;
+                        AthenaPlugin.Log($"Simulate Result = {result} updated for {_avatarInfos[index].Name}");
+                    }
+                    catch (Exception e)
+                    {
+                        AthenaPlugin.Log($"err {e}");
+                    }
+                };
+            }
+            else
+            {
+                OnSlotSelected += async avatarInfo =>
+                {
+                    bool heimdall = false;
+                    if(Game.instance.CurrentPlanetId.Value.ToString() == "0x000000000001")
+                        heimdall = true;
+
+                    try
+                    {
+                        AthenaPlugin.Log($"Simulate Start {avatarInfo.Address}");
+                        var index = _avatarInfos.FindIndex((a) => a.Address == avatarInfo.Address);
+
+                        if (index == -1)
+                        {
+                            return;
+                        }
+
+                        _avatarInfos[index].WinRate = -1;
+                        _avatarInfos[index].Progress = 0;
+
+                        var result = await Simulate(avatarInfo.Address.ToString(), _avatarInfos[index].Address.ToString(), heimdall);
+                        _avatarInfos[index].WinRate = result/100;
                         _playCount = 100;
                         AthenaPlugin.Log($"9CAPI - Simulate Result = {result} updated for {_avatarInfos[index].Name}");
                     }
@@ -172,15 +176,19 @@ namespace NineChronicles.Mods.Athena.GUIs
             }
         }
 
-        private static async Task<double> Simulate(string avatar, string enemy, int chain)
+        private static async Task<double> Simulate(string avatar, string enemy, bool heimdall)
         {
+            string apiUrl = "https://api.9capi.com/arenaSimOdin";
+            if (heimdall)
+                apiUrl = "https://api.9capi.com/arenaSimHeimdall";
+            AthenaPlugin.Log($"9CAPI Preparing Simulation against {apiUrl}");
             var client = new HttpClient();
             var battleModel = new BattleModel();
             battleModel.avatarAddress = avatar;
             battleModel.enemyAddress = enemy;
             string jsonString = JsonSerializer.Serialize(battleModel);
             var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("https://api.9capi.com/arenaSimOdin", content);
+            var response = await client.PostAsync(apiUrl, content);
 
             try
             {
