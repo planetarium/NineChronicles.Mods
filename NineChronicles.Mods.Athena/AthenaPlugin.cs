@@ -212,6 +212,7 @@ namespace NineChronicles.Mods.Athena
                     ("ItemSlots", CreateItemSlotsGUI),
                     ("Adventure", () => new AdventureGUI(UserDataManager.GetItemSlotsCache(BattleType.Adventure))),
                     ("Arena", CreateArenaGUI),
+                    ("Arena-9CAPI", CreateArenaGUI9CAPI),
                     ("Create", CreateItemCreationGUI),
                     ("Enhancement", () => new EnhancementGUI(_modInventoryManager, GetOrCreateInventoryGUI())),
                 }, DisableModeGUI);
@@ -284,6 +285,12 @@ namespace NineChronicles.Mods.Athena
             return new ArenaGUI(
                 UserDataManager.GetItemSlotsCache(BattleType.Arena),
                 _abilityRankingResponse);
+        }
+        private IGUI CreateArenaGUI9CAPI()
+        {
+            return new ArenaGUI(
+                UserDataManager.GetItemSlotsCache(BattleType.Arena),
+                _abilityRankingResponse, false);
         }
 
         private IGUI CreateItemCreationGUI()
